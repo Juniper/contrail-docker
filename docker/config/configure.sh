@@ -6,21 +6,26 @@ export PATH=$PATH:/opt/contrail/bin
 
 IPADDRESS=${IPADDRESS:-127.0.0.1}
 
+CONFIG_IP=${CONFIG_IP:-$IPADDRESS}
+
+CONTRAIL_INTERNAL_VIP=${CONTRAIL_INTERNAL_VIP}
+OPENSTACK_INTERNAL_VIP=${OPENSTACK_INTERNAL_VIP}
+
 API_SERVER_LISTEN=${API_SERVER_LISTEN:-0.0.0.0}
-API_SERVER_IP=${API_SERVER_IP:-$IPADDRESS}
+API_SERVER_IP=${API_SERVER_IP:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
 API_SERVER_PORT=${API_SERVER_PORT:-9100}
 API_SERVER_USE_SSL=${API_SERVER_PORT:-"False"}
 MULTI_TENANCY=${MULTI_TENANCY:-True}
 API_SERVER_LOG_FILE=${API_SERVER_LOG_FILE:-"/var/log/contrail/contrail-api.log"}
 API_SERVER_LOG_LEVEL=${API_SERVER_LOG_LEVEL:-"SYS_NOTICE"}
-
+API_SERVER_INSECURE=${API_SERVER_INSECURE:-"False"}
 SCHEMA_LOG_FILE=${SCHEMA_LOG_FILE:-"/var/log/contrail/contrail-schema.log"}
 SCHEMA_LOG_LEVEL=${SCHEMA_LOG_LEVEL:-SYS_NOTICE}
 
 RABBITMQ_SERVER_LIST=${RABBITMQ_SERVER_LIST:-$IPADDRESS}
 RABBITMQ_SERVER_PORT=${RABBITMQ_SERVER_PORT:-5672}
 
-ANALYTICS_SERVER=${ANALYTICS_SERVER:-$IPADDRESS}
+ANALYTICS_SERVER=${ANALYTICS_SERVER:-${CONTRAIL_INTERNAL_VIP:-$IPADDRESS}}
 ANALYTICS_SERVER_PORT=${ANALYTICS_SERVER_PORT:-8081}
 
 CASSANDRA_SERVER_LIST=${CASSANDRA_SERVER_LIST:-$IPADDRESS}
@@ -29,12 +34,12 @@ ZOOKEEPER_SERVER_LIST=${ZOOKEEPER_SERVER_LIST:-$IPADDRESS}
 ZOOKEEPER_SERVER_PORT=${ZOOKEEPER_SERVER_PORT:-2181}
 CONTROL_SERVER_LIST=${CONTROL_SERVER_LIST:-$IPADDRESS}
 
-IFMAP_SERVER=${IFMAP_SERVER:-$IPADDRESS}
+IFMAP_SERVER=${IFMAP_SERVER:-$CONFIG_IP}
 IFMAP_SERVER_PORT=${IFMAP_SERVER_PORT:-8443}
 IFMAP_USERNAME=${IFMAP_USERNAME:-"api-server"}
 IFMAP_PASSWORD=${IFMAP_PASSWORD:-"api-server"}
 
-DISCOVERY_SERVER=${DISCOVERY_SERVER:-$IPADDRESS}
+DISCOVERY_SERVER=${DISCOVERY_SERVER:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
 DISCOVERY_SERVER_LISTEN=${DISCOVERY_SERVER_LISTEN:-"0.0.0.0"}
 DISCOVERY_SERVER_PORT=${DISCOVERY_SERVER_PORT:-9110}
 DISCOVERY_LOG_FILE=${DISCOVERY_LOG_FILE:-"/var/log/contrail/contrail-discovery.log"}
@@ -50,9 +55,9 @@ SVC_MONITOR_LOG_FILE=${SVC_MONITOR_LOG_FILE:-"/var/log/contrail/contrail-svc-mon
 SVC_MONITOR_LOG_LEVEL=${SVC_MONITOR_LOG_LEVEL:-SYS_NOTICE}
 
 
-COLLECTOR_SERVER=${COLLECTOR_SERVER:-$IPADDRESS}
+COLLECTOR_SERVER=${COLLECTOR_SERVER:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
 
-KEYSTONE_SERVER=${KEYSTONE_SERVER:-$IPADDRESS}
+KEYSTONE_SERVER=${KEYSTONE_SERVER:-${OPENSTACK_INTERNAL_VIP:-$IPADDRESS}}
 
 SERVICE_TENANT=${SERVICE_TENANT:-service}
 KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
@@ -64,11 +69,14 @@ KEYSTONE_ADMIN_TENANT=${OS_TENANT_NAME:-admin}
 KEYSTONE_ADMIN_TOKEN=${OS_TOKEN:-$ADMIN_TOKEN}
 REGION=${REGION:-RegionOne}
 
-NEUTRON_IP=${NEUTRON_IP:-$IPADDRESS}
+NEUTRON_IP=${NEUTRON_IP:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
 NEUTRON_PORT=${NEUTRON_PORT:-9697}
 NEUTRON_USER=${NEUTRON_USER:-neutron}
 NEUTRON_PASSWORD=${NEUTRON_PASSWORD:-neutron}
 NEUTRON_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
+$CONTRAIL_EXTENSIONS_DEFAULTS="ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None"
+NEUTRON_CONTRAIL_EXTENSIONS=${NEUTRON_CONTRAIL_EXTENSIONS:-$CONTRAIL_EXTENSIONS_DEFAULTS}
+
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
 zk_server_list_w_port=$(echo $ZOOKEEPER_SERVER_LIST | sed -r -e "s/[, ]+/:$ZOOKEEPER_SERVER_PORT,/g" -e "s/$/:$ZOOKEEPER_SERVER_PORT/")
 rabbitmq_server_list_w_port=$(echo $RABBITMQ_SERVER_LIST | sed -r -e "s/[, ]+/:$RABBITMQ_SERVER_PORT,/g" -e "s/$/:$RABBITMQ_SERVER_PORT/")
@@ -110,7 +118,7 @@ setini ifmap_server_port $IFMAP_SERVER_PORT
 setini ifmap_username $IFMAP_USERNAME
 setini ifmap_password $IFMAP_PASSWORD
 setini cassandra_server_list $cassandra_server_list_w_port
-setini api_server_ip $API_SERVER_LISTEN
+setini api_server_ip $API_SERVER_IP
 setini api_server_port $API_SERVER_PORT
 setini api_server_use_ssl $API_SERVER_USE_SSL
 setini log_file $SCHEMA_LOG_FILE
@@ -158,7 +166,7 @@ setini ifmap_server_port $IFMAP_SERVER_PORT
 setini ifmap_username $IFMAP_USERNAME
 setini ifmap_password $IFMAP_PASSWORD
 setini cassandra_server_list $cassandra_server_list_w_port
-setini api_server_ip $API_SERVER_LISTEN
+setini api_server_ip $API_SERVER_IP
 setini api_server_port $API_SERVER_PORT
 setini api_server_use_ssl $API_SERVER_USE_SSL
 setini log_file $SVC_MONITOR_LOG_FILE
@@ -181,9 +189,31 @@ setini analytics_server_ip $ANALYTICS_SERVER
 setini analytics_server_port $ANALYTICS_SERVER_PORT
 # END /etc/contrail/contrail-svc-monitor.conf setup
 
+# Setup /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+setcfg /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+setsection "APISERVER"
+setini api_server_ip $API_SERVER_IP
+setini api_server_port $API_SERVER_PORT
+setini multi_tenancy $MULTI_TENANCY
+setini use_ssl $API_SERVER_USE_SSL
+setini insecure $API_SERVER_INSECURE
+setini contrail_extensions $NEUTRON_CONTRAIL_EXTENSIONS
+
+setsection "COLLECTOR"
+setini analytics_api_ip $ANALYTICS_SERVER
+setini analytics_api_port $ANALYTICS_SERVER_PORT
+
+setsection "KEYSTONE"
+setini auth_url ${KEYSTONE_AUTH_PROTOCOL}://${KEYSTONE_SERVER}:${KEYSTONE_AUTH_PORT}/v2.0
+setini admin_user $KEYSTONE_ADMIN_USER
+setini admin_password $KEYSTONE_ADMIN_PASSWORD
+setini admin_tenant_name $KEYSTONE_ADMIN_TENANT
+# END /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+
 setup_keystone_auth_config
 setup_vnc_api_lib
 
+# Create service endpoints et al
 /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER --quant_server_ip $NEUTRON_IP \
     --tenant $KEYSTONE_ADMIN_TENANT --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \
     --svc_password $NEUTRON_PASSWORD --svc_tenant_name $SERVICE_TENANT --region_name $REGION
@@ -206,4 +236,6 @@ COMPUTE=$KEYSTONE_SERVER
 CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
+# Start neutron
+# TODO: neutron need to be added to supervisord
 /opt/contrail/bin/quantum-server-setup.sh
