@@ -15,6 +15,7 @@ import argparse
 
 
 @task
+@parallel
 @roles('cfgm')
 def install_docker():
     """ At this moment, only ubuntu is supported
@@ -31,6 +32,7 @@ def install_docker():
 
 
 @task
+@parallel
 def load_docker_image(image_url):
     image_file = os.path.basename(image_url)
     cmd = "wget -q -O /tmp/%s %s; " % (image_file, image_url)
@@ -180,10 +182,10 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
 
     cmd += " -e IPADDRESS=%s" % tgt_ip
     cmd += " -e COLLECTOR_SERVER=%s" % collector_ip
-    cmd += " -e CASSANDRA_SERVER_LIST=%s" % ' '.join(cassandra_ip_list)
-    cmd += " -e ZOOKEEPER_SERVER_LIST=%s" % ' '.join(cassandra_ip_list)
+    cmd += ' -e CASSANDRA_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
+    cmd += ' -e ZOOKEEPER_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
     cmd += " -e NEUTRON_PORT=%s" % quantum_port
-    cmd += " -e RABBITMQ_SERVER_LIST=%s" % ' '.join(get_amqp_servers())
+    cmd += ' -e RABBITMQ_SERVER_LIST="%s"' % ' '.join(get_amqp_servers())
     cmd += " -e RABBITMQ_SERVER_PORT=%s" % get_amqp_port()
 
     # Affect is on ctrl-details for quantum_ip which will be localhost in case of haproxy
@@ -260,6 +262,18 @@ def frame_database_docker_cmd(host_string, contrail_version, openstack_sku):
     cmd += " -itd contrail-database-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
+
+def frame_lb_docker_cmd(contrail_version, openstack_sku):
+    config_node_list = ",".join([re.sub(r'^\w+@','',i) for i in env.roledefs['cfgm']])
+    my_ip = env.host_string.split('@')[1]
+    cmd = "docker run --net=host --restart=unless-stopped --name contrail-lb --privileged --cap-add=NET_ADMIN "
+    cmd += " -e IPADDRESS=%s" % my_ip
+    cmd += " -e NEUTRON_SERVER_LIST=%s " % config_node_list
+    cmd += " -e CONTRAIL_API_SERVER_LIST=%s " % config_node_list
+    cmd += " -e DISCOVERY_SERVER_LIST=%s " % config_node_list
+    cmd += " -itd contrail-loadbalancer-%s:%s" % (openstack_sku, contrail_version)
+    return cmd
+
 @task
 def start_container(component, contrail_version, openstack_sku):
     if component == 'database':
@@ -286,12 +300,18 @@ def initialize(package_path):
         sudo(cmd)
 
 @task
+@roles('cfgm')
+def install_rabbit():
+    sudo("DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --allow-unauthenticated install rabbitmq-server")
+
+@task
 @roles('build')
 def install_on_host(*tgzs, **kwargs):
     reboot = kwargs.get('reboot', 'True')
     execute('pre_check')
-    execute('create_installer_repo')
-    execute(create_install_repo, *tgzs, **kwargs)
+#    execute('create_installer_repo')
+#    execute(create_install_repo, *tgzs, **kwargs)
+    execute(install_rabbit)
     execute(create_install_repo_dpdk)
     execute('install_orchestrator')
     execute(install_docker)
@@ -338,10 +358,10 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
         execute(start_container, "analytics", contrail_version, openstack_sku, roles=["cfgm"])
         execute(load_docker_image, docker_images["loadbalancer"], roles=["cfgm"])
         execute(start_container, "lb", contrail_version, openstack_sku, roles=["cfgm"])
-        execute(enable_haproxy, roles=["cfgm"])
+#        execute(enable_haproxy, roles=["cfgm"])
 #        nworkers = 1
 #        sys.exit()
-        execute(fixup_restart_haproxy_in_all_cfgm, nworkers)
+#        execute(fixup_restart_haproxy_in_all_cfgm, nworkers)
     #    execute('setup_cfgm')  - Contanerized
     #   Setup haproxy - configure backends etc - this is eventually going to be a container
     #    execute('verify_cfgm') - Nothing as of now, will need to check

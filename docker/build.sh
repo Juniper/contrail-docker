@@ -11,7 +11,7 @@ else
     echo -e "Not able to extract contrail-version and SKU from contrail package url\nBad contrail package url, it should match regex http[s]*://.*/contrail-install-packages_[0-9\.\-]+~[a-zA-Z]+_all.deb"
     exit 1
 fi
-cp -r common.sh $component/* $temp
+cp -r common.sh pyj2.py $component/* $temp
 cd $temp
 docker build  --build-arg CONTRAIL_INSTALL_PACKAGE_URL=$package_url -t contrail-${component}-${openstack_release}:${contrail_version} .; rv=$?
 if [[ $rv == 0 ]]; then

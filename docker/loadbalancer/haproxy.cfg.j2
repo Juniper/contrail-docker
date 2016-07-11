@@ -1,0 +1,76 @@
+global
+    tune.maxrewrite {{ tune_maxrewrite|default(1024) }}
+    tune.bufsize {{ tune_bufsize|default(16384) }}
+#    log /dev/log	local0
+#    log /dev/log	local1 notice
+    stats socket /var/run/haproxy/admin.sock mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+    # Default SSL material locations
+    ca-base /etc/ssl/certs
+    crt-base /etc/ssl/private
+
+    # Default ciphers to use on SSL-enabled listening sockets.
+    # For more information, see ciphers(1SSL).
+    ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
+
+defaults
+    log	global
+    mode	http
+    option	httplog
+    option	dontlognull
+    timeout connect {{ connect_timeout|default(5000) }}
+    timeout client  {{ client_timeout|default(50000) }}
+    timeout server  {{ timeout_server|default(50000) }}
+    errorfile 400 /etc/haproxy/errors/400.http
+    errorfile 403 /etc/haproxy/errors/403.http
+    errorfile 408 /etc/haproxy/errors/408.http
+    errorfile 500 /etc/haproxy/errors/500.http
+    errorfile 502 /etc/haproxy/errors/502.http
+    errorfile 503 /etc/haproxy/errors/503.http
+    errorfile 504 /etc/haproxy/errors/504.http
+
+
+listen stats :{{ stats_port|default(5937) }}
+    mode http
+    stats enable
+    stats uri /
+    {%  if auth_user and auth_password -%}
+    stats auth {{ auth_user }}:{{ auth_password }}
+    {%- endif %}
+
+
+frontend neutron-server *:9696
+    default_backend    neutron-server-backend
+
+frontend  contrail-api *:8082
+    default_backend    contrail-api-backend
+    timeout client 3m
+
+frontend  contrail-discovery *:5998
+    default_backend    contrail-discovery-backend
+
+backend neutron-server-backend
+    option nolinger
+    balance roundrobin
+    {% for neutron_ip in neutron_server_list.split(',') %}
+    server {{ neutron_ip }} {{ neutron_ip }}:{{ neutron_backend_port|default(9697) }} check inter {{ check_interval|default(2000) }} rise 2 fall 3
+    {% endfor %}
+
+backend contrail-api-backend
+    option nolinger
+    timeout server 3m
+    balance roundrobin
+    {% for contrail_api_ip in contrail_api_server_list.split(',') %}
+    server {{ contrail_api_ip }} {{ contrail_api_ip }}:{{ contrail_api_backend_port|default(9100) }} check inter {{ check_interval|default(2000) }} rise 2 fall 3
+    {% endfor %}
+
+backend contrail-discovery-backend
+    option nolinger
+    balance roundrobin
+    {% for discovery_ip in discovery_server_list.split(',') %}
+    server {{ discovery_ip }} {{ discovery_ip }}:{{ discovery_backend_port|default(9110) }} check inter {{ check_interval|default(2000) }} rise 2 fall 3
+    {% endfor %}
