@@ -7,11 +7,11 @@ function fail() {
 }
 
 function setini() {
-    param=$1
-    value=$2
-    section=${3:-$SECTION}
-    config_file=${4:-$CONFIG_FILE}
-    crudini --set $config_file $section $param $value
+    param=$1; shift
+    value=$@
+    section=$SECTION
+    config_file=$CONFIG_FILE
+    crudini --set $config_file $section $param "$value"
 }
 
 function setcfg() {

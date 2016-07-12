@@ -42,7 +42,9 @@ setini hostname $HOSTNAME
 setini log_file $CONTROL_LOG_FILE
 setini log_level $CONTROL_LOG_LEVEL
 setini log_local 1
-setini server $DISCOVERY_SERVER DISCOVERY
+
+setsection DISCOVERY
+setini server $DISCOVERY_SERVER
 
 setsection IFMAP
 setini user $CONTROL_IFMAP_USER
@@ -60,7 +62,8 @@ setini log_file $DNS_LOG_FILE
 setini log_level $DNS_LOG_LEVEL
 setini log_local 1
 
-setini server $DISCOVERY_SERVER DISCOVERY
+setsection DISCOVERY
+setini server $DISCOVERY_SERVER
 
 setsection "IFMAP"
 setini user $DNS_IFMAP_USER
