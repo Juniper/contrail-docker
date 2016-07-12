@@ -22,6 +22,7 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
 
 VOLUME ["/var/log", "/var/crashes"]
 COPY common.sh configure.sh entrypoint.sh /
+COPY supervisor_configs/ /etc/contrail/supervisord_config_files/
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
 

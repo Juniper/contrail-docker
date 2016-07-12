@@ -34,14 +34,15 @@ ZOOKEEPER_SERVER_LIST=${ZOOKEEPER_SERVER_LIST:-$IPADDRESS}
 ZOOKEEPER_SERVER_PORT=${ZOOKEEPER_SERVER_PORT:-2181}
 CONTROL_SERVER_LIST=${CONTROL_SERVER_LIST:-$IPADDRESS}
 
-IFMAP_SERVER=${IFMAP_SERVER:-$CONFIG_IP}
+IFMAP_SERVER=${IFMAP_SERVER:-$IPADDRESS}
 IFMAP_SERVER_PORT=${IFMAP_SERVER_PORT:-8443}
 IFMAP_USERNAME=${IFMAP_USERNAME:-"api-server"}
 IFMAP_PASSWORD=${IFMAP_PASSWORD:-"api-server"}
 
 DISCOVERY_SERVER=${DISCOVERY_SERVER:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
 DISCOVERY_SERVER_LISTEN=${DISCOVERY_SERVER_LISTEN:-"0.0.0.0"}
-DISCOVERY_SERVER_PORT=${DISCOVERY_SERVER_PORT:-9110}
+DISCOVERY_SERVER_LISTEN_PORT=${DISCOVERY_SERVER_LISTEN_PORT:-9110}
+DISCOVERY_SERVER_PORT=${DISCOVERY_SERVER_PORT:-5998}
 DISCOVERY_LOG_FILE=${DISCOVERY_LOG_FILE:-"/var/log/contrail/contrail-discovery.log"}
 DISCOVERY_LOG_LEVEL=${DISCOVERY_LOG_LEVEL:-"SYS_NOTICE"}
 DISCOVERY_TTL_MIN=${DISCOVERY_TTL_MIN:-300}
@@ -80,6 +81,21 @@ NEUTRON_CONTRAIL_EXTENSIONS=${NEUTRON_CONTRAIL_EXTENSIONS:-$CONTRAIL_EXTENSIONS_
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
 zk_server_list_w_port=$(echo $ZOOKEEPER_SERVER_LIST | sed -r -e "s/[, ]+/:$ZOOKEEPER_SERVER_PORT,/g" -e "s/$/:$ZOOKEEPER_SERVER_PORT/")
 rabbitmq_server_list_w_port=$(echo $RABBITMQ_SERVER_LIST | sed -r -e "s/[, ]+/:$RABBITMQ_SERVER_PORT,/g" -e "s/$/:$RABBITMQ_SERVER_PORT/")
+
+
+# Setup ifmap_server/basicauthusers.properties
+for i in `echo $CONTROL_SERVER_LIST | sed 's/,\s*/ /'`; do
+    sed -i "/^${i}:/{h;s/:.*/:${i}/};\${x;/^\$/{s//${i}:${i}/;H};x}" /etc/ifmap-server/basicauthusers.properties
+    sed -i "/^${i}.dns:/{h;s/:.*/:${i}.dns/};\${x;/^\$/{s//${i}.dns:${i}.dns/;H};x}" /etc/ifmap-server/basicauthusers.properties
+done
+# END ifmap_server/basicauthusers.properties
+
+# Setup /etc/contrail/contrail-config-nodemgr.conf
+setcfg /etc/contrail/contrail-config-nodemgr.conf
+setsection DISCOVERY
+setini server $DISCOVERY_SERVER
+setini port $DISCOVERY_SERVER_PORT
+# END setup /etc/contrail/contrail-config-nodemgr.conf
 
 # Setup contrail-api.conf
 setcfg /etc/contrail/contrail-api.conf
@@ -142,7 +158,7 @@ setsection "DEFAULTS"
 setini zk_server_ip $ZOOKEEPER_SERVER_LIST
 setini zk_server_port $ZOOKEEPER_SERVER_PORT
 setini listen_ip_addr $DISCOVERY_SERVER_LISTEN
-setini listen_port $DISCOVERY_SERVER_PORT
+setini listen_port $DISCOVERY_SERVER_LISTEN_PORT
 setini log_local "True"
 setini log_file $DISCOVERY_LOG_FILE
 setini log_level $DISCOVERY_LOG_LEVEL
