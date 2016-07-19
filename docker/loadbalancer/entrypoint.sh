@@ -19,7 +19,8 @@ set -a # Export all variables below this statement
 HA_ENABLED=${HA_ENABLED}
 INTERNAL_VIP=${INTERNAL_VIP}
 EXTERNAL_VIP=${EXTERNAL_VIP}
-INTERNAL_DEVICE=${INTERNAL_DEVICE}
+INTERNAL_DEVICE_DETECTED=$(ip a show | grep -B3 "inet ${IPADDRESS}" | awk '/^[0-9]/ {gsub(":", "", $2); print $2}')
+INTERNAL_DEVICE=${INTERNAL_DEVICE:-$INTERNAL_DEVICE_DETECTED}
 EXTERNAL_DEVICE=${EXTERNAL_DEVICE}
 HA_NODE_IP_LIST=${HA_NODE_IP_LIST} # should be comma seperated list of ips
 EXTERNAL_VIRTUAL_ROUTER_ID=${EXTERNAL_VIRTUAL_ROUTER_ID:-101}
@@ -123,4 +124,6 @@ fi
 ## END setup keepalived
 
 
-$DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG
+$DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
+child=$!
+wait "$child"

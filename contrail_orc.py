@@ -11,8 +11,9 @@ from fabric.api import run, local, settings
 from fabfile.tasks.install import *
 from fabfile.tasks.provision import *
 from fabfile.utils.commandline import *
+from fabric.contrib.files import exists, append
 import argparse
-
+import tempfile
 
 @task
 @parallel
@@ -102,7 +103,7 @@ def frame_analytics_docker_cmd(host_string, contrail_version, openstack_sku):
     if get_kafka_enabled():
         cmd += " -e KAFKA_ENABLED=1"
     cmd += add_keystone_cmd_params()
-    internal_vip = get_contrail_internal_vip()
+#    internal_vip = get_contrail_internal_vip()
 #    if internal_vip:
 #        # Highly Available setup
 #        cmd += " --internal_vip %s" % internal_vip
@@ -180,6 +181,10 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
     if get_mt_enable():
         cmd += " -e MULTI_TENANCY=True"
 
+    contrail_internal_vip = get_contrail_internal_vip()
+    if contrail_internal_vip:
+        cmd += " -e CONTRAIL_INTERNAL_VIP=%s" % contrail_internal_vip
+
     cmd += " -e IPADDRESS=%s" % tgt_ip
     cmd += " -e COLLECTOR_SERVER=%s" % collector_ip
     cmd += ' -e CASSANDRA_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
@@ -216,6 +221,16 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
 
     cmd += " -itd contrail-config-%s:%s" % (openstack_sku, contrail_version)
     return cmd
+
+@task
+@roles('all')
+def set_hostname_permanent():
+    """ In case of node provisioned through images, hostname would not have set permanent.
+    """
+    # Applicable on ubuntu
+    hostname = run("hostname")
+    if not exists("/etc/hostname"):
+        sudo("echo {0} > /etc/hostname; sed -i '1i 127.0.0.1 {0}' /etc/hosts; service hostname restart".format(hostname))
 
 
 def frame_database_docker_cmd(host_string, contrail_version, openstack_sku):
@@ -271,6 +286,13 @@ def frame_lb_docker_cmd(contrail_version, openstack_sku):
     cmd += " -e NEUTRON_SERVER_LIST=%s " % config_node_list
     cmd += " -e CONTRAIL_API_SERVER_LIST=%s " % config_node_list
     cmd += " -e DISCOVERY_SERVER_LIST=%s " % config_node_list
+
+    contrail_internal_vip = get_contrail_internal_vip()
+    if contrail_internal_vip:
+        cmd += " -e HA_ENABLED=yes -e INTERNAL_VIP=%s" % contrail_internal_vip
+        cmd += " -e HA_NODE_IP_LIST=%s " % config_node_list
+        node_index = config_node_list.split(',').index(my_ip) + 1
+        cmd += " -e NODE_INDEX=%s" % node_index
     cmd += " -itd contrail-loadbalancer-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
@@ -305,12 +327,22 @@ def install_rabbit():
     sudo("DEBIAN_FRONTEND=noninteractive apt-get -y --force-yes --allow-unauthenticated install rabbitmq-server")
 
 @task
+def prepare_node(contrail_install_package_url, *tgzs, **kwargs):
+    temp_dir = tempfile.mkdtemp()
+    package_file_path = os.path.join(temp_dir, os.path.basename(contrail_install_package_url))
+    local("wget -q -O %s %s" % (package_file_path, contrail_install_package_url))
+    execute("install_pkg_all", package_file_path)
+    execute("create_installer_repo")
+    execute("create_install_repo", *tgzs, **kwargs)
+    local("rm -fr %s" % temp_dir)
+    execute(set_hostname_permanent)
+
+
+@task
 @roles('build')
 def install_on_host(*tgzs, **kwargs):
     reboot = kwargs.get('reboot', 'True')
     execute('pre_check')
-#    execute('create_installer_repo')
-#    execute(create_install_repo, *tgzs, **kwargs)
     execute(install_rabbit)
     execute(create_install_repo_dpdk)
     execute('install_orchestrator')
@@ -327,17 +359,35 @@ def install_on_host(*tgzs, **kwargs):
 
 @task
 @roles('build')
-def setups(reboot='True'):
-    execute(enable_haproxy, roles=["cfgm"])
-    nworkers = 1
-    execute(fixup_restart_haproxy_in_all_cfgm, nworkers, roles=["cfgm"])
+def ha_setup(docker_images, contrail_version, openstack_sku):
+    """Setup ha - contrail-fabric-utils ha.py does setup lb for contrail in the machine
+    which is not required as that is going to be in container.
+    """
+    execute('pre_check')
+    contrail_internal_vip = get_contrail_internal_vip()
+    if contrail_internal_vip:
+        execute(load_docker_image, docker_images["loadbalancer"], roles=["cfgm"])
+        execute(start_container, "lb", contrail_version, openstack_sku, roles=["cfgm"])
+
+    if get_openstack_internal_vip():
+        print "Multi Openstack setup, provisioning openstack HA."
+        execute('setup_galera_cluster')
+        execute('fix_wsrep_cluster_address')
+        execute('setup_cmon_schema')
+        execute('fix_restart_xinetd_conf')
+        execute('fixup_restart_haproxy_in_openstack')
+        execute('setup_glance_images_loc')
+        execute('fix_memcache_conf')
+        execute('tune_tcp')
+        execute('fix_cmon_param_and_add_keys_to_compute')
+        execute('create_and_copy_service_token')
 
 @task
 @roles('build')
 def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     with settings(warn_only=True):
         execute('setup_common')
-        execute('setup_ha')
+        execute(ha_setup, docker_images, contrail_version, openstack_sku)
         execute('setup_rabbitmq_cluster')
         execute('increase_limits')
         execute(load_docker_image, docker_images["database"], roles=["cfgm"])
@@ -356,8 +406,6 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
         execute(load_docker_image, docker_images["analytics"], roles=["cfgm"])
         # docker run --name contrail-analytics --net=host -e IPADDRESS=10.204.217.91 -itd contrail-analytics-liberty:3.0.2.0-35"
         execute(start_container, "analytics", contrail_version, openstack_sku, roles=["cfgm"])
-        execute(load_docker_image, docker_images["loadbalancer"], roles=["cfgm"])
-        execute(start_container, "lb", contrail_version, openstack_sku, roles=["cfgm"])
 #        execute(enable_haproxy, roles=["cfgm"])
 #        nworkers = 1
 #        sys.exit()
@@ -435,6 +483,8 @@ def main(argv=sys.argv[1:]):
                         help="Openstack release")
     p_prov.add_argument('-n', '--no-host-setup', action='store_true', default=False,
                         help="Contrail version")
+    p_prov.add_argument('-u', '--contrail-package-url', type=str, required=True,
+                        help="Contrail install package http[s] url")
 
     args = ap.parse_args()
     testbed_path = "/opt/contrail/utils/fabfile/testbeds/testbed.py"
@@ -461,6 +511,7 @@ def main(argv=sys.argv[1:]):
         }
 
     if not args.no_host_setup:
+        execute(prepare_node, args.contrail_package_url)
         execute(install_on_host, reboot=False)
     execute(setup, docker_images, args.contrail_version, args.openstack_sku)
     return True

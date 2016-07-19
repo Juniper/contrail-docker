@@ -37,4 +37,6 @@ function cleanup() {
 trap cleanup SIGHUP SIGINT SIGTERM
 
 pre_start
-$DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG
+$DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
+child=$!
+wait "$child"
