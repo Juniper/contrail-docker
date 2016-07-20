@@ -34,11 +34,16 @@ def install_docker():
 
 @task
 @parallel
-def load_docker_image(image_url):
-    image_file = os.path.basename(image_url)
-    cmd = "wget -q -O /tmp/%s %s; " % (image_file, image_url)
-    cmd += "docker load -q -i /tmp/%s" % (image_file)
-    run(cmd)
+def load_docker_image(component, contrail_version, openstack_sku, image_url):
+    with settings(warn_only=True):
+        result = run('docker images -q contrail-%s-%s:%s | grep -q "\w"' % (
+            component, openstack_sku, contrail_version
+        ))
+        if result.return_code != 0:
+            image_file = os.path.basename(image_url)
+            cmd = "wget -q -O /tmp/%s %s; " % (image_file, image_url)
+            cmd += "docker load -q -i /tmp/%s" % (image_file)
+            run(cmd)
 
 
 def add_keystone_cmd_params():
@@ -293,11 +298,12 @@ def frame_lb_docker_cmd(contrail_version, openstack_sku):
         node_index = config_node_list.split(',').index(my_ip) + 1
         cmd += " -e NODE_INDEX=%s" % node_index
         cmd += ' -e RABBITMQ_SERVER_LIST="%s"' % ','.join(get_amqp_servers())
-    cmd += " -itd contrail-loadbalancer-%s:%s" % (openstack_sku, contrail_version)
+    cmd += " -itd contrail-lb-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
 @task
-def start_container(component, contrail_version, openstack_sku):
+@parallel
+def start_container(component, contrail_version, openstack_sku, image_url):
     if component == 'database':
         run_command = frame_database_docker_cmd(env.host_string, contrail_version, openstack_sku)
     elif component == 'config':
@@ -308,8 +314,10 @@ def start_container(component, contrail_version, openstack_sku):
         run_command = frame_analytics_docker_cmd(env.host_string, contrail_version, openstack_sku)
     elif component == 'lb':
         run_command = frame_lb_docker_cmd(contrail_version, openstack_sku)
-
-    sudo(run_command)
+    execute(load_docker_image, component, contrail_version, openstack_sku, image_url)
+    result = run('docker ps -q -a -f name=contrail-%s | grep -q "\w"' % (component))
+    if result.return_code != 0:
+        sudo(run_command)
 
 @task
 @roles('cfgm')
@@ -366,8 +374,7 @@ def ha_setup(docker_images, contrail_version, openstack_sku):
     execute('pre_check')
     contrail_internal_vip = get_contrail_internal_vip()
     if contrail_internal_vip:
-        execute(load_docker_image, docker_images["loadbalancer"], roles=["cfgm"])
-        execute(start_container, "lb", contrail_version, openstack_sku, roles=["cfgm"])
+        execute(start_container, "lb", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["lb"])
 
     if get_openstack_internal_vip():
         print "Multi Openstack setup, provisioning openstack HA."
@@ -406,20 +413,15 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
         execute(ha_setup, docker_images, contrail_version, openstack_sku)
         execute('setup_rabbitmq_cluster')
         execute('increase_limits')
-        execute(load_docker_image, docker_images["database"], roles=["cfgm"])
-        execute(start_container, 'database', contrail_version, openstack_sku, roles=["database"])
-        setup_neutron_endpoints()
+        execute(start_container, 'database', contrail_version, openstack_sku, roles=["database"], image_url=docker_images["database"])
     #    execute('verify_database') - verify_service will not work on container, would need to have a replacement
     #    execute('fixup_mongodb_conf') - This need to be done on container, skipping as of now
     #    execute('setup_mongodb_ceilometer_cluster') - this is required but skipping as of now (may be ceilometer is not setup at this stage
         execute('setup_orchestrator')
-        os_token = local("cat /etc/contrail/service.token", capture=True)
-        execute(load_docker_image, docker_images["config"], roles=["cfgm"])
-        execute(start_container, "config", contrail_version, openstack_sku, roles=["cfgm"])
-        execute(load_docker_image, docker_images["control"], roles=["cfgm"])
-        execute(start_container, "control", contrail_version, openstack_sku, roles=["cfgm"])
-        execute(load_docker_image, docker_images["analytics"], roles=["cfgm"])
-        execute(start_container, "analytics", contrail_version, openstack_sku, roles=["cfgm"])
+        setup_neutron_endpoints()
+        execute(start_container, "config", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["config"])
+        execute(start_container, "control", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["control"])
+        execute(start_container, "analytics", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["analytics"])
     #    execute('verify_cfgm') - Nothing as of now, will need to check
     #    execute('verify_control') - Nothing as of now, will need to check
     #    execute('verify_collector') - Nothing as of now, will need to check
@@ -505,7 +507,7 @@ def main(argv=sys.argv[1:]):
     for host, password in passwords.iteritems():
         update_env_passwords(host, password)
 
-    contrail_service_containers = ['config','control','analytics','database','loadbalancer']
+    contrail_service_containers = ['config','control','analytics','database','lb']
     container_base_image_url = testbed.contrail_docker_image_base_url
     docker_images = {
         component: "%s/contrail-%s-%s-%s.tar.gz" % (container_base_image_url,
