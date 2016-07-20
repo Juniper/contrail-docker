@@ -76,7 +76,7 @@ NEUTRON_PORT=${NEUTRON_PORT:-9697}
 NEUTRON_USER=${NEUTRON_USER:-neutron}
 NEUTRON_PASSWORD=${NEUTRON_PASSWORD:-neutron}
 NEUTRON_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
-$CONTRAIL_EXTENSIONS_DEFAULTS="ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None"
+CONTRAIL_EXTENSIONS_DEFAULTS="ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None"
 NEUTRON_CONTRAIL_EXTENSIONS=${NEUTRON_CONTRAIL_EXTENSIONS:-$CONTRAIL_EXTENSIONS_DEFAULTS}
 
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
@@ -230,10 +230,6 @@ setini admin_tenant_name $KEYSTONE_ADMIN_TENANT
 setup_keystone_auth_config
 setup_vnc_api_lib
 
-# Create service endpoints et al
-/opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER --quant_server_ip $NEUTRON_IP \
-    --tenant $KEYSTONE_ADMIN_TENANT --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \
-    --svc_password $NEUTRON_PASSWORD --svc_tenant_name $SERVICE_TENANT --region_name $REGION
 
 cat <<EOF > /etc/contrail/ctrl-details
 SERVICE_TOKEN=$KEYSTONE_ADMIN_TOKEN

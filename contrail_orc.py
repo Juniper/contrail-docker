@@ -382,6 +382,22 @@ def ha_setup(docker_images, contrail_version, openstack_sku):
         execute('fix_cmon_param_and_add_keys_to_compute')
         execute('create_and_copy_service_token')
 
+
+def setup_neutron_endpoints():
+    contrail_internal_vip = get_contrail_internal_vip()
+    (_, openstack_admin_password) = get_authserver_credentials()
+    if contrail_internal_vip:
+        neutron_ip = contrail_internal_vip
+    else:
+        neutron_ip = host_string_to_ip(env.roledefs["cfgm"][0])
+
+    cmd = " /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip %s " % get_authserver_ip()
+    cmd += " --quant_server_ip %s --tenant admin" % neutron_ip
+    cmd += " --user admin --password %s --svc_password %s" % (openstack_admin_password, get_neutron_password())
+    cmd += " --svc_tenant_name %s --region_name %s" % (get_keystone_service_tenant_name(), get_region_name())
+    with settings(host_string=env.roledefs["cfgm"][0]):
+        sudo(cmd)
+
 @task
 @roles('build')
 def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
@@ -392,6 +408,7 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
         execute('increase_limits')
         execute(load_docker_image, docker_images["database"], roles=["cfgm"])
         execute(start_container, 'database', contrail_version, openstack_sku, roles=["database"])
+        setup_neutron_endpoints()
     #    execute('verify_database') - verify_service will not work on container, would need to have a replacement
     #    execute('fixup_mongodb_conf') - This need to be done on container, skipping as of now
     #    execute('setup_mongodb_ceilometer_cluster') - this is required but skipping as of now (may be ceilometer is not setup at this stage
