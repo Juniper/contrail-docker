@@ -74,3 +74,21 @@ backend contrail-discovery-backend
     {% for discovery_ip in discovery_server_list.split(',') %}
     server {{ discovery_ip }} {{ discovery_ip }}:{{ discovery_backend_port|default(9110) }} check inter {{ check_interval|default(2000) }} rise 2 fall 3
     {% endfor %}
+
+{%  if INTERNAL_VIP or EXTERNAL_VIP -%}
+
+listen  rabbitmq 0.0.0.0:5673
+    mode tcp
+    maxconn 10000
+    balance leastconn
+    option tcpka
+    option nolinger
+    option forceclose
+    timeout client 0
+    timeout server 0
+    timeout client-fin 60s
+    timeout server-fin 60s
+    {% for rabbit_ip in RABBITMQ_SERVER_LIST.split(',') %}
+    server {{ rabbit_ip }} {{ rabbit_ip }}:{{ RABBITMQ_BACKEND_PORT |default(5672) }} check inter {{ check_interval|default(2000) }} rise 2 fall 3
+    {% endfor %}
+{% endif %}

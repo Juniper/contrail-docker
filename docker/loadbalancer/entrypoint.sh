@@ -26,12 +26,13 @@ HA_NODE_IP_LIST=${HA_NODE_IP_LIST} # should be comma seperated list of ips
 EXTERNAL_VIRTUAL_ROUTER_ID=${EXTERNAL_VIRTUAL_ROUTER_ID:-101}
 INTERNAL_VIRTUAL_ROUTER_ID=${INTERNAL_VIRTUAL_ROUTER_ID:-100}
 NODE_INDEX=${NODE_INDEX}
-
+RABBITMQ_SERVER_LIST=${RABBITMQ_SERVER_LIST}
 ## Setup haproxy
 # Include supervisor defaults if available
 if [ -f /etc/default/haproxy ] ; then
 	. /etc/default/haproxy
 fi
+
 
 pyj2.py -t /haproxy.cfg.j2 -o /etc/haproxy/haproxy.cfg -v neutron_server_list=$NEUTRON_SERVER_LIST \
     contrail_api_server_list=${CONTRAIL_API_SERVER_LIST} \

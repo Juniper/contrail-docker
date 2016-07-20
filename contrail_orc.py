@@ -286,13 +286,13 @@ def frame_lb_docker_cmd(contrail_version, openstack_sku):
     cmd += " -e NEUTRON_SERVER_LIST=%s " % config_node_list
     cmd += " -e CONTRAIL_API_SERVER_LIST=%s " % config_node_list
     cmd += " -e DISCOVERY_SERVER_LIST=%s " % config_node_list
-
     contrail_internal_vip = get_contrail_internal_vip()
     if contrail_internal_vip:
         cmd += " -e HA_ENABLED=yes -e INTERNAL_VIP=%s" % contrail_internal_vip
         cmd += " -e HA_NODE_IP_LIST=%s " % config_node_list
         node_index = config_node_list.split(',').index(my_ip) + 1
         cmd += " -e NODE_INDEX=%s" % node_index
+        cmd += ' -e RABBITMQ_SERVER_LIST="%s"' % ','.join(get_amqp_servers())
     cmd += " -itd contrail-loadbalancer-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
@@ -392,7 +392,6 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
         execute('increase_limits')
         execute(load_docker_image, docker_images["database"], roles=["cfgm"])
         execute(start_container, 'database', contrail_version, openstack_sku, roles=["database"])
-    #    execute('setup_database') - Containerized
     #    execute('verify_database') - verify_service will not work on container, would need to have a replacement
     #    execute('fixup_mongodb_conf') - This need to be done on container, skipping as of now
     #    execute('setup_mongodb_ceilometer_cluster') - this is required but skipping as of now (may be ceilometer is not setup at this stage
@@ -401,23 +400,12 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
         execute(load_docker_image, docker_images["config"], roles=["cfgm"])
         execute(start_container, "config", contrail_version, openstack_sku, roles=["cfgm"])
         execute(load_docker_image, docker_images["control"], roles=["cfgm"])
-        #docker run --name contrail-control --net=host -e IPADDRESS=10.204.217.91 -itd contrail-control-liberty:3.0.2.0-35"
         execute(start_container, "control", contrail_version, openstack_sku, roles=["cfgm"])
         execute(load_docker_image, docker_images["analytics"], roles=["cfgm"])
-        # docker run --name contrail-analytics --net=host -e IPADDRESS=10.204.217.91 -itd contrail-analytics-liberty:3.0.2.0-35"
         execute(start_container, "analytics", contrail_version, openstack_sku, roles=["cfgm"])
-#        execute(enable_haproxy, roles=["cfgm"])
-#        nworkers = 1
-#        sys.exit()
-#        execute(fixup_restart_haproxy_in_all_cfgm, nworkers)
-    #    execute('setup_cfgm')  - Contanerized
-    #   Setup haproxy - configure backends etc - this is eventually going to be a container
     #    execute('verify_cfgm') - Nothing as of now, will need to check
-    #    execute('setup_control')   - Containerized
     #    execute('verify_control') - Nothing as of now, will need to check
-    #    execute('setup_collector') - Containerized
     #    execute('verify_collector') - Nothing as of now, will need to check
-    #    execute('setup_webui') - Containerized
     #    execute('verify_webui') - Nothing as of now, will check
         execute('setup_vrouter')
         execute('prov_config') # - This should be done in config node (while starting container) or on orchestrator
