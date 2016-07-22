@@ -14,6 +14,9 @@ from fabfile.utils.commandline import *
 from fabric.contrib.files import exists, append
 import argparse
 import tempfile
+import ConfigParser
+import uuid
+import socket
 
 @task
 @parallel
@@ -116,7 +119,6 @@ def frame_analytics_docker_cmd(host_string, contrail_version, openstack_sku):
         cmd += " -e CASSANDRA_USER=%s" % cassandra_user
         cmd += " -e CASSANDRA_PASSWORD=%s" % cassandra_password
 
-    cmd += " -itd contrail-analytics-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
 
@@ -148,7 +150,6 @@ def frame_control_docker_cmd(host_string, contrail_version, openstack_sku):
 # Need to see where collector_ip being used
 #    cmd += ' --collector_ip %s' % collector_ip
     cmd += add_keystone_cmd_params()
-    cmd += " -itd contrail-control-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
 
@@ -195,7 +196,6 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
     cmd += ' -e CASSANDRA_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
     cmd += ' -e ZOOKEEPER_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
     cmd += " -e NEUTRON_PORT=%s" % quantum_port
-    cmd += ' -e RABBITMQ_SERVER_LIST="%s"' % ' '.join(get_amqp_servers())
     cmd += " -e RABBITMQ_SERVER_PORT=%s" % get_amqp_port()
 
     # Affect is on ctrl-details for quantum_ip which will be localhost in case of haproxy
@@ -224,7 +224,6 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
         cmd += ' -e CASSANDRA_USER=%s' % (cassandra_user)
         cmd += ' -e CASSANDRA_PASSWORD=%s' % (cassandra_password)
 
-    cmd += " -itd contrail-config-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
 @task
@@ -279,7 +278,6 @@ def frame_database_docker_cmd(host_string, contrail_version, openstack_sku):
         cmd += " -e CASSANDRA_USER=%s" % cassandra_user
         cmd += " -e CASSANDRA_PASSWORD=%s" % cassandra_password
 
-    cmd += " -itd contrail-database-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
 
@@ -298,12 +296,10 @@ def frame_lb_docker_cmd(contrail_version, openstack_sku):
         node_index = config_node_list.split(',').index(my_ip) + 1
         cmd += " -e NODE_INDEX=%s" % node_index
         cmd += ' -e RABBITMQ_SERVER_LIST="%s"' % ','.join(get_amqp_servers())
-    cmd += " -itd contrail-lb-%s:%s" % (openstack_sku, contrail_version)
     return cmd
 
 @task
-@parallel
-def start_container(component, contrail_version, openstack_sku, image_url):
+def start_container(component, contrail_version, openstack_sku, image_url, env_vars=None):
     if component == 'database':
         run_command = frame_database_docker_cmd(env.host_string, contrail_version, openstack_sku)
     elif component == 'config':
@@ -315,8 +311,14 @@ def start_container(component, contrail_version, openstack_sku, image_url):
     elif component == 'lb':
         run_command = frame_lb_docker_cmd(contrail_version, openstack_sku)
     execute(load_docker_image, component, contrail_version, openstack_sku, image_url)
-    result = run('docker ps -q -a -f name=contrail-%s | grep -q "\w"' % (component))
+    result = run('docker ps -q -a -f name=contrails-%s | grep -q "\w"' % (component))
     if result.return_code != 0:
+        # Pass any environment variables passed in env_vars (it should be in form of ["VARIABLE=value"])
+        if env_vars:
+            for env_var in env_vars:
+                run_command += " -e %s" % env_var
+
+        run_command += " -itd contrail-%s-%s:%s" % (component, openstack_sku, contrail_version)
         sudo(run_command)
 
 @task
@@ -405,13 +407,72 @@ def setup_neutron_endpoints():
     with settings(host_string=env.roledefs["cfgm"][0]):
         sudo(cmd)
 
+
+def get_apmq_roles():
+    amqp_roles = []
+    rabbit_servers = get_from_testbed_dict('cfgm', 'amqp_hosts', None)
+    if rabbit_servers:
+        print "Using external rabbitmq servers %s" % rabbit_servers
+    else:
+        # Provision rabbitmq cluster in cfgm role nodes.
+        print "Provisioning rabbitq in cfgm nodes"
+        amqp_roles = ['cfgm']
+    # Provision rabbitmq cluster in openstack on request
+    if get_from_testbed_dict('openstack', 'manage_amqp', 'no') == 'yes':
+        # Provision rabbitmq cluster in openstack role nodes aswell.
+        amqp_roles.append('openstack')
+    return amqp_roles
+
+
+def setup_config(docker_images, contrail_version, openstack_sku):
+    env_vars_common = []
+    amqp_roles = get_apmq_roles()
+    if not get_from_testbed_dict('cfgm', 'amqp_hosts', None):
+        env_vars_common.append("ENABLE_RABBITMQ=yes")
+
+    # Disable iptables on amqp_roles - this is copied from contrail-fabric-utils rabbitmq.allow_rabbitmq_port()
+    execute('disable_iptables', roles=amqp_roles)
+
+    if ('openstack' in amqp_roles and get_openstack_internal_vip() or
+            'cfgm' in amqp_roles and get_contrail_internal_vip()):
+        execute('set_tcp_keepalive', roles=amqp_roles)
+
+    for role in amqp_roles:
+        env_vars = env_vars_common
+        rabbitmq_cluster_uuid = getattr(testbed, 'rabbitmq_cluster_uuid', None)
+        if not rabbitmq_cluster_uuid:
+            rabbitmq_cluster_uuid = uuid.uuid4()
+        env_vars.append("RABBITMQ_CLUSTER_UUID=%s" % rabbitmq_cluster_uuid)
+
+        # Set RABBITMQ_SERVER_LIST
+        rabbitmq_server_list=[]
+        for node in env.roledefs[role]:
+            with settings(host_string=node):
+                hostname = run("hostname -s")
+                rabbitmq_server_list.append("{}:{}".format(hstr_to_ip(node), hostname))
+
+        env_vars.append("RABBITMQ_SERVER_LIST=\"%s\"" % " ".join(rabbitmq_server_list))
+        execute(start_container, "config", contrail_version, openstack_sku,
+                    image_url=docker_images["config"], env_vars=env_vars,
+                    roles=[role])
+
+@task
+def disable_rabbitmq_on_host():
+    """ The package contrail-openstack is dependent on rabbitmq package,
+    so cannot remove rabbitmq until all openstack services dockerized. So
+    disabling the service on the node.
+    """
+    cmd = "service rabbitmq-server stop; update-rc.d rabbitmq-server remove; echo > /etc/init.d/rabbitmq-server"
+    sudo(cmd)
+
 @task
 @roles('build')
 def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     with settings(warn_only=True):
         execute('setup_common')
         execute(ha_setup, docker_images, contrail_version, openstack_sku)
-        execute('setup_rabbitmq_cluster')
+#        execute('setup_rabbitmq_cluster')
+        execute(disable_rabbitmq_on_host, roles=get_apmq_roles())
         execute('increase_limits')
         execute(start_container, 'database', contrail_version, openstack_sku, roles=["database"], image_url=docker_images["database"])
     #    execute('verify_database') - verify_service will not work on container, would need to have a replacement
@@ -419,7 +480,7 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     #    execute('setup_mongodb_ceilometer_cluster') - this is required but skipping as of now (may be ceilometer is not setup at this stage
         execute('setup_orchestrator')
         setup_neutron_endpoints()
-        execute(start_container, "config", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["config"])
+        setup_config(docker_images, contrail_version, openstack_sku)
         execute(start_container, "control", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["control"])
         execute(start_container, "analytics", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["analytics"])
     #    execute('verify_cfgm') - Nothing as of now, will need to check

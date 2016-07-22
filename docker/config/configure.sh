@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -a # Export all variables below this statement
+
 . common.sh
 
 export PATH=$PATH:/opt/contrail/bin
@@ -23,8 +25,15 @@ API_SERVER_INSECURE=${API_SERVER_INSECURE:-"False"}
 SCHEMA_LOG_FILE=${SCHEMA_LOG_FILE:-"/var/log/contrail/contrail-schema.log"}
 SCHEMA_LOG_LEVEL=${SCHEMA_LOG_LEVEL:-SYS_NOTICE}
 
-RABBITMQ_SERVER_LIST=${RABBITMQ_SERVER_LIST:-$IPADDRESS}
+# Rabbitmq server list is a comma seperated list of rabbitmq server *NAMES* which are
+# resolvable from the container or a list of ip1:host1,ip2:host2. e.g, 192.168.0.10:rabbit1,192.168.0.11:rabbit2
+RABBITMQ_SERVER_LIST=${RABBITMQ_SERVER_LIST:-"$IPADDRESS:$HOSTNAME"}
 RABBITMQ_SERVER_PORT=${RABBITMQ_SERVER_PORT:-5672}
+RABBITMQ_LISTEN_IP=${RABBITMQ_LISTEN_IP:-$IPADDRESS}
+ENABLE_RABBITMQ=${ENABLE_RABBITMQ}
+RABBITMQ_CLUSTER_UUID=${RABBITMQ_CLUSTER_UUID}
+
+[[ $RABBITMQ_CLUSTER_UUID ]] || fail "Rabbitmq erlang cookie must be set in the variable \$RABBITMQ_CLUSTER_UUID."
 
 ANALYTICS_SERVER=${ANALYTICS_SERVER:-${CONTRAIL_INTERNAL_VIP:-$IPADDRESS}}
 ANALYTICS_SERVER_PORT=${ANALYTICS_SERVER_PORT:-8081}
@@ -79,11 +88,84 @@ NEUTRON_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
 CONTRAIL_EXTENSIONS_DEFAULTS="ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None"
 NEUTRON_CONTRAIL_EXTENSIONS=${NEUTRON_CONTRAIL_EXTENSIONS:-$CONTRAIL_EXTENSIONS_DEFAULTS}
 
+# Functions
+function setup_rabbitmq() {
+    rabbitmq_server_list_w_port=$(echo $rabbitmq_server_ip_list | sed 's/, *$//' |\
+        sed -r -e "s/[, ]+/:$RABBITMQ_SERVER_PORT,/g" -e "s/$/:$RABBITMQ_SERVER_PORT/")
+
+    # Setup rabbitmq-env.conf
+    cat <<EOF > /etc/rabbitmq/rabbitmq-env.conf
+NODE_IP_ADDRESS=$RABBITMQ_LISTEN_IP
+NODENAME=rabbit@${HOSTNAME}-ctrl
+EOF
+    # Determine node's index based on IP address
+    rabbit_servers_sorted=$(echo $RABBITMQ_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
+    index=$(echo "$rabbit_servers_sorted" | grep -n "${RABBITMQ_LISTEN_IP}:" | cut -f1 -d:)
+
+    # Setup rabbitmq.config
+    pyj2.py -t /rabbitmq.conf.j2 -o /etc/rabbitmq/rabbitmq.config
+
+    service rabbitmq-server stop
+    if [[ `epmd -kill | grep -c "Killed"` -eq 0 ]]; then
+        pkill -9  beam;
+        pkill -9  epmd
+        if [ `netstat -anp | grep -c beam` -ne 0 ]; then
+            pkill -9 beam
+        fi
+    fi
+    # Remove rabbitmq mnesia database, set erlang cookie
+    rm -rf /var/lib/rabbitmq/mnesia
+    echo $RABBITMQ_CLUSTER_UUID > /var/lib/rabbitmq/.erlang.cookie
+    chmod 400 /var/lib/rabbitmq/.erlang.cookie
+    chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie
+    service rabbitmq-server restart
+        # All nodes except first node will wait till first node is up
+    if [[ $index > 1 ]]; then
+        first_ip=$(echo "$rabbit_servers_sorted" | cut -f1 -d: | head -1)
+        first_server_name=$(echo "$rabbit_servers_sorted" | cut -f2 -d: | head -1)
+        while  ! </dev/tcp/${first_ip}/${RABBITMQ_SERVER_PORT}; do
+            sleep 5
+        done
+        rabbitmqctl stop_app
+        rabbitmqctl join_cluster rabbit@${first_server_name}-ctrl
+        rabbitmqctl start_app
+    fi
+    # adding sleep to workaround rabbitmq bug 26370 prevent
+    # "rabbitmqctl cluster_status" from breaking the database,
+    # this is seen in ci
+    sleep 30
+    rabbitmqctl set_policy HA-all "" '{"ha-mode":"all","ha-sync-mode":"automatic"}'
+
+}
+
+# Main code start here
+
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
 zk_server_list_w_port=$(echo $ZOOKEEPER_SERVER_LIST | sed -r -e "s/[, ]+/:$ZOOKEEPER_SERVER_PORT,/g" -e "s/$/:$ZOOKEEPER_SERVER_PORT/")
-rabbitmq_server_list_w_port=$(echo $RABBITMQ_SERVER_LIST | sed -r -e "s/[, ]+/:$RABBITMQ_SERVER_PORT,/g" -e "s/$/:$RABBITMQ_SERVER_PORT/")
 
+## Rabbitmq server configuration
+# Setup /etc/hosts entries for all rabbitmq hostnames (and hostname-ctrl name) - it is not required if those
+# names are resolvable using dns but it is not expected here
 
+for rabbitmq_server in `echo $RABBITMQ_SERVER_LIST | sed -r 's/[, ]/ /g'`; do
+    if [[ $rabbitmq_server =~ : ]]; then
+        ip=${rabbitmq_server%:*}
+        hostname=${rabbitmq_server#*:}
+        rabbitmq_server_ip_list+="$ip,"
+        rabbitmq_servername_list+="$hostname,"
+
+        if [[ `grep -c "${hostname}-ctrl" /etc/hosts` -eq 0 ]]; then
+            echo "$ip $hostname ${hostname}-ctrl" >> /etc/hosts
+        fi
+    fi
+done
+
+rabbitmq_server_ip_list=${rabbitmq_server_ip_list/%,/}
+rabbitmq_servername_list=${rabbitmq_servername_list/%,/}
+
+if [[ $ENABLE_RABBITMQ == "yes" ]]; then
+    setup_rabbitmq
+fi
 # Setup ifmap_server/basicauthusers.properties
 for i in `echo $CONTROL_SERVER_LIST | sed 's/,\s*/ /'`; do
     sed -i "/^${i}:/{h;s/:.*/:${i}/};\${x;/^\$/{s//${i}:${i}/;H};x}" /etc/ifmap-server/basicauthusers.properties

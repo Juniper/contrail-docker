@@ -8,7 +8,8 @@ ENV SKU=liberty
 ARG PACKAGES_CONTRAIL_CONFIG="contrail-lib contrail-config contrail-f5 neutron-plugin-contrail contrail-setup \
                               contrail-utils contrail-config-openstack supervisor neutron-server python-neutron-lbaas \
                               python-novaclient python-keystoneclient haproxy euca2ools python-qpid python-iniparse \
-                              python-bottle ifmap-server ifmap-python-client keepalived contrail-nodemgr crudini"
+                              python-bottle ifmap-server ifmap-python-client keepalived contrail-nodemgr crudini \
+                              rabbitmq-server"
 
 RUN wget -q --spider $CONTRAIL_INSTALL_PACKAGE_URL
 
@@ -21,9 +22,10 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
     apt-get -y autoremove && apt-get -y clean;
 
 VOLUME ["/var/log", "/var/crashes"]
-COPY common.sh configure.sh entrypoint.sh /
+COPY common.sh configure.sh entrypoint.sh *.j2 /
 COPY supervisor_configs/ /etc/contrail/supervisord_config_files/
-RUN chmod +x /entrypoint.sh
+COPY pyj2.py /usr/local/bin/
+RUN chmod +x /entrypoint.sh /usr/local/bin/pyj2.py
 ENTRYPOINT /entrypoint.sh
 
 
