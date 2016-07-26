@@ -9,6 +9,7 @@ export PATH=$PATH:/opt/contrail/bin
 IPADDRESS=${IPADDRESS:-127.0.0.1}
 
 CONFIG_IP=${CONFIG_IP:-$IPADDRESS}
+CONFIG_SERVER_LIST=${CONFIG_SERVER_LIST:-$CONFIG_IP}
 
 CONTRAIL_INTERNAL_VIP=${CONTRAIL_INTERNAL_VIP}
 OPENSTACK_INTERNAL_VIP=${OPENSTACK_INTERNAL_VIP}
@@ -87,6 +88,7 @@ NEUTRON_PASSWORD=${NEUTRON_PASSWORD:-neutron}
 NEUTRON_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
 CONTRAIL_EXTENSIONS_DEFAULTS="ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None"
 NEUTRON_CONTRAIL_EXTENSIONS=${NEUTRON_CONTRAIL_EXTENSIONS:-$CONTRAIL_EXTENSIONS_DEFAULTS}
+NEUTRON_SERVER_LIST=${NEUTRON_SERVER_LIST:-$CONFIG_SERVER_LIST}
 
 # Functions
 function setup_rabbitmq() {
@@ -330,6 +332,21 @@ QUANTUM_PORT=$NEUTRON_PORT
 COMPUTE=$KEYSTONE_SERVER
 CONTROLLER_MGMT=$API_SERVER_IP
 EOF
+
+# setup neutron endpoints - this is bit tricky, currently we use setup-quantum-in-keystone
+# To setup neutron endpoints in keystone, and that script doesnt handle simultaneous executions.
+# So only one neutron container should run this.
+neutron_servers_sorted=$(echo $NEUTRON_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
+neutron_index=$(echo "$neutron_servers_sorted" | grep -n "${IPADDRESS}:" | cut -f1 -d:)
+
+if [[ $neutron_index == 1 ]]; then
+    /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER  \
+        --quant_server_ip $NEUTRON_IP --tenant $KEYSTONE_ADMIN_TENANT \
+        --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \
+        --svc_password $NEUTRON_PASSWORD --svc_tenant_name $SERVICE_TENANT \
+        --region_name $REGION
+fi
+
 
 # Start neutron
 # TODO: neutron need to be added to supervisord

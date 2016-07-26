@@ -196,6 +196,7 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
     cmd += ' -e CASSANDRA_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
     cmd += ' -e ZOOKEEPER_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
     cmd += " -e NEUTRON_PORT=%s" % quantum_port
+    cmd += " -e CONFIG_SERVER_LIST=\"%s\"" % ' '.join(env.roledefs['cfgm'])
     cmd += " -e RABBITMQ_SERVER_PORT=%s" % get_amqp_port()
 
     # Affect is on ctrl-details for quantum_ip which will be localhost in case of haproxy
@@ -299,6 +300,7 @@ def frame_lb_docker_cmd(contrail_version, openstack_sku):
     return cmd
 
 @task
+@parallel
 def start_container(component, contrail_version, openstack_sku, image_url, env_vars=None):
     if component == 'database':
         run_command = frame_database_docker_cmd(env.host_string, contrail_version, openstack_sku)
@@ -392,22 +394,6 @@ def ha_setup(docker_images, contrail_version, openstack_sku):
         execute('create_and_copy_service_token')
 
 
-def setup_neutron_endpoints():
-    contrail_internal_vip = get_contrail_internal_vip()
-    (_, openstack_admin_password) = get_authserver_credentials()
-    if contrail_internal_vip:
-        neutron_ip = contrail_internal_vip
-    else:
-        neutron_ip = host_string_to_ip(env.roledefs["cfgm"][0])
-
-    cmd = " /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip %s " % get_authserver_ip()
-    cmd += " --quant_server_ip %s --tenant admin" % neutron_ip
-    cmd += " --user admin --password %s --svc_password %s" % (openstack_admin_password, get_neutron_password())
-    cmd += " --svc_tenant_name %s --region_name %s" % (get_keystone_service_tenant_name(), get_region_name())
-    with settings(host_string=env.roledefs["cfgm"][0]):
-        sudo(cmd)
-
-
 def get_apmq_roles():
     amqp_roles = []
     rabbit_servers = get_from_testbed_dict('cfgm', 'amqp_hosts', None)
@@ -479,7 +465,6 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     #    execute('fixup_mongodb_conf') - This need to be done on container, skipping as of now
     #    execute('setup_mongodb_ceilometer_cluster') - this is required but skipping as of now (may be ceilometer is not setup at this stage
         execute('setup_orchestrator')
-        setup_neutron_endpoints()
         setup_config(docker_images, contrail_version, openstack_sku)
         execute(start_container, "control", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["control"])
         execute(start_container, "analytics", contrail_version, openstack_sku, roles=["cfgm"], image_url=docker_images["analytics"])
