@@ -22,7 +22,7 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
     apt-get -y autoremove && apt-get -y clean;
 
 VOLUME ["/var/log", "/var/crashes"]
-COPY common.sh configure.sh entrypoint.sh *.j2 /
+COPY *.sh *.j2 /
 COPY supervisor_configs/ /etc/contrail/supervisord_config_files/
 COPY pyj2.py /usr/local/bin/
 RUN chmod +x /entrypoint.sh /usr/local/bin/pyj2.py

@@ -1,4 +1,5 @@
 #!/bin/bash -x
+source /env.sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/supervisord
 SERVICE=config
@@ -24,7 +25,7 @@ function pre_start() {
     ulimit -d unlimited
     ulimit -v unlimited
     ulimit -n 4096
-    source /configure.sh
+    bash -x /configure.sh
 }
 
 function cleanup() {

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -a # Export all variables below this statement
+export PATH=$PATH:/opt/contrail/bin:/usr/share/contrail-utils/
+
 function fail() {
     echo "$@"
     exit 1
