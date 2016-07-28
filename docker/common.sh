@@ -55,3 +55,25 @@ function setup_vnc_api_lib() {
     setini insecure $KEYSTONE_INSECURE
     # END vnc_api_lib.ini setup
 }
+
+function check_port() {
+    ip=$1
+    port=$2
+    </dev/tcp/${ip}/${port}
+}
+
+function wait_for_service_port() {
+    ip=$1
+    port=$2
+    while  ! check_port $ip $port; do
+        sleep 5
+    done
+}
+
+function wait_for_url() {
+    url=$1
+    response=$(curl -s -o /dev/null -I -w "%{http_code}" $url)
+    while [[ $response -ge 500 || $response -eq 0 ]]; do
+        sleep 5
+    done
+}

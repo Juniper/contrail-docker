@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -x
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/supervisord
 SERVICE=config
@@ -24,7 +24,7 @@ function pre_start() {
     ulimit -d unlimited
     ulimit -v unlimited
     ulimit -n 4096
-    bash /configure.sh
+    source /configure.sh
 }
 
 function cleanup() {
@@ -38,4 +38,11 @@ trap cleanup SIGHUP SIGINT SIGTERM
 pre_start
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
+
+# Register config node in config db
+wait_for_url http://${API_SERVER_IP}:${API_SERVER_PORT}
+/usr/share/contrail-utils/provision_config_node.py --api_server_ip $API_SERVER_IP --host_name $HOSTNAME \
+    --host_ip $API_SERVER_IP --oper add  --admin_user ${KEYSTONE_ADMIN_USER} \
+    --admin_password ${KEYSTONE_ADMIN_PASSWORD} --admin_tenant_name ${KEYSTONE_ADMIN_TENANT}
+
 wait "$child"

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -a # Export all variables below this statement
 
 . common.sh
@@ -84,6 +83,7 @@ REGION=${REGION:-RegionOne}
 NEUTRON_IP=${NEUTRON_IP:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
 NEUTRON_PORT=${NEUTRON_PORT:-9697}
 NEUTRON_USER=${NEUTRON_USER:-neutron}
+
 NEUTRON_PASSWORD=${NEUTRON_PASSWORD:-neutron}
 NEUTRON_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
 CONTRAIL_EXTENSIONS_DEFAULTS="ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None"
@@ -125,9 +125,7 @@ EOF
     if [[ $index > 1 ]]; then
         first_ip=$(echo "$rabbit_servers_sorted" | cut -f1 -d: | head -1)
         first_server_name=$(echo "$rabbit_servers_sorted" | cut -f2 -d: | head -1)
-        while  ! </dev/tcp/${first_ip}/${RABBITMQ_SERVER_PORT}; do
-            sleep 5
-        done
+        wait_for_service_port $first_ip  $RABBITMQ_SERVER_PORT
         rabbitmqctl stop_app
         rabbitmqctl join_cluster rabbit@${first_server_name}-ctrl
         rabbitmqctl start_app
@@ -288,6 +286,7 @@ setini ca_certs /etc/contrail/ssl/certs/ca.pem
 setsection "SCHEDULER"
 setini analytics_server_ip $ANALYTICS_SERVER
 setini analytics_server_port $ANALYTICS_SERVER_PORT
+
 # END /etc/contrail/contrail-svc-monitor.conf setup
 
 # Setup /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
@@ -334,12 +333,14 @@ CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
 # setup neutron endpoints - this is bit tricky, currently we use setup-quantum-in-keystone
+
 # To setup neutron endpoints in keystone, and that script doesnt handle simultaneous executions.
 # So only one neutron container should run this.
 neutron_servers_sorted=$(echo $NEUTRON_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
 neutron_index=$(echo "$neutron_servers_sorted" | grep -n "${IPADDRESS}:" | cut -f1 -d:)
 
 if [[ $neutron_index == 1 ]]; then
+    wait_for_url ${KEYSTONE_AUTH_PROTOCOL}://$KEYSTONE_SERVER:${KEYSTONE_AUTH_PORT}
     /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER  \
         --quant_server_ip $NEUTRON_IP --tenant $KEYSTONE_ADMIN_TENANT \
         --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \

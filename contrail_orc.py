@@ -473,7 +473,6 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     #    execute('verify_collector') - Nothing as of now, will need to check
     #    execute('verify_webui') - Nothing as of now, will check
         execute('setup_vrouter')
-        execute('prov_config') # - This should be done in config node (while starting container) or on orchestrator
         execute('prov_database')  # This should be done in config container or or on orchestrator
         execute('prov_analytics')
         execute('prov_control_bgp')
