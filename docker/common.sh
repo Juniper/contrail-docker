@@ -75,8 +75,33 @@ function wait_for_service_port() {
 
 function wait_for_url() {
     url=$1
-    response=$(curl -s -o /dev/null -I -w "%{http_code}" $url)
+    response=$(curl -s -o /dev/null -I -w "%{http_code}" $url || true)
     while [[ $response -ge 500 || $response -eq 0 ]]; do
         sleep 5
+        response=$(curl -s -o /dev/null -I -w "%{http_code}" $url || true)
+    done
+}
+
+##
+# Function to retry other functions or commands
+# variables: $timeout , $wait
+# Example: retry do_something -f arg1 -d arg2 arg3
+##
+function retry() {
+    timeout=${timeout:-300}
+    wait=${wait:-5}
+    cmd=$1; shift
+    args=$*
+    rv=1
+    duration=0
+    while [[ $rv -ne 0 ]]; do
+        $cmd $args
+        rv=$?
+        sleep $wait
+        duration=$(($duration+$wait))
+        if [[ $duration -ge $timeout ]]; then
+            echo "Timeout occurred"
+            return 1
+        fi
     done
 }

@@ -279,6 +279,8 @@ def frame_database_docker_cmd(host_string, contrail_version, openstack_sku):
         cmd += " -e CASSANDRA_USER=%s" % cassandra_user
         cmd += " -e CASSANDRA_PASSWORD=%s" % cassandra_password
 
+    cmd += add_keystone_cmd_params()
+
     return cmd
 
 
@@ -473,7 +475,6 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     #    execute('verify_collector') - Nothing as of now, will need to check
     #    execute('verify_webui') - Nothing as of now, will check
         execute('setup_vrouter')
-        execute('prov_database')  # This should be done in config container or or on orchestrator
         execute('prov_analytics')
         execute('prov_control_bgp')
         execute('prov_external_bgp')

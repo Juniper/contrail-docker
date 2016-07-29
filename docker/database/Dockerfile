@@ -19,7 +19,7 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
 VOLUME ["/var/log", "/var/crashes"]
 COPY scripts/cassandra_start.sh scripts/zookeeper_start.sh /usr/local/bin/
 COPY scripts/supervisor_config /etc/contrail/supervisord_database_files/
-COPY configure.py entrypoint.sh /
+COPY configure.py *.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
 
