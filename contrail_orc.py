@@ -475,7 +475,6 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     #    execute('verify_collector') - Nothing as of now, will need to check
     #    execute('verify_webui') - Nothing as of now, will check
         execute('setup_vrouter')
-        execute('prov_analytics')
         execute('prov_control_bgp')
         execute('prov_external_bgp')
         execute('prov_metadata_services')

@@ -40,4 +40,14 @@ trap cleanup SIGHUP SIGINT SIGTERM
 pre_start
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
+
+# Wait for config api
+wait_for_url http://${CONFIG_IP}:${CONFIG_API_PORT}
+
+# Register analytics in config
+retry /usr/share/contrail-utils/provision_analytics_node.py --api_server_ip $CONFIG_IP \
+    --host_name ${HOSTNAME} --host_ip ${DATABASE_IP} --oper add \
+    --admin_user ${KEYSTONE_ADMIN_USER} --admin_password ${KEYSTONE_ADMIN_PASSWORD} \
+     --admin_tenant_name ${KEYSTONE_ADMIN_TENANT}
+
 wait "$child"
