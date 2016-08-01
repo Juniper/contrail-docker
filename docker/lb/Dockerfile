@@ -3,7 +3,7 @@ MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG ENTRY_POINT=docker_entrypoint.sh
 ARG DEBIAN_FRONTEND=noninteractive
 ARG CONTRAIL_INSTALL_PACKAGE_URL
-ARG PACKAGES_LB="haproxy python-jinja2 keepalived supervisor"
+ARG PACKAGES_LB="haproxy python-jinja2 keepalived supervisor jq"
 
 RUN wget -q --spider $CONTRAIL_INSTALL_PACKAGE_URL
 

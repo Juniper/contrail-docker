@@ -18,11 +18,8 @@ fi
 if [[ ! -f /etc/hostname ]]; then
     echo `hostname` > /etc/hostname
 fi
-
 wget -O /tmp/contrail-install-package.deb $package_url
 dpkg -i /tmp/contrail-install-package.deb
 cd /opt/contrail/contrail_packages
 bash setup.sh
 cp -fv $testbed /opt/contrail/utils/fabfile/testbeds/testbed.py
-
-

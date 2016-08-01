@@ -114,8 +114,8 @@ function retry() {
 function get_service_connect_details() {
     discovery_services_json_url=$1
     service_type=$2
-    ip_port=`curl -s ${discovery_services_json_url} | jq '.services[] | \
-        if .service_type == "${service_type}" then .info["ip-address"] + ":" + .info.port else empty end ' |\
+    ip_port=`curl -s ${discovery_services_json_url} | jq ".services[] | \
+        if .service_type == \"${service_type}\" then .info[\"ip-address\"] + \":\" + .info.port else empty end " |\
         sed 's/"//g'`
     rv=$?
     echo "${ip_port}" # send space separated list of ip:port values for provided service type

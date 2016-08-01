@@ -42,7 +42,6 @@ setini syslog_port $ANALYTICS_SYSLOG_PORT
 
 setsection "COLLECTOR"
 setini port $COLLECTOR_PORT
-setini disc_server_port $DISCOVERY_PORT
 
 setsection "DISCOVERY"
 setini server $DISCOVERY_SERVER

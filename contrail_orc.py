@@ -44,8 +44,18 @@ def load_docker_image(component, contrail_version, openstack_sku, image_url):
         ))
         if result.return_code != 0:
             image_file = os.path.basename(image_url)
-            cmd = "wget -q -O /tmp/%s %s; " % (image_file, image_url)
-            cmd += "docker load -q -i /tmp/%s" % (image_file)
+            cmd = ''
+            # FIXME: this is a workaround which just make local image path work only on single node environment
+            if re.match(r"^http[s]*://", image_url):
+                image_path = "/tmp/%s" % image_file
+                cmd += "wget -q -O %s %s; " % (image_path, image_url)
+            elif os.path.isfile(image_url):
+                image_path = os.path.abspath(image_url)
+            else:
+                print("Unsupported or invalid image_url (%s)" % image_url)
+                sys.exit(100)
+
+            cmd += "docker load -q -i %s" % (image_path)
             run(cmd)
 
 
@@ -148,7 +158,7 @@ def frame_control_docker_cmd(host_string, contrail_version, openstack_sku):
     cmd += ' -e IPADDRESS=%s' % tgt_ip
     cmd += ' -e CONFIG_IP=%s' % cfgm_ip
     cmd += ' -e ROUTER_ASN=%s' % testbed.router_asn
-    cmd += ' -e BGP_MD5=%s' % get_from_testbed_dict('md5', host, '')
+    cmd += ' -e BGP_MD5=%s' % get_from_testbed_dict('md5', host_string, '')
     ext_bgp_list=''
     for ext_bgp in testbed.ext_routers:
         ext_bgp_name = ext_bgp[0]
@@ -542,7 +552,7 @@ def main(argv=sys.argv[1:]):
     p_prov.add_argument('-n', '--no-host-setup', action='store_true', default=False,
                         help="Contrail version")
     p_prov.add_argument('-u', '--contrail-package-url', type=str, required=True,
-                        help="Contrail install package http[s] url")
+                        help="Contrail install package http[s] url or local path")
 
     args = ap.parse_args()
     testbed_path = "/opt/contrail/utils/fabfile/testbeds/testbed.py"

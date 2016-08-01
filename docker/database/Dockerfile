@@ -5,7 +5,7 @@ ARG ENTRY_POINT=docker_entrypoint.sh
 ARG SSHPASS
 ARG DEBIAN_FRONTEND=noninteractive
 ENV SKU=liberty
-ARG PACKAGES_CONTRAIL_CONTROL="contrail-openstack-database default-jre-headless mongodb-clients mongodb-server contrail-setup crudini"
+ARG PACKAGES_CONTRAIL_CONTROL="contrail-openstack-database default-jre-headless mongodb-clients mongodb-server contrail-setup crudini jq"
 
 RUN wget -q --spider $CONTRAIL_INSTALL_PACKAGE_URL
 

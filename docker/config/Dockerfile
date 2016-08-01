@@ -9,7 +9,7 @@ ARG PACKAGES_CONTRAIL_CONFIG="contrail-lib contrail-config contrail-f5 neutron-p
                               contrail-utils contrail-config-openstack supervisor neutron-server python-neutron-lbaas \
                               python-novaclient python-keystoneclient haproxy euca2ools python-qpid python-iniparse \
                               python-bottle ifmap-server ifmap-python-client keepalived contrail-nodemgr crudini \
-                              rabbitmq-server"
+                              rabbitmq-server jq"
 
 RUN wget -q --spider $CONTRAIL_INSTALL_PACKAGE_URL
 
