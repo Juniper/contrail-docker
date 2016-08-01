@@ -105,3 +105,18 @@ function retry() {
         fi
     done
 }
+
+##
+# Function to connect to discovery service and get the ipaddress:port list for provided service type
+# Run it with discovory services.json url as first argument and service_type as second argument
+# e.g get_service_connect_details http://10.0.0.10:5998/services.json ApiServer
+##
+function get_service_connect_details() {
+    discovery_services_json_url=$1
+    service_type=$2
+    ip_port=`curl -s ${discovery_services_json_url} | jq '.services[] | \
+        if .service_type == "${service_type}" then .info["ip-address"] + ":" + .info.port else empty end ' |\
+        sed 's/"//g'`
+    rv=$?
+    echo "${ip_port}" # send space separated list of ip:port values for provided service type
+}

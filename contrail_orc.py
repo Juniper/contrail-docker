@@ -147,6 +147,14 @@ def frame_control_docker_cmd(host_string, contrail_version, openstack_sku):
 
     cmd += ' -e IPADDRESS=%s' % tgt_ip
     cmd += ' -e CONFIG_IP=%s' % cfgm_ip
+    cmd += ' -e ROUTER_ASN=%s' % testbed.router_asn
+    cmd += ' -e BGP_MD5=%s' % get_from_testbed_dict('md5', host, '')
+    ext_bgp_list=''
+    for ext_bgp in testbed.ext_routers:
+        ext_bgp_name = ext_bgp[0]
+        ext_bgp_ip = ext_bgp[1]
+        ext_bgp_list += ' %s:%s' % (ext_bgp_name, ext_bgp_ip)
+    cmd += ' -e EXTERNAL_ROUTERS_LIST="%s"' % ext_bgp_list
 # Need to see where collector_ip being used
 #    cmd += ' --collector_ip %s' % collector_ip
     cmd += add_keystone_cmd_params()
@@ -475,8 +483,6 @@ def setup(docker_images, contrail_version, openstack_sku, reboot='True'):
     #    execute('verify_collector') - Nothing as of now, will need to check
     #    execute('verify_webui') - Nothing as of now, will check
         execute('setup_vrouter')
-        execute('prov_control_bgp')
-        execute('prov_external_bgp')
         execute('prov_metadata_services')
         execute('prov_encap_type') # till this done
         execute('setup_remote_syslog')
