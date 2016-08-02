@@ -177,7 +177,6 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
     # -itd contrail-config-liberty:3.0.2.0-35" % os_token
 
     nworkers = 1
-    quantum_port = '9697'
     cfgm_host=get_control_host_string(host_string)
     tgt_ip = hstr_to_ip(cfgm_host)
     cmd = "docker run --net=host --restart=unless-stopped --name contrail-config"
@@ -213,7 +212,6 @@ def frame_config_docker_cmd(host_string, contrail_version, openstack_sku):
     cmd += " -e COLLECTOR_SERVER=%s" % collector_ip
     cmd += ' -e CASSANDRA_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
     cmd += ' -e ZOOKEEPER_SERVER_LIST="%s"' % ' '.join(cassandra_ip_list)
-    cmd += " -e NEUTRON_PORT=%s" % quantum_port
     cmd += " -e CONFIG_SERVER_LIST=\"%s\"" % ' '.join(env.roledefs['cfgm'])
     cmd += " -e RABBITMQ_SERVER_PORT=%s" % get_amqp_port()
 

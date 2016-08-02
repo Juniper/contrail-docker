@@ -33,8 +33,9 @@
               {collect_statistics_interval, 60000}
             ]
             {% endif %}
-   },
+   }
    {% if rabbitmq_servers|length > 1 -%}
+   ,
    {rabbitmq_management_agent, [ {force_fine_statistics, true} ] },
    {kernel, [{net_ticktime,  30}]}
    {% endif -%}

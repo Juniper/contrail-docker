@@ -249,7 +249,7 @@ EOF
 # To setup neutron endpoints in keystone, and that script doesnt handle simultaneous executions.
 # So only one neutron container should run this.
 neutron_servers_sorted=$(echo $NEUTRON_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
-neutron_index=$(echo "$neutron_servers_sorted" | grep -n "${IPADDRESS}:" | cut -f1 -d:)
+neutron_index=$(echo "$neutron_servers_sorted" | grep -ne "${IPADDRESS}$" | cut -f1 -d:)
 
 if [[ $neutron_index == 1 ]]; then
     wait_for_url ${KEYSTONE_AUTH_PROTOCOL}://$KEYSTONE_SERVER:${KEYSTONE_AUTH_PORT}
