@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 source /common.sh
 
-IPADDRESS=${IPADDRESS:-127.0.0.1}
+IPADDRESS=${IPADDRESS:-${primary_ip}}
 
 CONFIG_IP=${CONFIG_IP:-$IPADDRESS}
 CONFIG_API_PORT=${CONFIG_API_PORT:-8082}

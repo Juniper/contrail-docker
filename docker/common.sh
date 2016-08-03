@@ -3,6 +3,9 @@
 set -a # Export all variables below this statement
 export PATH=$PATH:/opt/contrail/bin:/usr/share/contrail-utils/
 
+primary_if=$(ip route list | awk  '/default/ {if (NR==1); print $NF}')
+primary_ip=$(ifconfig $primary_if | awk '/inet.addr:/ {print $2}' | cut -f2 -d:)
+
 function fail() {
     echo "$@"
     exit 1

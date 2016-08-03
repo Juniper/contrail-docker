@@ -75,7 +75,7 @@ done
 rabbitmq_server_ip_list=${rabbitmq_server_ip_list/%,/}
 rabbitmq_servername_list=${rabbitmq_servername_list/%,/}
 
-if [[ $ENABLE_RABBITMQ == "yes" ]]; then
+if [[ $DISABLE_RABBITMQ != "yes" ]]; then
     setup_rabbitmq
 fi
 # Setup ifmap_server/basicauthusers.properties

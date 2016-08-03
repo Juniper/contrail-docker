@@ -2,7 +2,7 @@
 
 source /common.sh
 
-IPADDRESS=${IPADDRESS:-127.0.0.1}
+IPADDRESS=${IPADDRESS:-${primary_ip}}
 
 CONTROL_IP=${CONTROL_IP:-$IPADDRESS}
 # Control ifmap user/password are control ip address
