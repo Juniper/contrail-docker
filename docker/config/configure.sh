@@ -45,7 +45,8 @@ EOF
     # adding sleep to workaround rabbitmq bug 26370 prevent
     # "rabbitmqctl cluster_status" from breaking the database,
     # this is seen in ci
-    sleep 30
+    # 2016-07-03 Harish: Lets confirm this is happening in current environment
+    #sleep 30
     rabbitmqctl set_policy HA-all "" '{"ha-mode":"all","ha-sync-mode":"automatic"}'
 
 }
@@ -198,33 +199,10 @@ setini ca_certs /etc/contrail/ssl/certs/ca.pem
 setsection "SCHEDULER"
 setini analytics_server_ip $ANALYTICS_SERVER
 setini analytics_server_port $ANALYTICS_SERVER_PORT
-
 # END /etc/contrail/contrail-svc-monitor.conf setup
-
-# Setup /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
-setcfg /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
-setsection "APISERVER"
-setini api_server_ip $API_SERVER_IP
-setini api_server_port $API_SERVER_PORT
-setini multi_tenancy $MULTI_TENANCY
-setini use_ssl $API_SERVER_USE_SSL
-setini insecure $API_SERVER_INSECURE
-setini contrail_extensions $NEUTRON_CONTRAIL_EXTENSIONS
-
-setsection "COLLECTOR"
-setini analytics_api_ip $ANALYTICS_SERVER
-setini analytics_api_port $ANALYTICS_SERVER_PORT
-
-setsection "KEYSTONE"
-setini auth_url ${KEYSTONE_AUTH_PROTOCOL}://${KEYSTONE_SERVER}:${KEYSTONE_AUTH_PORT}/v2.0
-setini admin_user $KEYSTONE_ADMIN_USER
-setini admin_password $KEYSTONE_ADMIN_PASSWORD
-setini admin_tenant_name $KEYSTONE_ADMIN_TENANT
-# END /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
 
 setup_keystone_auth_config
 setup_vnc_api_lib
-
 
 cat <<EOF > /etc/contrail/ctrl-details
 SERVICE_TOKEN=$KEYSTONE_ADMIN_TOKEN
@@ -244,23 +222,45 @@ COMPUTE=$KEYSTONE_SERVER
 CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
-# setup neutron endpoints - this is bit tricky, currently we use setup-quantum-in-keystone
+# Below steps only required for openstack
+if [[ $CLOUD_ORCHESTRATOR == "openstack" ]]; then
+    # Setup /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+    setcfg /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+    setsection "APISERVER"
+    setini api_server_ip $API_SERVER_IP
+    setini api_server_port $API_SERVER_PORT
+    setini multi_tenancy $MULTI_TENANCY
+    setini use_ssl $API_SERVER_USE_SSL
+    setini insecure $API_SERVER_INSECURE
+    setini contrail_extensions $NEUTRON_CONTRAIL_EXTENSIONS
 
-# To setup neutron endpoints in keystone, and that script doesnt handle simultaneous executions.
-# So only one neutron container should run this.
-neutron_servers_sorted=$(echo $NEUTRON_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
-neutron_index=$(echo "$neutron_servers_sorted" | grep -ne "${IPADDRESS}$" | cut -f1 -d:)
+    setsection "COLLECTOR"
+    setini analytics_api_ip $ANALYTICS_SERVER
+    setini analytics_api_port $ANALYTICS_SERVER_PORT
 
-if [[ $neutron_index == 1 ]]; then
-    wait_for_url ${KEYSTONE_AUTH_PROTOCOL}://$KEYSTONE_SERVER:${KEYSTONE_AUTH_PORT}
-    /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER  \
-        --quant_server_ip $NEUTRON_IP --tenant $KEYSTONE_ADMIN_TENANT \
-        --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \
-        --svc_password $NEUTRON_PASSWORD --svc_tenant_name $SERVICE_TENANT \
-        --region_name $REGION
+    setsection "KEYSTONE"
+    setini auth_url ${KEYSTONE_AUTH_PROTOCOL}://${KEYSTONE_SERVER}:${KEYSTONE_AUTH_PORT}/v2.0
+    setini admin_user $KEYSTONE_ADMIN_USER
+    setini admin_password $KEYSTONE_ADMIN_PASSWORD
+    setini admin_tenant_name $KEYSTONE_ADMIN_TENANT
+    # END /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+
+    # setup neutron endpoints - this is bit tricky, currently we use setup-quantum-in-keystone
+    # to setup neutron endpoints in keystone, and that script doesnt handle simultaneous executions.
+    # So only one neutron container should run this.
+    neutron_servers_sorted=$(echo $NEUTRON_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
+    neutron_index=$(echo "$neutron_servers_sorted" | grep -ne "${IPADDRESS}$" | cut -f1 -d:)
+
+    if [[ $neutron_index == 1 ]]; then
+        wait_for_url ${KEYSTONE_AUTH_PROTOCOL}://$KEYSTONE_SERVER:${KEYSTONE_AUTH_PORT}
+        /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER  \
+            --quant_server_ip $NEUTRON_IP --tenant $KEYSTONE_ADMIN_TENANT \
+            --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \
+            --svc_password $NEUTRON_PASSWORD --svc_tenant_name $SERVICE_TENANT \
+            --region_name $REGION
+    fi
+
+    # Start neutron
+    # TODO: neutron need to be added to supervisord
+    /opt/contrail/bin/quantum-server-setup.sh
 fi
-
-
-# Start neutron
-# TODO: neutron need to be added to supervisord
-/opt/contrail/bin/quantum-server-setup.sh

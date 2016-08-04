@@ -4,6 +4,21 @@ source /common.sh
 
 IPADDRESS=${IPADDRESS:-${primary_ip}}
 
+# Specify cloud orchestrator,
+# NOTE: if there are lot of variable configuration steps for different cloud orchestrator,
+# It may make sense to create different set of containers for specific cloud orchestrator like
+# contrail-config-liberty etc for openstack
+# contrail-config-mesos for mesos
+# contrail-config-kubernates for kubernates
+#
+CLOUD_ORCHESTRATOR=${CLOUD_ORCHESTRATOR:-"openstack”}
+
+if [[ $CLOUD_ORCHESTRATOR == "openstack" ]]; then
+    MULTI_TENANCY=${MULTI_TENANCY:-True}
+else
+    MULTI_TENANCY=False
+fi
+
 CONFIG_IP=${CONFIG_IP:-$IPADDRESS}
 CONFIG_SERVER_LIST=${CONFIG_SERVER_LIST:-$CONFIG_IP}
 
@@ -30,7 +45,6 @@ API_SERVER_LISTEN_PORT=${API_SERVER_LISTEN_PORT:-$CONFIG_API_LISTEN_PORT_DEFAULT
 API_SERVER_IP=${API_SERVER_IP:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
 API_SERVER_PORT=${API_SERVER_PORT:-8082}
 API_SERVER_USE_SSL=${API_SERVER_USE_SSL:-"False"}
-MULTI_TENANCY=${MULTI_TENANCY:-True}
 API_SERVER_LOG_FILE=${API_SERVER_LOG_FILE:-"/var/log/contrail/contrail-api.log"}
 API_SERVER_LOG_LEVEL=${API_SERVER_LOG_LEVEL:-"SYS_NOTICE"}
 API_SERVER_INSECURE=${API_SERVER_INSECURE:-"False"}
@@ -100,4 +114,3 @@ NEUTRON_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
 CONTRAIL_EXTENSIONS_DEFAULTS="ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None"
 NEUTRON_CONTRAIL_EXTENSIONS=${NEUTRON_CONTRAIL_EXTENSIONS:-$CONTRAIL_EXTENSIONS_DEFAULTS}
 NEUTRON_SERVER_LIST=${NEUTRON_SERVER_LIST:-$CONFIG_SERVER_LIST}
-
