@@ -1,0 +1,12 @@
+version: '2'
+services:
+  config:
+    image: contrail-config-liberty:3.0.2.0-35
+    depends_on:
+     - database
+    environment:
+      - CLOUD_ORCHESTRATOR=kubernetes
+  database:
+    image: contrail-database-liberty:3.0.2.0-35
+    links:
+      - config

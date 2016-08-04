@@ -22,6 +22,7 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
     apt-get -y autoremove && apt-get -y clean;
 
 VOLUME ["/var/log", "/var/crashes"]
+EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123
 COPY *.sh *.j2 /
 COPY supervisor_configs/ /etc/contrail/supervisord_config_files/
 COPY pyj2.py /usr/local/bin/

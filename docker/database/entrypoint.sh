@@ -27,6 +27,8 @@ function pre_start() {
     ulimit -d unlimited
     ulimit -v unlimited
     ulimit -n 4096
+    chown -R cassandra.cassandra /var/lib/cassandra
+    chown -R zookeeper.zookeeper /var/lib/zookeeper
     python /configure.py
 }
 
@@ -35,6 +37,7 @@ function cleanup() {
     supervisorctl -s unix://${SOCKETFILE} shutdown
     rm -f $SOCKETFILE
 }
+
 
 trap cleanup SIGHUP SIGINT SIGTERM
 pre_start
@@ -45,10 +48,10 @@ setup_vnc_api_lib
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 # Wait for config api
-wait_for_url http://${CONFIG_API_IP}:${CONFIG_API_PORT}
+CFGM_IP=$(retry check_url config $CFGM_IP $CONFIG_API_PORT)
 
 # Register database in config
-retry /usr/share/contrail-utils/provision_database_node.py --api_server_ip $CONFIG_API_IP \
+retry /usr/share/contrail-utils/provision_database_node.py --api_server_ip $CFGM_IP \
     --host_name ${HOSTNAME} --host_ip ${DATABASE_IP} --oper add \
     --admin_user ${KEYSTONE_ADMIN_USER} --admin_password ${KEYSTONE_ADMIN_PASSWORD} \
      --admin_tenant_name ${KEYSTONE_ADMIN_TENANT}

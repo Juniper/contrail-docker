@@ -5,11 +5,20 @@ export PATH=$PATH:/opt/contrail/bin:/usr/share/contrail-utils/
 
 primary_if=$(ip route list | awk  '/default/ {if (NR==1); print $NF}')
 primary_ip=$(ifconfig $primary_if | awk '/inet.addr:/ {print $2}' | cut -f2 -d:)
+KEYSTONE_SERVER=${KEYSTONE_SERVER:-$primary_ip}
+KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-"http"}
+KEYSTONE_AUTH_PORT=${KEYSTONE_AUTH_PORT:-35357}
+KEYSTONE_INSECURE=${KEYSTONE_INSECURE:-False}
 
 function fail() {
     echo "$@"
     exit 1
 
+}
+
+function ipof() {
+    name=$1
+    getent hosts ${name} | awk '{print $1}'
 }
 
 function setini() {
@@ -85,6 +94,26 @@ function wait_for_url() {
     done
 }
 
+function check_url() {
+    name=$1
+    IP_DEFAULT=$2
+    PORT=${3:-8082}
+    name_resolve_ip=$(ipof $name)
+    if [[ $name_resolve_ip ]]; then
+        IP=$name_resolve_ip
+    else
+        IP=$IP_DEFAULT
+    fi
+    url=http://${IP}:${PORT}
+    response=$(curl -s -o /dev/null -I -w "%{http_code}" $url || true)
+    if [[ $response -ge 500 || $response -eq 0 ]]; then
+      return 1
+    else
+        echo $IP
+        return 0
+    fi
+}
+
 ##
 # Function to retry other functions or commands
 # variables: $timeout , $wait
@@ -122,4 +151,18 @@ function get_service_connect_details() {
         sed 's/"//g'`
     rv=$?
     echo "${ip_port}" # send space separated list of ip:port values for provided service type
+}
+
+function sort_ips() {
+    # Input is a list of ip addresses separated by space or comma
+    ip_list=$1
+    echo $ip_list | sed -r 's/[\s,]+/\n/g' | sort -V
+}
+
+function index_of_ip() {
+    # Input is a list of ip addresses separated by space or comma
+    # search is an ip address of which the index is returned (starts from 1)
+    ip_list=$1
+    search=$2
+    echo "$(sort_ips $ip_list)" | grep -nP "^${search}\b" | cut -f1 -d:
 }

@@ -16,7 +16,8 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
     apt-get install -y --force-yes $PACKAGES_CONTRAIL_CONTROL && \
     find /opt/contrail -mindepth 1 ! -name bin -delete; \
     apt-get -y autoremove && apt-get -y clean;
-VOLUME ["/var/log", "/var/crashes"]
+VOLUME ["/var/log", "/var/crashes", "/var/lib/cassandra", "/var/lib/zookeeper"]
+EXPOSE 8103 9160 2181 9092
 COPY scripts/cassandra_start.sh scripts/zookeeper_start.sh /usr/local/bin/
 COPY scripts/supervisor_config /etc/contrail/supervisord_database_files/
 COPY configure.py *.sh /
