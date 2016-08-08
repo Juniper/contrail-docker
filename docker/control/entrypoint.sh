@@ -43,6 +43,9 @@ $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
 # Get config api servers from discovery
+
+DISCOVERY_SERVER=$(retry check_url config $DISCOVERY_SERVER $DISCOVERY_PORT)
+
 api_servers=$(get_service_connect_details http://${DISCOVERY_SERVER}:${DISCOVERY_PORT}/services.json ApiServer)
 first_api_server=$(echo $api_servers | awk '{print $1}')
 

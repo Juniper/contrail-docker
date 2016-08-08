@@ -1,12 +1,16 @@
+# Expected Variables
+# TAG - Tag or version of the containers
 version: '2'
 services:
   config:
-    image: contrail-config-liberty:3.0.2.0-35
+    image: contrail-config-liberty:${TAG}
     depends_on:
      - database
     environment:
       - CLOUD_ORCHESTRATOR=kubernetes
   database:
-    image: contrail-database-liberty:3.0.2.0-35
-    links:
-      - config
+    image: contrail-database-liberty:${TAG}
+  control:
+    image: contrail-control-liberty:${TAG}
+    depends_on:
+     - config

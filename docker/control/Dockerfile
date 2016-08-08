@@ -17,6 +17,7 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
     find /opt/contrail -mindepth 1 ! -name bin -delete; \
     apt-get -y autoremove && apt-get -y clean;
 VOLUME ["/var/log", "/var/crashes"]
+EXPOSE 8092 8093 8094 8101 8083 179 53 5269
 COPY *.sh *.j2 /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
