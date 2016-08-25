@@ -1,0 +1,42 @@
+{#- Expects variables from environment or specifically passed to pyj2.py -#}
+{%- set rabbitmq_servers = rabbitmq_servername_list.split(',') -%}
+{%- set num_rabbitmq_servers = rabbitmq_servers|length -%}
+[
+   {rabbit, [ {tcp_listeners, [{"{{ RABBITMQ_LISTEN_IP }}", {{ RABBITMQ_SERVER_PORT|default(5672) }} }]},
+              {loopback_users, []},
+              {log_levels,[{connection, info},{mirroring, info}]},
+              {% if num_rabbitmq_servers -%}
+              {cluster_partition_handling, autoheal},
+              {cluster_nodes, {[{%- for number in range(0, num_rabbitmq_servers) -%}
+              {%- if number < num_rabbitmq_servers - 1 -%}
+              'rabbit@{{rabbitmq_servers[number]}}-ctrl',
+              {%- else -%}
+              'rabbit@{{rabbitmq_servers[number]}}-ctrl'
+              {%- endif -%}
+              {%- endfor -%}
+              ], disc}},
+              {vm_memory_high_watermark, 0.4},
+              {disk_free_limit,50000000},
+              {heartbeat,10},
+              {delegate_count,20},
+              {channel_max,5000},
+              {tcp_listen_options,
+                        [binary,
+                          {packet, raw},
+                          {reuseaddr, true},
+                          {backlog, 128},
+                          {nodelay, true},
+                          {exit_on_close, false},
+                          {keepalive, true}
+                         ]
+              },
+              {collect_statistics_interval, 60000}
+            ]
+            {% endif %}
+   }
+   {% if rabbitmq_servers|length > 1 -%}
+   ,
+   {rabbitmq_management_agent, [ {force_fine_statistics, true} ] },
+   {kernel, [{net_ticktime,  30}]}
+   {% endif -%}
+].

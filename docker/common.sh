@@ -16,6 +16,15 @@ function fail() {
 
 }
 
+function webui_config() {
+    # NOTE: This function should be called with all quotes escaped. It will not add any quotes for you.
+    # For example, if you want my_key = 'value1' in your config.global.js file, you would need to escape
+    # Quotes in 'value1' so that it will be like this "'value1'"
+    key=$1
+    value="$2"
+    sed -i "/^$key *=/{h;s/=.*/= $value/};\${x;/^\$/{s//$key = $value/;H};x}" /etc/contrail/config.global.js
+}
+
 function ipof() {
     name=$1
     getent hosts ${name} | awk '{print $1}'
@@ -94,23 +103,42 @@ function wait_for_url() {
     done
 }
 
-function check_url() {
+# Try to resolve the name if not resolved, use default IP address provided.
+# Also check the port connectivity, and if connected, send right ip address
+# If not connected, return 1
+#
+# Along with retry(), it can wait till the service is up on an IP and return
+# right IP address where the service is listen
+function get_right_ip() {
     name=$1
     IP_DEFAULT=$2
-    PORT=${3:-8082}
+    PORT=$3
+    # Valid protocols are http, https, tcp
+    PROTOCOL=${4:-"http"}
     name_resolve_ip=$(ipof $name)
     if [[ $name_resolve_ip ]]; then
         IP=$name_resolve_ip
     else
         IP=$IP_DEFAULT
     fi
-    url=http://${IP}:${PORT}
-    response=$(curl -s -o /dev/null -I -w "%{http_code}" $url || true)
-    if [[ $response -ge 500 || $response -eq 0 ]]; then
-      return 1
-    else
+    if [[ $PROTOCOL == "http" || $PROTOCOL == "https" ]]; then
+        url=http://${IP}:${PORT}
+        response=$(curl -s -o /dev/null -I -w "%{http_code}" $url || true)
+        if [[ $response -ge 500 || $response -eq 0 ]]; then
+            response=1
+        else
+            response=0
+        fi
+    elif [[ $PROTOCOL == "tcp" ]]; then
+        timeout  10 nc -z $IP $PORT
+        response=$?
+    fi
+
+    if [[ $response -eq 0 ]]; then
         echo $IP
         return 0
+    else
+        return 1
     fi
 }
 
