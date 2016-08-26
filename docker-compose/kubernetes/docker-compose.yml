@@ -2,15 +2,23 @@
 # TAG - Tag or version of the containers
 version: '2'
 services:
-  config:
-    image: contrail-config-liberty:${TAG}
-    depends_on:
-     - database
+  controller:
+    image: contrail-controller-liberty:${TAG}
+    privileged: true
+    network_mode: host
+    pid: "host"
+    cap_add:
+      - AUDIT_WRITE
     environment:
       - CLOUD_ORCHESTRATOR=kubernetes
-  database:
-    image: contrail-database-liberty:${TAG}
-  control:
-    image: contrail-control-liberty:${TAG}
+  analytics:
+    image: contrail-analytics-liberty:${TAG}
+    privileged: true
+    network_mode: host
+    pid: "host"
+    cap_add:
+      - AUDIT_WRITE
     depends_on:
-     - config
+     - controller
+    environment:
+      - CLOUD_ORCHESTRATOR=kubernetes
