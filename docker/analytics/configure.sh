@@ -56,7 +56,6 @@ setcfg /etc/contrail/contrail-query-engine.conf
 setsection "DEFAULT"
 setini analytics_data_ttl $ANALYTICS_DATA_TTL
 setini cassandra_server_list $cassandra_server_list_w_port
-setini host_ip $IPADDRESS
 setini http_server_port $QUERY_ENGINE_INTROSPECT_PORT
 setini log_local 1
 setini log_level $QUERY_ENGINE_LOG_LEVEL
