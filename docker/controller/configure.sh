@@ -85,7 +85,7 @@ function configure_webui() {
 
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
 zk_server_list_w_port=$(echo $ZOOKEEPER_SERVER_LIST | sed -r -e "s/[, ]+/:$ZOOKEEPER_SERVER_PORT,/g" -e "s/$/:$ZOOKEEPER_SERVER_PORT/")
-
+rabbitmq_server_list_w_port=$(echo $RABBITMQ_SERVER_LIST | sed -r -e "s/[, ]+/:$RABBITMQ_SERVER_PORT,/g" -e "s/$/:$RABBITMQ_SERVER_PORT/")
 ## Rabbitmq server configuration
 # Setup /etc/hosts entries for all rabbitmq hostnames (and hostname-ctrl name) - it is not required if those
 # names are resolvable using dns but it is not expected here
@@ -230,6 +230,22 @@ setsection "SCHEDULER"
 setini analytics_server_ip $ANALYTICS_SERVER
 setini analytics_server_port $ANALYTICS_SERVER_PORT
 # END /etc/contrail/contrail-svc-monitor.conf setup
+
+# Setup  /etc/contrail/contrail-device-manager.conf
+setcfg /etc/contrail/contrail-device-manager.conf
+setsection "DEFAULTS"
+setini rabbit_server $rabbitmq_server_list_w_port
+setini api_server_ip $API_SERVER_IP
+setini api_server_port $API_SERVER_PORT
+setini api_server_use_ssl $API_SERVER_USE_SSL
+setini zk_server_ip $zk_server_list_w_port
+setini log_file $DEVICE_MANAGER_LOG_FILE
+setini log_level $DEVICE_MANAGER_LOG_LEVEL
+setini log_local 1
+setini cassandra_server_list $cassandra_server_list_w_port
+setini disc_server_ip $DISCOVERY_SERVER
+setini disc_server_port $DISCOVERY_PORT
+# END Setup  /etc/contrail/contrail-device-manager.conf
 
 setup_keystone_auth_config
 setup_vnc_api_lib

@@ -22,7 +22,7 @@ function webui_config() {
     # Quotes in 'value1' so that it will be like this "'value1'"
     key=$1
     value="$2"
-    sed -i "/^$key *=/{h;s/=.*/= $value/};\${x;/^\$/{s//$key = $value/;H};x}" /etc/contrail/config.global.js
+    sed -i "/^$key *=/{h;s/=.*/= $value;/};\${x;/^\$/{s//$key = $value;/;H};x}" /etc/contrail/config.global.js
 }
 
 function ipof() {

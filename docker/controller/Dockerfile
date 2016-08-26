@@ -22,7 +22,7 @@ RUN wget $CONTRAIL_INSTALL_PACKAGE_URL -O /contrail-install-packages.deb && \
     rm -f /contrail-install-packages.deb && \
     cd /opt/contrail/contrail_packages/ && ./setup.sh && \
     apt-get install -y --force-yes $PACKAGES_COMMON $PACKAGES_CONTRAIL_DATABASE $PACKAGES_CONTRAIL_CONFIG \
-        $PACKAGES_CONTRAIL_CONTROL $PACKAGES_CONTRAIL_WEBUI && \
+        $PACKAGES_CONTRAIL_CONTROL $PACKAGES_CONTRAIL_WEBUI; \
     find /opt/contrail -mindepth 1 -maxdepth 1 ! -name bin -exec rm -fr {} \; ; \
     apt-get -y autoremove && apt-get -y clean;
 
