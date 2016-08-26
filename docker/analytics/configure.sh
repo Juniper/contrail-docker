@@ -5,7 +5,7 @@ source /env.sh
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
 zk_server_list_w_port=$(echo $ZOOKEEPER_SERVER_LIST | sed -r -e "s/[, ]+/:$ZOOKEEPER_SERVER_PORT,/g" -e "s/$/:$ZOOKEEPER_SERVER_PORT/")
 rabbitmq_server_list_w_port=$(echo $RABBITMQ_SERVER_LIST | sed -r -e "s/[, ]+/:$RABBITMQ_SERVER_PORT,/g" -e "s/$/:$RABBITMQ_SERVER_PORT/")
-
+kafka_broker_list_w_port=$(echo $KAFKA_BROKER_LIST | sed -r -e "s/[, ]+/:$KAFKA_PORT /g" -e "s/$/:$KAFKA_PORT/")
 
 # Setup /etc/contrail/contrail-alarm-gen.conf
 setcfg /etc/contrail/contrail-alarm-gen.conf
@@ -14,9 +14,7 @@ setini host_ip $IPADDRESS
 setini log_file $ALARM_GEN_LOG_FILE
 setini log_level $ALARM_GEN_LOG_LEVEL
 setini log_local 1
-if [[ $KAFKA_ENABLED ]]; then
-    setini kafka_broker_list $kafka_broker_list_w_port
-fi
+setini kafka_broker_list $kafka_broker_list_w_port
 setini zk_list $zk_server_list_w_port
 
 setsection "DISCOVERY"
@@ -85,7 +83,9 @@ setini analytics_data_ttl $ANALYTICS_DATA_TTL
 setini analytics_config_audit_ttl $ANALYTICS_CONFIG_AUDIT_TTL
 setini analytics_statistics_ttl $ANALYTICS_STATISTICS_TTL
 setini analytics_flow_ttl $ANALYTICS_FLOW_TTL
-
+if [[ $MULTI_TENANCY != 'True' ]]; then
+    setini aaa_mode no-auth
+fi
 setsection "DISCOVERY"
 setini disc_server_ip $DISCOVERY_SERVER
 setini disc_server_port $DISCOVERY_PORT
