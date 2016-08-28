@@ -3,7 +3,7 @@
 version: '2'
 services:
   controller:
-    image: contrail-controller-liberty:${TAG}
+    image: 10.84.34.155:5000/contrail-controller-liberty:${TAG}
     privileged: true
     network_mode: host
     pid: "host"
@@ -12,7 +12,7 @@ services:
     environment:
       - CLOUD_ORCHESTRATOR=kubernetes
   analytics:
-    image: contrail-analytics-liberty:${TAG}
+    image: 10.84.34.155:5000/contrail-analytics-liberty:${TAG}
     privileged: true
     network_mode: host
     pid: "host"
@@ -20,5 +20,20 @@ services:
       - AUDIT_WRITE
     depends_on:
      - controller
+    environment:
+      - CLOUD_ORCHESTRATOR=kubernetes
+  agent:
+    image: 10.84.34.155:5000/contrail-agent-liberty:${TAG}
+    privileged: true
+    network_mode: host
+    pid: "host"
+    volumes:
+      - /usr/src:/usr/src
+      - /lib/modules:/lib/modules
+    cap_add:
+      - AUDIT_WRITE
+    depends_on:
+     - controller
+     - analytics
     environment:
       - CLOUD_ORCHESTRATOR=kubernetes

@@ -5,6 +5,8 @@ export PATH=$PATH:/opt/contrail/bin:/usr/share/contrail-utils/
 
 primary_if=$(ip route list | awk  '/default/ {if (NR==1); print $NF}')
 primary_ip=$(ifconfig $primary_if | awk '/inet.addr:/ {print $2}' | cut -f2 -d:)
+gateway=$(ip route list| awk  '/default/ {if (NR==1); print $3}')
+primary_mac=$(ip a l $primary_if  | awk '/link\/ether/ {print $2}')
 KEYSTONE_SERVER=${KEYSTONE_SERVER:-$primary_ip}
 KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-"http"}
 KEYSTONE_AUTH_PORT=${KEYSTONE_AUTH_PORT:-35357}
