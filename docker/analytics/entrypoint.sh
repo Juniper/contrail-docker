@@ -43,7 +43,7 @@ child=$!
 
 # Register analytics in config
 retry /usr/share/contrail-utils/provision_analytics_node.py --api_server_ip $CONFIG_IP \
-    --host_name ${HOSTNAME} --host_ip ${ANALYTICS_IP} --oper add \
+    --host_name ${MYHOSTNAME} --host_ip ${ANALYTICS_IP} --oper add \
     --admin_user ${KEYSTONE_ADMIN_USER} --admin_password ${KEYSTONE_ADMIN_PASSWORD} \
      --admin_tenant_name ${KEYSTONE_ADMIN_TENANT}
 

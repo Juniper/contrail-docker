@@ -40,13 +40,13 @@ child=$!
 
 # Register config node in config db
 wait_for_url http://${API_SERVER_IP}:${API_SERVER_PORT}
-retry /usr/share/contrail-utils/provision_config_node.py --api_server_ip $API_SERVER_IP --host_name $HOSTNAME \
+retry /usr/share/contrail-utils/provision_config_node.py --api_server_ip $API_SERVER_IP --host_name $MYHOSTNAME \
     --host_ip $API_SERVER_IP --oper add  --admin_user ${KEYSTONE_ADMIN_USER} \
     --admin_password ${KEYSTONE_ADMIN_PASSWORD} --admin_tenant_name ${KEYSTONE_ADMIN_TENANT}
 
 # Register database in config
 retry /usr/share/contrail-utils/provision_database_node.py --api_server_ip $API_SERVER_IP \
-    --host_name ${HOSTNAME} --host_ip ${DATABASE_IP} --oper add \
+    --host_name ${MYHOSTNAME} --host_ip ${DATABASE_IP} --oper add \
     --admin_user ${KEYSTONE_ADMIN_USER} --admin_password ${KEYSTONE_ADMIN_PASSWORD} \
      --admin_tenant_name ${KEYSTONE_ADMIN_TENANT}
 
@@ -66,7 +66,7 @@ fi
 retry /usr/share/contrail-utils/provision_control.py --api_server_ip ${API_SERVER_IP} \
     --api_server_port ${API_SERVER_PORT} --router_asn ${ROUTER_ASN}  --admin_user ${KEYSTONE_ADMIN_USER} \
     --admin_password ${KEYSTONE_ADMIN_PASSWORD} --admin_tenant_name ${KEYSTONE_ADMIN_TENANT} ${md5_param} \
-    --host_name $HOSTNAME --host_ip ${CONTROL_IP} --oper add
+    --host_name $MYHOSTNAME --host_ip ${CONTROL_IP} --oper add
 
 # Add external routers if any
 # EXTERNAL_ROUTERS_LIST is a space delimited list of routers in form of routername:ipaddress

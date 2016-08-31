@@ -10,7 +10,7 @@ function setup_rabbitmq() {
     # Setup rabbitmq-env.conf
     cat <<EOF > /etc/rabbitmq/rabbitmq-env.conf
 NODE_IP_ADDRESS=$RABBITMQ_LISTEN_IP
-NODENAME=rabbit@${HOSTNAME}-ctrl
+NODENAME=rabbit@${MYHOSTNAME}-ctrl
 EOF
     # Determine node's index based on IP address
     rabbit_servers_sorted=$(echo $RABBITMQ_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
@@ -319,7 +319,7 @@ fi
 setcfg "/etc/contrail/contrail-control.conf"
 setsection DEFAULT
 setini hostip $IPADDRESS
-setini hostname $HOSTNAME
+setini hostname $MYHOSTNAME
 setini log_file $CONTROL_LOG_FILE
 setini log_level $CONTROL_LOG_LEVEL
 setini log_local 1
@@ -338,7 +338,7 @@ setini certs_store $CONTROL_CERTS_STORE
 setcfg "/etc/contrail/contrail-dns.conf"
 setsection "DEFAULT"
 setini hostip $IPADDRESS
-setini hostname $HOSTNAME
+setini hostname $MYHOSTNAME
 setini log_file $DNS_LOG_FILE
 setini log_level $DNS_LOG_LEVEL
 setini log_local 1

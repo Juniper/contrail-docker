@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -x
 source /common.sh
 
 IPADDRESS=${IPADDRESS:-${primary_ip}}
@@ -75,7 +75,7 @@ SCHEMA_LOG_LEVEL=${SCHEMA_LOG_LEVEL:-SYS_NOTICE}
 
 # Rabbitmq server list is a comma seperated list of rabbitmq server *NAMES* which are
 # resolvable from the container or a list of ip1:host1,ip2:host2. e.g, 192.168.0.10:rabbit1,192.168.0.11:rabbit2
-RABBITMQ_SERVER_LIST=${RABBITMQ_SERVER_LIST:-"$IPADDRESS:$HOSTNAME"}
+RABBITMQ_SERVER_LIST=${RABBITMQ_SERVER_LIST:-"$IPADDRESS:$MYHOSTNAME"}
 RABBITMQ_SERVER_PORT=${RABBITMQ_SERVER_PORT:-5672}
 RABBITMQ_LISTEN_IP=${RABBITMQ_LISTEN_IP:-$IPADDRESS}
 DISABLE_RABBITMQ=${DISABLE_RABBITMQ}
