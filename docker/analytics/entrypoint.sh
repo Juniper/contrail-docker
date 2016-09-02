@@ -18,8 +18,6 @@ if [ -f /etc/default/supervisor_${SERVICE} ] ; then
 fi
 DAEMON_OPTS="-n -c /etc/contrail/supervisord_${SERVICE}.conf $DAEMON_OPTS"
 
-set -e
-
 function pre_start() {
     ulimit -s unlimited
     ulimit -c unlimited

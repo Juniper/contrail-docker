@@ -4,8 +4,10 @@ set -x
 source /env.sh
 
 # Build kernel module with dkms - this may not work with redhat/centos, also it need kernel headers installed on the base host
-cp -r /usr/src.orig/vrouter* /usr/src/
-dpkg-reconfigure contrail-vrouter-dkms
+if [ $COMPILE_VROUTER_MODULE == "yes" ]; then
+    cp -r /usr/src.orig/vrouter* /usr/src/
+    dpkg-reconfigure contrail-vrouter-dkms
+fi
 depmod -a
 modprobe vrouter || fail "Failed loading vrouter kernel module"
 lsmod | grep -q vrouter || fail "Failed loading vrouter kernel module"

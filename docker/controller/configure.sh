@@ -250,6 +250,9 @@ setini disc_server_port $DISCOVERY_PORT
 setup_keystone_auth_config
 setup_vnc_api_lib
 
+# Handle changes of IFMAP_SERVER_PORT in ifmap server configuration
+sed -i "s/^irond.comm.basicauth.port=.*/irond.comm.basicauth.port=${IFMAP_SERVER_PORT}/" /etc/ifmap-server/ifmap.properties
+
 cat <<EOF > /etc/contrail/ctrl-details
 SERVICE_TOKEN=$KEYSTONE_ADMIN_TOKEN
 AUTH_PROTOCOL=$KEYSTONE_AUTH_PROTOCOL
@@ -310,6 +313,7 @@ if [[ $CLOUD_ORCHESTRATOR == "openstack" ]]; then
     # TODO: neutron need to be added to supervisord
     /opt/contrail/bin/quantum-server-setup.sh
 fi
+
 
 ##
 # Configure control services
