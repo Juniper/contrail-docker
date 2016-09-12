@@ -1,3 +1,9 @@
+## Variables accepted
+#
+# KEEP_IMAGES - to avoid cleaning up container images locally
+#
+##
+
 # If SKU is not defined, default to mitaka
 ifndef CONTRAIL_SKU
 	export CONTRAIL_SKU := mitaka
@@ -44,7 +50,7 @@ $(CONTAINER_TARS): $(CONTRAIL_REPO_CONTAINER_TAR)
 	cd docker/$(CONTAINER_NAME); \
 	docker build --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) \
 		-t $(CONTAINER):$(CONTRAIL_VERSION) .
-	@echo "Saving the container"
+	@echo "Saving the container $(CONTAINER):$(CONTRAIL_VERSION)"
 	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 
 
@@ -61,7 +67,8 @@ endif
 		-t $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) .
 	@echo "Starting contrail repo container"
 	docker run -d -p $(CONTRAIL_REPO_PORT):1567 --name contrail-apt-repo $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION)
-	@touch $@
+	@echo "Saving the container $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION)"
+	docker save $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 
 $(CONTRAIL_INSTALL_PACKAGE):
 	@echo "Making Contrail packages"
@@ -73,6 +80,10 @@ $(CONTRAIL_INSTALL_PACKAGE):
 clean:
 	@echo "Cleaning the workspace"
 	docker rm -f contrail-apt-repo | true
+ifndef KEEP_IMAGES
+	$(foreach i,$(CONTAINERS),docker rmi -f contrail-$(i):$(CONTRAIL_VERSION) | true;)
+	docker rmi -f $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) | true
+endif
 	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR)
 
 .PHONY: save
