@@ -56,18 +56,28 @@ $(CONTAINER_TARS): $(CONTRAIL_REPO_CONTAINER_TAR)
 .PHONY: prep
 
 prep: $(CONTRAIL_REPO_CONTAINER_TAR)
-	@echo "Preparing for container build"
+	@echo "Preparation for container build is completed"
 
 $(CONTRAIL_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
 	@echo "Pre-build step:"
-ifndef CONTRAIL_INSTALL_PACKAGE_TAR_URL
+	$(eval CONTRAIL_REPO_BUILD_ARGS := )
+ifdef CONTRAIL_INSTALL_PACKAGE_TAR_URL
+	$(eval CONTRAIL_REPO_BUILD_ARGS +=  --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_TAR_URL) )
+else
 	$(error CONTRAIL_INSTALL_PACKAGE_TAR_URL is undefined)
 endif
 
-	set -e
+ifdef SSHPASS
+	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHPASS=$(SSHPASS) )
+endif
+
+ifdef SSHUSER
+	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHUSER=$(SSHUSER))
+endif
+
 	@echo "Building Contrail repo container"
 	cd docker/contrail_repo/; \
-	docker build --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_TAR_URL) \
+	docker build $(CONTRAIL_REPO_BUILD_ARGS) \
 		-t $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) .
 	@echo "Starting contrail repo container"
 	docker run -d -p $(CONTRAIL_REPO_PORT):1567 --name contrail-apt-repo $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION)

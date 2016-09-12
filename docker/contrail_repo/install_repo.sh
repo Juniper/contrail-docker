@@ -6,6 +6,11 @@ function try_wget () {
     return $?
 }
 
+xtrace_status() {
+  set | grep -q SHELLOPTS=.*:xtrace
+  return $?
+}
+
 apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 apt_update="apt-get update -qy"
 
@@ -25,9 +30,15 @@ if [[ $CONTRAIL_INSTALL_PACKAGE_TAR_URL =~ ^http[s]*:// ]]; then
 elif [[ $CONTRAIL_INSTALL_PACKAGE_TAR_URL =~ ^ssh:// ]]; then
     server=` echo $CONTRAIL_INSTALL_PACKAGE_TAR_URL | sed 's/ssh:\/\///;s|\/.*||'`
     path=`echo $CONTRAIL_INSTALL_PACKAGE_TAR_URL |sed -r 's#ssh://[a-zA-Z0-9_\.\-]+##'`
-    SSHUSER = ${SSHUSER:-root}
-    $apt_update; $apt_install sshpass
-    sshpass -e scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SSHUSER}${server}:${path} /tmp/contrail-install-packages.tar.gz
+    export SSHUSER=${SSHUSER:-root}
+    if xtrace_status; then
+        set +x
+        xtrace=1
+    fi
+    export SSHPASS=${SSHPASS:-passwd}
+    [[ -n $xtrace ]] && set -x
+    $apt_update; $apt_install sshpass openssh-client
+    sshpass -e scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SSHUSER}@${server}:${path} /tmp/contrail-install-packages.tar.gz
 else
     echo "ERROR, Unknown url format, only http[s], ssh supported"
     exit 1
