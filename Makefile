@@ -53,6 +53,10 @@ $(CONTAINER_TARS): $(CONTRAIL_REPO_CONTAINER_TAR)
 	@echo "Saving the container $(CONTAINER):$(CONTRAIL_VERSION)"
 	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 
+.PHONY: prep
+
+prep: $(CONTRAIL_REPO_CONTAINER_TAR)
+	@echo "Preparing for container build"
 
 $(CONTRAIL_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
 	@echo "Pre-build step:"
