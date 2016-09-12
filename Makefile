@@ -8,7 +8,7 @@ ifndef CONTRAIL_REPO_PORT
 endif
 
 ifndef CONTRAIL_REPO_IP
-    export CONTRAIL_REPO_IP := $(shell ifconfig docker0 | awk '/inet.addr:/ {print $$2}' | cut -f2 -d:)
+	export CONTRAIL_REPO_IP := $(shell ifconfig docker0 | awk '/inet.addr:/ {print $$2}' | cut -f2 -d:)
 endif
 
 ifndef SSHUSER
@@ -16,7 +16,7 @@ ifndef SSHUSER
 endif
 
 # Define all containers to be built
-CONTAINERS = controller analytics vrouter
+CONTAINERS = controller
 
 # CONTRAIL_VERSION is requisite so fail, if not provided
 ifndef CONTRAIL_VERSION
@@ -37,9 +37,16 @@ all: $(CONTAINER_TARS)
 	@echo "Building containers finished"
 
 $(CONTAINER_TARS): $(CONTRAIL_REPO_CONTAINER_TAR)
-	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,:$(CONTRAIL_VERSION),$@))
-	@echo "Building the container $(CONTAINER)"
-	touch $@
+	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
+	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(CONTRAIL_VERSION).tar.gz,,$@)))
+	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
+	cp docker/common.sh docker/pyj2.py docker/$(CONTAINER_NAME)/
+	cd docker/$(CONTAINER_NAME); \
+	docker build --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) \
+		-t $(CONTAINER):$(CONTRAIL_VERSION) .
+	@echo "Saving the container"
+	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
+
 
 $(CONTRAIL_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
 	@echo "Pre-build step:"
