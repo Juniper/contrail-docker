@@ -89,11 +89,12 @@ endif
 .PHONY: save
 
 save: $(CONTAINER_TARS)
-ifdef CONTAINER_SAVE_LOCATION
-		@echo "Saving container images $(CONTAINER_TARS) in $(CONTAINER_SAVE_LOCATION)"
-else
-		$(error CONTAINER_SAVE_LOCATION is undefined)
+ifndef CONTAINER_SAVE_LOCATION
+	$(error CONTAINER_SAVE_LOCATION is undefined)
 endif
+	@echo "Saving container images in $(CONTAINER_SAVE_LOCATION)"
+	install -t  $(CONTAINER_SAVE_LOCATION) $(CONTAINER_TARS)
+	install -t  $(CONTAINER_SAVE_LOCATION) $(CONTRAIL_REPO_CONTAINER_TAR)
 
 .PHONY: push
 
