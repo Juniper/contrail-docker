@@ -45,7 +45,7 @@ CONTRAIL_ANSIBLE = contrail-ansible
 .PHONY: all
 
 all: $(CONTAINER_TARS)
-	@echo "Building containers finished"
+
 
 $(CONTAINER_TARS): prep
 	$(eval CONTRAIL_BUILD_ARGS := --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) )
@@ -60,15 +60,16 @@ $(CONTAINER_TARS): prep
 	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 	rm -fr $(TEMP)
 
-.PHONY: prep
 
 prep: contrail-repo contrail-ansible
+	@touch prep
 
-.PHONY: contrail-ansible
 contrail-ansible: $(CONTRAIL_ANSIBLE_TAR)
+	@touch contrail-ansible
 
-.PHONY: contrail-repo
+
 contrail-repo: $(CONTRAIL_REPO_CONTAINER_TAR)
+	@touch contrail-repo
 
 $(CONTRAIL_ANSIBLE_TAR):
 ifdef $(CONTRAIL_ANSIBLE_ARTIFACT)
@@ -136,7 +137,7 @@ ifndef KEEP_IMAGES
 	$(foreach i,$(CONTAINERS),docker rmi -f contrail-$(i):$(CONTRAIL_VERSION) | true;)
 	docker rmi -f $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) | true
 endif
-	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR)
+	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR) prep contrail-repo contrail-ansible
 
 .PHONY: save
 
