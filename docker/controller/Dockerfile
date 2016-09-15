@@ -1,31 +1,37 @@
 FROM hkumar/ubuntu-14.04.2:latest
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
+ARG CONTRAIL_ANSIBLE_TAR
 ARG ENTRY_POINT=docker_entrypoint.sh
 ARG SSHPASS
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV SKU=liberty
-ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq"
+ARG ANSIBLE_INVENTORY="all-in-one"
+ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq opscenter python-pip"
+ARG PACKAGES_ANSIBLE="ansible"
 ARG PACKAGES_CONTRAIL_CONTROL="contrail-openstack-control"
 ARG PACKAGES_CONTRAIL_WEBUI="contrail-openstack-webui"
-ARG PACKAGES_CONTRAIL_DATABASE="contrail-openstack-database default-jre-headless mongodb-clients mongodb-server"
-ARG PACKAGES_CONTRAIL_CONFIG="contrail-lib contrail-config contrail-f5 neutron-plugin-contrail contrail-config-openstack \
-                              neutron-server python-neutron-lbaas python-novaclient python-keystoneclient \
-                              haproxy euca2ools python-qpid python-iniparse \
-                              python-bottle ifmap-server ifmap-python-client keepalived contrail-nodemgr \
-                              rabbitmq-server"
-
+ARG PACKAGES_CONTRAIL_DATABASE="contrail-openstack-database default-jre-headless"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
     echo "Package: *\nPin: origin \"$var1\"\nPin-Priority: 1001" > /etc/apt/preferences
 RUN echo; cat /etc/apt/preferences
 RUN echo apt_auth="APT::Get::AllowUnauthenticated \"true\";" >> /etc/apt/apt.conf
+RUN $apt_install software-properties-common && \
+    apt-add-repository -y ppa:ansible/ansible
 RUN apt-get update -qy && \
-    $apt_install $PACKAGES_COMMON $PACKAGES_CONTRAIL_DATABASE $PACKAGES_CONTRAIL_CONFIG \
-        $PACKAGES_CONTRAIL_CONTROL $PACKAGES_CONTRAIL_WEBUI; \
-    apt-get autoremove -yq && apt-get clean -yq && \
-    rm -fr /var/lib/apt/lists/* /usr/share/doc/* /usr/share/man/*
+    $apt_install $PACKAGES_COMMON && \
+    $apt_install $PACKAGES_CONTRAIL_DATABASE &&\
+    $apt_install $PACKAGES_CONTRAIL_CONTROL &&\
+    $apt_install $PACKAGES_CONTRAIL_WEBUI && \
+    $apt_install $PACKAGES_ANSIBLE && \
+    apt-get autoremove -yq  &&\
+    rm -fr /usr/share/doc/* /usr/share/man/*
+RUN pip install fabric==1.11.1 paramiko==1.17.0
+ADD $CONTRAIL_ANSIBLE_TAR /
+RUN cd /contrail-ansible/playbooks/ && \
+    ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t install  site.yml
 VOLUME ["/var/log", "/var/crashes", "/var/lib/cassandra", "/var/lib/zookeeper"]
 EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123 8103 9160 2181 9092 8092 8093 8094 8101 8083 179 53 5269 8080 8143
 COPY cassandra_start.sh zookeeper_start.sh /usr/local/bin/

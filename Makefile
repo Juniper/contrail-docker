@@ -36,30 +36,68 @@ CONTRAIL_INSTALL_PACKAGE_TAR = contrail-install-packages_$(CONTRAIL_VERSION)-$(C
 CONTRAIL_REPO_CONTAINER = contrail-apt-repo
 CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 
+CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
+CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible.git"
+CONTRAIL_ANSIBLE_REF = "master"
+CONTRAIL_ANSIBLE = contrail-ansible
+
 # This is the default target which should build all containers
 .PHONY: all
 
 all: $(CONTAINER_TARS)
 	@echo "Building containers finished"
 
-$(CONTAINER_TARS): $(CONTRAIL_REPO_CONTAINER_TAR)
+$(CONTAINER_TARS): prep
+	$(eval CONTRAIL_BUILD_ARGS := --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) )
+	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
+	$(eval TEMP := $(shell mktemp -d))
 	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
 	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(CONTRAIL_VERSION).tar.gz,,$@)))
 	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
-	cp docker/common.sh docker/pyj2.py docker/$(CONTAINER_NAME)/
-	cd docker/$(CONTAINER_NAME); \
-	docker build --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) \
-		-t $(CONTAINER):$(CONTRAIL_VERSION) .
-	@echo "Saving the container $(CONTAINER):$(CONTRAIL_VERSION)"
+	cp -rf $(CONTRAIL_ANSIBLE_TAR) docker/*.sh docker/*.py docker/$(CONTAINER_NAME)/* $(TEMP)
+	cd $(TEMP); \
+	docker build $(CONTRAIL_BUILD_ARGS) -t $(CONTAINER):$(CONTRAIL_VERSION) .
 	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
+	rm -fr $(TEMP)
 
 .PHONY: prep
 
-prep: $(CONTRAIL_REPO_CONTAINER_TAR)
-	@echo "Preparation for container build is completed"
+prep: contrail-repo contrail-ansible
+
+.PHONY: contrail-ansible
+contrail-ansible: $(CONTRAIL_ANSIBLE_TAR)
+
+.PHONY: contrail-repo
+contrail-repo: $(CONTRAIL_REPO_CONTAINER_TAR)
+
+$(CONTRAIL_ANSIBLE_TAR):
+ifdef $(CONTRAIL_ANSIBLE_ARTIFACT)
+	if [[ -f $(CONTRAIL_ANSIBLE_ARTIFACT) ]]; then  \
+		cp -f $(CONTRAIL_ANSIBLE_ARTIFACT) $(CONTRAIL_ANSIBLE_TAR) ;\
+	else \
+		@echo "No artifact found, getting the code from git repo" ; \
+		$(eval BUILD_CONTRAIL_ANSIBLE_TAR := yes) ; \
+	fi
+else
+	$(eval BUILD_CONTRAIL_ANSIBLE_TAR := yes)
+endif
+
+	if [ -n "$(BUILD_CONTRAIL_ANSIBLE_TAR)" ]; then \
+		echo "Building from repo $(CONTRAIL_ANSIBLE_REPO) ref: $(CONTRAIL_ANSIBLE_REF)"; \
+		git clone $(CONTRAIL_ANSIBLE_REPO) $(CONTRAIL_ANSIBLE) ;\
+		cd $(CONTRAIL_ANSIBLE) ;\
+		git checkout $(CONTRAIL_ANSIBLE_REF) ;\
+		git reset --hard; \
+		ansible-galaxy install -r requirements.yml -p playbooks/roles/ ;\
+		rm -fr .git* ;\
+		cd .. ; \
+		echo "Saving to $(CONTRAIL_ANSIBLE_TAR)";\
+		tar zcf $(CONTRAIL_ANSIBLE_TAR) $(CONTRAIL_ANSIBLE); \
+		rm -fr $(CONTRAIL_ANSIBLE);\
+	fi
+
 
 $(CONTRAIL_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
-	@echo "Pre-build step:"
 	$(eval CONTRAIL_REPO_BUILD_ARGS := )
 ifdef CONTRAIL_INSTALL_PACKAGE_TAR_URL
 	$(eval CONTRAIL_REPO_BUILD_ARGS +=  --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_TAR_URL) )
