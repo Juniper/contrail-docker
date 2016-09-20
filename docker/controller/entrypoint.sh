@@ -38,6 +38,11 @@ pre_start
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
+sleep 5
+
+cd /contrail-ansible/playbooks/
+ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY -t service
+
 # Register config node in config db
 wait_for_url http://${API_SERVER_IP}:${API_SERVER_PORT}
 retry /usr/share/contrail-utils/provision_config_node.py --api_server_ip $API_SERVER_IP --host_name $MYHOSTNAME \
