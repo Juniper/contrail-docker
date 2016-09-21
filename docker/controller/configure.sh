@@ -271,7 +271,57 @@ function setup_config () {
 
 }
 
+function configure_control() {
+    ##
+    # Configure control services
+    ##
+    # Setup contrail-control.conf
 
+    setcfg "/etc/contrail/contrail-control.conf"
+    setsection DEFAULT
+    setini hostip $IPADDRESS
+    setini hostname $MYHOSTNAME
+    setini log_file $CONTROL_LOG_FILE
+    setini log_level $CONTROL_LOG_LEVEL
+    setini log_local 1
+
+    setsection DISCOVERY
+    setini server $DISCOVERY_SERVER
+
+    setsection IFMAP
+    setini user $CONTROL_IFMAP_USER
+    setini password $CONTROL_IFMAP_PASSWORD
+    setini certs_store $CONTROL_CERTS_STORE
+
+    # End contrail-control.conf setup
+
+    # Setup contrail-dns.conf
+    setcfg "/etc/contrail/contrail-dns.conf"
+    setsection "DEFAULT"
+    setini hostip $IPADDRESS
+    setini hostname $MYHOSTNAME
+    setini log_file $DNS_LOG_FILE
+    setini log_level $DNS_LOG_LEVEL
+    setini log_local 1
+
+    setsection DISCOVERY
+    setini server $DISCOVERY_SERVER
+
+    setsection "IFMAP"
+    setini user $DNS_IFMAP_USER
+    setini password $DNS_IFMAP_PASSWORD
+    setini certs_store $CONTROL_CERTS_STORE
+    # END contrail-dns.conf
+
+
+    # Setup contrail-control-nodemgr.conf
+    setcfg "/etc/contrail/contrail-control-nodemgr.conf"
+    setsection "DISCOVERY"
+    setini server $DISCOVERY_SERVER
+    setini port $DISCOVERY_PORT
+    # END contrail-control-nodemgr.conf
+
+}
 # Main code start here
 
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
@@ -321,56 +371,8 @@ CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
 cd /contrail-ansible/playbooks/
-ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY -t contrail.config.provision
+ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY -t contrail.config.provision,contrail.control.provision
 
-##
-# Configure control services
-##
-# Setup contrail-control.conf
-
-setcfg "/etc/contrail/contrail-control.conf"
-setsection DEFAULT
-setini hostip $IPADDRESS
-setini hostname $MYHOSTNAME
-setini log_file $CONTROL_LOG_FILE
-setini log_level $CONTROL_LOG_LEVEL
-setini log_local 1
-
-setsection DISCOVERY
-setini server $DISCOVERY_SERVER
-
-setsection IFMAP
-setini user $CONTROL_IFMAP_USER
-setini password $CONTROL_IFMAP_PASSWORD
-setini certs_store $CONTROL_CERTS_STORE
-
-# End contrail-control.conf setup
-
-# Setup contrail-dns.conf
-setcfg "/etc/contrail/contrail-dns.conf"
-setsection "DEFAULT"
-setini hostip $IPADDRESS
-setini hostname $MYHOSTNAME
-setini log_file $DNS_LOG_FILE
-setini log_level $DNS_LOG_LEVEL
-setini log_local 1
-
-setsection DISCOVERY
-setini server $DISCOVERY_SERVER
-
-setsection "IFMAP"
-setini user $DNS_IFMAP_USER
-setini password $DNS_IFMAP_PASSWORD
-setini certs_store $CONTROL_CERTS_STORE
-# END contrail-dns.conf
-
-
-# Setup contrail-control-nodemgr.conf
-setcfg "/etc/contrail/contrail-control-nodemgr.conf"
-setsection "DISCOVERY"
-setini server $DISCOVERY_SERVER
-setini port $DISCOVERY_PORT
-# END contrail-control-nodemgr.conf
 
 setup_keystone_auth_config
 setup_vnc_api_lib
