@@ -22,7 +22,7 @@ ifndef SSHUSER
 endif
 
 # Define all containers to be built
-CONTAINERS = controller
+CONTAINERS = controller analytics
 
 # CONTRAIL_VERSION is requisite so fail, if not provided
 ifndef CONTRAIL_VERSION
