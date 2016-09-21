@@ -81,6 +81,197 @@ function configure_webui() {
     fi
 }
 
+function setup_config () {
+    # Setup ifmap_server/basicauthusers.properties
+    for i in `echo $CONTROL_SERVER_LIST | sed 's/,\s*/ /'`; do
+        sed -i "/^${i}:/{h;s/:.*/:${i}/};\${x;/^\$/{s//${i}:${i}/;H};x}" /etc/ifmap-server/basicauthusers.properties
+        sed -i "/^${i}.dns:/{h;s/:.*/:${i}.dns/};\${x;/^\$/{s//${i}.dns:${i}.dns/;H};x}" /etc/ifmap-server/basicauthusers.properties
+    done
+    # END ifmap_server/basicauthusers.properties
+
+    # Setup /etc/contrail/contrail-config-nodemgr.conf
+    setcfg /etc/contrail/contrail-config-nodemgr.conf
+    setsection DISCOVERY
+    setini server $DISCOVERY_SERVER
+    setini port $DISCOVERY_SERVER_PORT
+    # END setup /etc/contrail/contrail-config-nodemgr.conf
+
+    # Setup contrail-api.conf
+    setcfg /etc/contrail/contrail-api.conf
+    setsection DEFAULTS
+    setini ifmap_server_ip $IFMAP_SERVER
+    setini ifmap_server_port $IFMAP_SERVER_PORT
+    setini ifmap_username $IFMAP_USERNAME
+    setini ifmap_password $IFMAP_PASSWORD
+    setini cassandra_server_list $cassandra_server_list_w_port
+    setini listen_ip_addr $API_SERVER_LISTEN
+    setini listen_port $API_SERVER_LISTEN_PORT
+    setini multi_tenancy $MULTI_TENANCY
+    setini log_file $API_SERVER_LOG_FILE
+    setini log_local 1
+    setini log_level $API_SERVER_LOG_LEVEL
+    setini disc_server_ip $DISCOVERY_SERVER
+    setini disc_server_port $DISCOVERY_SERVER_PORT
+    setini zk_server_ip $zk_server_list_w_port
+    setini rabbit_server $rabbitmq_server_list_w_port
+    setini list_optimization_enabled True
+    setini auth "keystone"
+
+    setsection "SECURITY"
+    setini use_certs False
+    setini keyfile /etc/contrail/ssl/private_keys/apiserver_key.pem
+    setini certfile "/etc/contrail/ssl/certs/apiserver.pem"
+    setini ca_certs "/etc/contrail/ssl/certs/ca.pem"
+    # END contrail-api.conf setup
+
+
+    # Setup /etc/contrail/contrail-schema.conf
+    setcfg /etc/contrail/contrail-schema.conf
+    setsection "DEFAULTS"
+    setini ifmap_server_ip $IFMAP_SERVER
+    setini ifmap_server_port $IFMAP_SERVER_PORT
+    setini ifmap_username $IFMAP_USERNAME
+    setini ifmap_password $IFMAP_PASSWORD
+    setini cassandra_server_list $cassandra_server_list_w_port
+    setini api_server_ip $API_SERVER_IP
+    setini api_server_port $API_SERVER_PORT
+    setini api_server_use_ssl $API_SERVER_USE_SSL
+    setini log_file $SCHEMA_LOG_FILE
+    setini log_local 1
+    setini log_level $SCHEMA_LOG_LEVEL
+    setini disc_server_ip $DISCOVERY_SERVER
+    setini disc_server_port $DISCOVERY_SERVER_PORT
+    setini zk_server_ip $zk_server_list_w_port
+    setini rabbit_server $rabbitmq_server_list_w_port
+
+    setsection "SECURITY"
+    setini use_certs "False"
+    setini keyfile "/etc/contrail/ssl/private_keys/schema_xfer_key.pem"
+    setini certfile "/etc/contrail/ssl/certs/schema_xfer.pem"
+    setini ca_certs "/etc/contrail/ssl/certs/ca.pem"
+    # END /etc/contrail/contrail-schema.conf setup
+
+    # Setup /etc/contrail/contrail-discovery.conf
+    setcfg /etc/contrail/contrail-discovery.conf
+    setsection "DEFAULTS"
+    setini zk_server_ip $ZOOKEEPER_SERVER_LIST
+    setini zk_server_port $ZOOKEEPER_SERVER_PORT
+    setini listen_ip_addr $DISCOVERY_SERVER_LISTEN
+    setini listen_port $DISCOVERY_SERVER_LISTEN_PORT
+    setini log_local "True"
+    setini log_file $DISCOVERY_LOG_FILE
+    setini log_level $DISCOVERY_LOG_LEVEL
+    setini cassandra_server_list $cassandra_server_list_w_port
+    setini ttl_min $DISCOVERY_TTL_MIN
+    setini ttl_max $DISCOVERY_TTL_MAX
+    setini hc_interval $DISCOVERY_HC_INTERVAL
+    setini hc_max_miss $DISCOVERY_HC_MAX_MISS
+    setini ttl_short $DISCOVERY_TTL_SHORT
+
+    setsection "DNS-SERVER"
+    setini policy "fixed"
+    # END /etc/contrail/contrail-discovery.conf setup
+
+
+    # Setup /etc/contrail/contrail-svc-monitor.conf
+    setcfg /etc/contrail/contrail-svc-monitor.conf
+    setsection "DEFAULTS"
+    setini ifmap_server_ip $IFMAP_SERVER
+    setini ifmap_server_port $IFMAP_SERVER_PORT
+    setini ifmap_username $IFMAP_USERNAME
+    setini ifmap_password $IFMAP_PASSWORD
+    setini cassandra_server_list $cassandra_server_list_w_port
+    setini api_server_ip $API_SERVER_IP
+    setini api_server_port $API_SERVER_PORT
+    setini api_server_use_ssl $API_SERVER_USE_SSL
+    setini log_file $SVC_MONITOR_LOG_FILE
+    setini log_local 1
+    setini log_level $SVC_MONITOR_LOG_LEVEL
+    setini disc_server_ip $DISCOVERY_SERVER
+    setini disc_server_port $DISCOVERY_SERVER_PORT
+    setini zk_server_ip $zk_server_list_w_port
+    setini rabbit_server $rabbitmq_server_list_w_port
+    setini region_name $REGION
+
+    setsection "SECURITY"
+    setini use_certs False
+    setini keyfile /etc/contrail/ssl/private_keys/svc_monitor_key.pem
+    setini certfile /etc/contrail/ssl/certs/svc_monitor.pem
+    setini ca_certs /etc/contrail/ssl/certs/ca.pem
+
+    setsection "SCHEDULER"
+    setini analytics_server_ip $ANALYTICS_SERVER
+    setini analytics_server_port $ANALYTICS_SERVER_PORT
+    # END /etc/contrail/contrail-svc-monitor.conf setup
+
+    # Setup  /etc/contrail/contrail-device-manager.conf
+    setcfg /etc/contrail/contrail-device-manager.conf
+    setsection "DEFAULTS"
+    setini rabbit_server $rabbitmq_server_list_w_port
+    setini api_server_ip $API_SERVER_IP
+    setini api_server_port $API_SERVER_PORT
+    setini api_server_use_ssl $API_SERVER_USE_SSL
+    setini zk_server_ip $zk_server_list_w_port
+    setini log_file $DEVICE_MANAGER_LOG_FILE
+    setini log_level $DEVICE_MANAGER_LOG_LEVEL
+    setini log_local 1
+    setini cassandra_server_list $cassandra_server_list_w_port
+    setini disc_server_ip $DISCOVERY_SERVER
+    setini disc_server_port $DISCOVERY_PORT
+    # END Setup  /etc/contrail/contrail-device-manager.conf
+
+    setup_keystone_auth_config
+    setup_vnc_api_lib
+
+    # Handle changes of IFMAP_SERVER_PORT in ifmap server configuration
+    sed -i "s/^irond.comm.basicauth.port=.*/irond.comm.basicauth.port=${IFMAP_SERVER_PORT}/" /etc/ifmap-server/ifmap.properties
+
+    # Below steps only required for openstack
+    if [[ $CLOUD_ORCHESTRATOR == "openstack" ]]; then
+        # Setup /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+        setcfg /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+        setsection "APISERVER"
+        setini api_server_ip $API_SERVER_IP
+        setini api_server_port $API_SERVER_PORT
+        setini multi_tenancy $MULTI_TENANCY
+        setini use_ssl $API_SERVER_USE_SSL
+        setini insecure $API_SERVER_INSECURE
+        setini contrail_extensions $NEUTRON_CONTRAIL_EXTENSIONS
+
+        setsection "COLLECTOR"
+        setini analytics_api_ip $ANALYTICS_SERVER
+        setini analytics_api_port $ANALYTICS_SERVER_PORT
+
+        setsection "KEYSTONE"
+        setini auth_url ${KEYSTONE_AUTH_PROTOCOL}://${KEYSTONE_SERVER}:${KEYSTONE_AUTH_PORT}/v2.0
+        setini admin_user $KEYSTONE_ADMIN_USER
+        setini admin_password $KEYSTONE_ADMIN_PASSWORD
+        setini admin_tenant_name $KEYSTONE_ADMIN_TENANT
+        # END /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
+
+        # setup neutron endpoints - this is bit tricky, currently we use setup-quantum-in-keystone
+        # to setup neutron endpoints in keystone, and that script doesnt handle simultaneous executions.
+        # So only one neutron container should run this.
+        neutron_servers_sorted=$(echo $NEUTRON_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
+        neutron_index=$(echo "$neutron_servers_sorted" | grep -ne "${IPADDRESS}$" | cut -f1 -d:)
+
+        if [[ $neutron_index == 1 ]]; then
+            wait_for_url ${KEYSTONE_AUTH_PROTOCOL}://$KEYSTONE_SERVER:${KEYSTONE_AUTH_PORT}
+            /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER  \
+                --quant_server_ip $NEUTRON_IP --tenant $KEYSTONE_ADMIN_TENANT \
+                --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \
+                --svc_password $NEUTRON_PASSWORD --svc_tenant_name $SERVICE_TENANT \
+                --region_name $REGION
+        fi
+
+        # Start neutron
+        # TODO: neutron need to be added to supervisord
+        /opt/contrail/bin/quantum-server-setup.sh
+    fi
+
+}
+
+
 # Main code start here
 
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
@@ -109,149 +300,7 @@ rabbitmq_servername_list=${rabbitmq_servername_list/%,/}
 if [[ $DISABLE_RABBITMQ != "yes" ]]; then
     setup_rabbitmq
 fi
-# Setup ifmap_server/basicauthusers.properties
-for i in `echo $CONTROL_SERVER_LIST | sed 's/,\s*/ /'`; do
-    sed -i "/^${i}:/{h;s/:.*/:${i}/};\${x;/^\$/{s//${i}:${i}/;H};x}" /etc/ifmap-server/basicauthusers.properties
-    sed -i "/^${i}.dns:/{h;s/:.*/:${i}.dns/};\${x;/^\$/{s//${i}.dns:${i}.dns/;H};x}" /etc/ifmap-server/basicauthusers.properties
-done
-# END ifmap_server/basicauthusers.properties
 
-# Setup /etc/contrail/contrail-config-nodemgr.conf
-setcfg /etc/contrail/contrail-config-nodemgr.conf
-setsection DISCOVERY
-setini server $DISCOVERY_SERVER
-setini port $DISCOVERY_SERVER_PORT
-# END setup /etc/contrail/contrail-config-nodemgr.conf
-
-# Setup contrail-api.conf
-setcfg /etc/contrail/contrail-api.conf
-setsection DEFAULTS
-setini ifmap_server_ip $IFMAP_SERVER
-setini ifmap_server_port $IFMAP_SERVER_PORT
-setini ifmap_username $IFMAP_USERNAME
-setini ifmap_password $IFMAP_PASSWORD
-setini cassandra_server_list $cassandra_server_list_w_port
-setini listen_ip_addr $API_SERVER_LISTEN
-setini listen_port $API_SERVER_LISTEN_PORT
-setini multi_tenancy $MULTI_TENANCY
-setini log_file $API_SERVER_LOG_FILE
-setini log_local 1
-setini log_level $API_SERVER_LOG_LEVEL
-setini disc_server_ip $DISCOVERY_SERVER
-setini disc_server_port $DISCOVERY_SERVER_PORT
-setini zk_server_ip $zk_server_list_w_port
-setini rabbit_server $rabbitmq_server_list_w_port
-setini list_optimization_enabled True
-setini auth "keystone"
-
-setsection "SECURITY"
-setini use_certs False
-setini keyfile /etc/contrail/ssl/private_keys/apiserver_key.pem
-setini certfile "/etc/contrail/ssl/certs/apiserver.pem"
-setini ca_certs "/etc/contrail/ssl/certs/ca.pem"
-# END contrail-api.conf setup
-
-
-# Setup /etc/contrail/contrail-schema.conf
-setcfg /etc/contrail/contrail-schema.conf
-setsection "DEFAULTS"
-setini ifmap_server_ip $IFMAP_SERVER
-setini ifmap_server_port $IFMAP_SERVER_PORT
-setini ifmap_username $IFMAP_USERNAME
-setini ifmap_password $IFMAP_PASSWORD
-setini cassandra_server_list $cassandra_server_list_w_port
-setini api_server_ip $API_SERVER_IP
-setini api_server_port $API_SERVER_PORT
-setini api_server_use_ssl $API_SERVER_USE_SSL
-setini log_file $SCHEMA_LOG_FILE
-setini log_local 1
-setini log_level $SCHEMA_LOG_LEVEL
-setini disc_server_ip $DISCOVERY_SERVER
-setini disc_server_port $DISCOVERY_SERVER_PORT
-setini zk_server_ip $zk_server_list_w_port
-setini rabbit_server $rabbitmq_server_list_w_port
-
-setsection "SECURITY"
-setini use_certs "False"
-setini keyfile "/etc/contrail/ssl/private_keys/schema_xfer_key.pem"
-setini certfile "/etc/contrail/ssl/certs/schema_xfer.pem"
-setini ca_certs "/etc/contrail/ssl/certs/ca.pem"
-# END /etc/contrail/contrail-schema.conf setup
-
-# Setup /etc/contrail/contrail-discovery.conf
-setcfg /etc/contrail/contrail-discovery.conf
-setsection "DEFAULTS"
-setini zk_server_ip $ZOOKEEPER_SERVER_LIST
-setini zk_server_port $ZOOKEEPER_SERVER_PORT
-setini listen_ip_addr $DISCOVERY_SERVER_LISTEN
-setini listen_port $DISCOVERY_SERVER_LISTEN_PORT
-setini log_local "True"
-setini log_file $DISCOVERY_LOG_FILE
-setini log_level $DISCOVERY_LOG_LEVEL
-setini cassandra_server_list $cassandra_server_list_w_port
-setini ttl_min $DISCOVERY_TTL_MIN
-setini ttl_max $DISCOVERY_TTL_MAX
-setini hc_interval $DISCOVERY_HC_INTERVAL
-setini hc_max_miss $DISCOVERY_HC_MAX_MISS
-setini ttl_short $DISCOVERY_TTL_SHORT
-
-setsection "DNS-SERVER"
-setini policy "fixed"
-# END /etc/contrail/contrail-discovery.conf setup
-
-
-# Setup /etc/contrail/contrail-svc-monitor.conf
-setcfg /etc/contrail/contrail-svc-monitor.conf
-setsection "DEFAULTS"
-setini ifmap_server_ip $IFMAP_SERVER
-setini ifmap_server_port $IFMAP_SERVER_PORT
-setini ifmap_username $IFMAP_USERNAME
-setini ifmap_password $IFMAP_PASSWORD
-setini cassandra_server_list $cassandra_server_list_w_port
-setini api_server_ip $API_SERVER_IP
-setini api_server_port $API_SERVER_PORT
-setini api_server_use_ssl $API_SERVER_USE_SSL
-setini log_file $SVC_MONITOR_LOG_FILE
-setini log_local 1
-setini log_level $SVC_MONITOR_LOG_LEVEL
-setini disc_server_ip $DISCOVERY_SERVER
-setini disc_server_port $DISCOVERY_SERVER_PORT
-setini zk_server_ip $zk_server_list_w_port
-setini rabbit_server $rabbitmq_server_list_w_port
-setini region_name $REGION
-
-setsection "SECURITY"
-setini use_certs False
-setini keyfile /etc/contrail/ssl/private_keys/svc_monitor_key.pem
-setini certfile /etc/contrail/ssl/certs/svc_monitor.pem
-setini ca_certs /etc/contrail/ssl/certs/ca.pem
-
-setsection "SCHEDULER"
-setini analytics_server_ip $ANALYTICS_SERVER
-setini analytics_server_port $ANALYTICS_SERVER_PORT
-# END /etc/contrail/contrail-svc-monitor.conf setup
-
-# Setup  /etc/contrail/contrail-device-manager.conf
-setcfg /etc/contrail/contrail-device-manager.conf
-setsection "DEFAULTS"
-setini rabbit_server $rabbitmq_server_list_w_port
-setini api_server_ip $API_SERVER_IP
-setini api_server_port $API_SERVER_PORT
-setini api_server_use_ssl $API_SERVER_USE_SSL
-setini zk_server_ip $zk_server_list_w_port
-setini log_file $DEVICE_MANAGER_LOG_FILE
-setini log_level $DEVICE_MANAGER_LOG_LEVEL
-setini log_local 1
-setini cassandra_server_list $cassandra_server_list_w_port
-setini disc_server_ip $DISCOVERY_SERVER
-setini disc_server_port $DISCOVERY_PORT
-# END Setup  /etc/contrail/contrail-device-manager.conf
-
-setup_keystone_auth_config
-setup_vnc_api_lib
-
-# Handle changes of IFMAP_SERVER_PORT in ifmap server configuration
-sed -i "s/^irond.comm.basicauth.port=.*/irond.comm.basicauth.port=${IFMAP_SERVER_PORT}/" /etc/ifmap-server/ifmap.properties
 
 cat <<EOF > /etc/contrail/ctrl-details
 SERVICE_TOKEN=$KEYSTONE_ADMIN_TOKEN
@@ -271,49 +320,8 @@ COMPUTE=$KEYSTONE_SERVER
 CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
-# Below steps only required for openstack
-if [[ $CLOUD_ORCHESTRATOR == "openstack" ]]; then
-    # Setup /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
-    setcfg /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
-    setsection "APISERVER"
-    setini api_server_ip $API_SERVER_IP
-    setini api_server_port $API_SERVER_PORT
-    setini multi_tenancy $MULTI_TENANCY
-    setini use_ssl $API_SERVER_USE_SSL
-    setini insecure $API_SERVER_INSECURE
-    setini contrail_extensions $NEUTRON_CONTRAIL_EXTENSIONS
-
-    setsection "COLLECTOR"
-    setini analytics_api_ip $ANALYTICS_SERVER
-    setini analytics_api_port $ANALYTICS_SERVER_PORT
-
-    setsection "KEYSTONE"
-    setini auth_url ${KEYSTONE_AUTH_PROTOCOL}://${KEYSTONE_SERVER}:${KEYSTONE_AUTH_PORT}/v2.0
-    setini admin_user $KEYSTONE_ADMIN_USER
-    setini admin_password $KEYSTONE_ADMIN_PASSWORD
-    setini admin_tenant_name $KEYSTONE_ADMIN_TENANT
-    # END /etc/neutron/plugins/opencontrail/ContrailPlugin.ini
-
-    # setup neutron endpoints - this is bit tricky, currently we use setup-quantum-in-keystone
-    # to setup neutron endpoints in keystone, and that script doesnt handle simultaneous executions.
-    # So only one neutron container should run this.
-    neutron_servers_sorted=$(echo $NEUTRON_SERVER_LIST | sed -r 's/\s+/\n/g' | sort -V)
-    neutron_index=$(echo "$neutron_servers_sorted" | grep -ne "${IPADDRESS}$" | cut -f1 -d:)
-
-    if [[ $neutron_index == 1 ]]; then
-        wait_for_url ${KEYSTONE_AUTH_PROTOCOL}://$KEYSTONE_SERVER:${KEYSTONE_AUTH_PORT}
-        /opt/contrail/bin/setup-quantum-in-keystone --ks_server_ip $KEYSTONE_SERVER  \
-            --quant_server_ip $NEUTRON_IP --tenant $KEYSTONE_ADMIN_TENANT \
-            --user $KEYSTONE_ADMIN_USER --password $KEYSTONE_ADMIN_PASSWORD \
-            --svc_password $NEUTRON_PASSWORD --svc_tenant_name $SERVICE_TENANT \
-            --region_name $REGION
-    fi
-
-    # Start neutron
-    # TODO: neutron need to be added to supervisord
-    /opt/contrail/bin/quantum-server-setup.sh
-fi
-
+cd /contrail-ansible/playbooks/
+ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY -t contrail.config.provision
 
 ##
 # Configure control services
