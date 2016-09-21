@@ -11,7 +11,6 @@ ARG ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_INFRA="rabbitmq-server"
 ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq opscenter python-pip"
 ARG PACKAGES_ANSIBLE="ansible"
-ARG PACKAGES_CONTRAIL_CONTROL="contrail-openstack-control"
 ARG PACKAGES_CONTRAIL_WEBUI="contrail-openstack-webui"
 ARG PACKAGES_CONTRAIL_DATABASE="contrail-openstack-database default-jre-headless"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
@@ -25,7 +24,6 @@ RUN apt-get update -qy && \
     $apt_install $PACKAGES_COMMON && \
     $apt_install $PACKAGES_INFRA && \
     $apt_install $PACKAGES_CONTRAIL_DATABASE &&\
-    $apt_install $PACKAGES_CONTRAIL_CONTROL &&\
     $apt_install $PACKAGES_CONTRAIL_WEBUI && \
     $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
