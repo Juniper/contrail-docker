@@ -11,7 +11,6 @@ ARG ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_INFRA="rabbitmq-server"
 ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq opscenter python-pip"
 ARG PACKAGES_ANSIBLE="ansible"
-ARG PACKAGES_CONTRAIL_WEBUI="contrail-openstack-webui"
 ARG PACKAGES_CONTRAIL_DATABASE="contrail-openstack-database default-jre-headless"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
@@ -24,14 +23,13 @@ RUN apt-get update -qy && \
     $apt_install $PACKAGES_COMMON && \
     $apt_install $PACKAGES_INFRA && \
     $apt_install $PACKAGES_CONTRAIL_DATABASE &&\
-    $apt_install $PACKAGES_CONTRAIL_WEBUI && \
     $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
 RUN pip install fabric==1.11.1 paramiko==1.17.0
 ADD $CONTRAIL_ANSIBLE_TAR /
 RUN cd /contrail-ansible/playbooks/ && \
-    ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t install  site.yml
+    ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t contrail.controller.install  site.yml
 VOLUME ["/var/log", "/var/crashes", "/var/lib/cassandra", "/var/lib/zookeeper"]
 EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123 8103 9160 2181 9092 8092 8093 8094 8101 8083 179 53 5269 8080 8143
 COPY cassandra_start.sh zookeeper_start.sh /usr/local/bin/
