@@ -371,7 +371,8 @@ CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
 cd /contrail-ansible/playbooks/
-ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY -t contrail.config.provision,contrail.control.provision
+ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY \
+ -t contrail.config.provision,contrail.control.provision,contrail.webui.provision
 
 
 setup_keystone_auth_config
@@ -382,5 +383,3 @@ setup_vnc_api_lib
 for file in /etc/contrail/dns/contrail-rndc.conf /etc/contrail/dns/contrail-named.conf; do
     sed -i 's/secret \"secret123\";/secret \"${DNS_RNDC_KEY}\";/g' $file
 done
-
-configure_webui
