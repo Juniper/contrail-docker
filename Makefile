@@ -22,7 +22,7 @@ ifndef SSHUSER
 endif
 
 # Define all containers to be built
-CONTAINERS = controller analytics
+CONTAINERS = controller analytics agent
 
 # CONTRAIL_VERSION is requisite so fail, if not provided
 ifndef CONTRAIL_VERSION
@@ -57,7 +57,9 @@ $(CONTAINER_TARS): prep
 	cp -rf $(CONTRAIL_ANSIBLE_TAR) docker/*.sh docker/*.py docker/$(CONTAINER_NAME)/* $(TEMP)
 	cd $(TEMP); \
 	docker build $(CONTRAIL_BUILD_ARGS) -t $(CONTAINER):$(CONTRAIL_VERSION) .
+ifndef NO_CACHE
 	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
+endif
 	rm -fr $(TEMP)
 
 
