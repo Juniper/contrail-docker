@@ -22,7 +22,6 @@ function pre_start() {
     ulimit -n 4096
     chown -R cassandra.cassandra /var/lib/cassandra
     chown -R zookeeper.zookeeper /var/lib/zookeeper
-    python /configure.py
     bash -x /configure.sh
 }
 
