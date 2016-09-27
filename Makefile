@@ -46,6 +46,8 @@ CONTRAIL_ANSIBLE = contrail-ansible
 
 all: $(CONTAINER_TARS)
 
+$(CONTAINERS): $(CONTAINER_TARS)
+	@touch $@
 
 $(CONTAINER_TARS): prep
 	$(eval CONTRAIL_BUILD_ARGS := --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) )
