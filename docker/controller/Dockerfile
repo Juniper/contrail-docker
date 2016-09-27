@@ -9,9 +9,8 @@ ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-in
 ENV SKU=liberty
 ENV ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_INFRA="rabbitmq-server"
-ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq opscenter python-pip"
+ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq"
 ARG PACKAGES_ANSIBLE="ansible"
-ARG PACKAGES_CONTRAIL_DATABASE="contrail-openstack-database default-jre-headless"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
     echo "Package: *\nPin: origin \"$var1\"\nPin-Priority: 1001" > /etc/apt/preferences
@@ -22,11 +21,9 @@ RUN $apt_install software-properties-common && \
 RUN apt-get update -qy && \
     $apt_install $PACKAGES_COMMON && \
     $apt_install $PACKAGES_INFRA && \
-    $apt_install $PACKAGES_CONTRAIL_DATABASE &&\
     $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
-RUN pip install fabric==1.11.1 paramiko==1.17.0
 ADD $CONTRAIL_ANSIBLE_TAR /
 RUN cd /contrail-ansible/playbooks/ && \
     ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t install -l contrail-controllers site.yml
