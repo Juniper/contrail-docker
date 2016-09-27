@@ -41,7 +41,7 @@ child=$!
 sleep 5
 
 cd /contrail-ansible/playbooks/
-ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY -t service
+ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY -t service -l contrail-controllers
 
 # Register config node in config db
 wait_for_url http://${API_SERVER_IP}:${API_SERVER_PORT}

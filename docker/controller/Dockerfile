@@ -7,7 +7,7 @@ ARG SSHPASS
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV SKU=liberty
-ARG ANSIBLE_INVENTORY="all-in-one"
+ENV ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_INFRA="rabbitmq-server"
 ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq opscenter python-pip"
 ARG PACKAGES_ANSIBLE="ansible"
@@ -29,7 +29,7 @@ RUN apt-get update -qy && \
 RUN pip install fabric==1.11.1 paramiko==1.17.0
 ADD $CONTRAIL_ANSIBLE_TAR /
 RUN cd /contrail-ansible/playbooks/ && \
-    ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t contrail.controller.install  site.yml
+    ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t install -l contrail-controllers site.yml
 VOLUME ["/var/log", "/var/crashes", "/var/lib/cassandra", "/var/lib/zookeeper"]
 EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123 8103 9160 2181 9092 8092 8093 8094 8101 8083 179 53 5269 8080 8143
 COPY cassandra_start.sh zookeeper_start.sh /usr/local/bin/

@@ -372,7 +372,7 @@ EOF
 
 cd /contrail-ansible/playbooks/
 ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY \
- -t contrail.config.provision,contrail.control.provision,contrail.webui.provision
+ -t provision,configure -l contrail-controllers
 
 
 setup_keystone_auth_config

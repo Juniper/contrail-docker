@@ -5,6 +5,7 @@ source /common.sh
 IPADDRESS=${IPADDRESS:-${primary_ip}}
 
 ## Environment for Config Database
+ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-"all-in-one"}
 MY_INDEX=$(index_of_ip $SEED_LIST $IPADDRESS)
 DATABASE_IP=${DATABASE_IP:-$IPADDRESS}
 CASSANDRA_DIRECTORY=${CASSANDRA_DIRECTORY}
