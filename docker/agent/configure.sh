@@ -80,5 +80,8 @@ if [[ $VROUTER_PHYSICAL_INTERFACE != $VIRTUAL_HOST_INTERFACE ]]; then
     ip address delete $VIRTUAL_HOST_INTERFACE_IP_WITH_MASK dev $PHYSICAL_INTERFACE
     ip address add $VIRTUAL_HOST_INTERFACE_IP_WITH_MASK dev $VIRTUAL_HOST_INTERFACE
     ip link set dev $VIRTUAL_HOST_INTERFACE up
-    ip route add default via $NODE_GATEWAY
+    if [[ ${VIRTUAL_HOST_INTERFACE_IP_WITH_MASK#*/} -eq 32 ]]; then
+        ip route add unicast $NODE_GATEWAY dev $VIRTUAL_HOST_INTERFACE scope link
+    fi
+    ip route add default via $NODE_GATEWAY dev $VIRTUAL_HOST_INTERFACE
 fi
