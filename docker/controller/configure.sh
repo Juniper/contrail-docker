@@ -371,8 +371,8 @@ CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
 cd /contrail-ansible/playbooks/
-ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY \
- -t provision,configure -l contrail-controllers
+ansible-playbook -i inventory/$ANSIBLE_INVENTORY \
+ -t provision,configure contrail_controller.yml
 
 
 setup_keystone_auth_config
