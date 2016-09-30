@@ -370,10 +370,13 @@ COMPUTE=$KEYSTONE_SERVER
 CONTROLLER_MGMT=$API_SERVER_IP
 EOF
 
-cd /contrail-ansible/playbooks/
-ansible-playbook site.yml -i inventory/$ANSIBLE_INVENTORY \
- -t provision,configure -l contrail-controllers
+ansible_extra_vars+=" webui_http_listen_port=$WEBUI_HTTP_LISTEN_PORT"
+ansible_extra_vars+=" webui_https_listen_port=$WEBUI_HTTPS_LISTEN_PORT"
+ansible_extra_vars+=" ifmap_server_port=$IFMAP_SERVER_PORT"
 
+cd /contrail-ansible/playbooks/
+ansible-playbook -i inventory/$ANSIBLE_INVENTORY \
+ -t provision,configure contrail_controller.yml -e "$ansible_extra_vars"
 
 setup_keystone_auth_config
 setup_vnc_api_lib
