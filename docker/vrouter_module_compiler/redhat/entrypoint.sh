@@ -8,8 +8,12 @@ function fail() {
 
 KERNEL_VERSION=$(uname -r)
 VROUTER_VERSION=$(rpm -q contrail-vrouter-source | sed -r 's/contrail-vrouter-source-([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\-[[:digit:]]+).*/\1/')
-VROUTER_MODULE_PATH=${VROUTER_MODULE_PATH:-"/opt/contrail/vrouter_modules/"}
-VROUTER_MODULE_SAVE_PATH=${VROUTER_MODULE_PATH}/${KERNEL_VERSION}/${VROUTER_VERSION}
+if [[ $INSTALL_VROUTER_MODULE ]]; then
+    VROUTER_MODULE_SAVE_PATH="/lib/modules/${KERNEL_VERSION}/kernel/net/contrail/"
+else:
+    VROUTER_MODULE_PATH=${VROUTER_MODULE_PATH:-"/opt/contrail/vrouter_modules/"}
+    VROUTER_MODULE_SAVE_PATH=${VROUTER_MODULE_PATH}/${KERNEL_VERSION}/${VROUTER_VERSION}
+fi
 if [[ ! -e /lib/modules/${KERNEL_VERSION} ]]; then
     fail "No kernel module directory found under /lib/modules for current kernel ($KERNEL_VERSION)"
 fi
