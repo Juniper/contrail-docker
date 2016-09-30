@@ -35,7 +35,6 @@ EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123 8103 9
 COPY cassandra_start.sh zookeeper_start.sh /usr/local/bin/
 COPY  *.sh *.j2 *.py /
 COPY supervisor_configs/config/ /etc/contrail/supervisord_config_files/
-COPY supervisor_configs/database/ /etc/contrail/supervisord_database_files/
 RUN mkdir /etc/contrail/supervisord_files
 COPY supervisor_configs/main/supervisord.conf /etc/contrail/
 COPY supervisor_configs/main/*.ini /etc/contrail/supervisord_files/
