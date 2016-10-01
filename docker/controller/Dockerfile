@@ -8,7 +8,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV SKU=liberty
 ENV ANSIBLE_INVENTORY="all-in-one"
-ARG PACKAGES_INFRA="rabbitmq-server"
 ARG PACKAGES_COMMON="contrail-setup contrail-utils supervisor crudini jq"
 ARG PACKAGES_ANSIBLE="ansible"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
@@ -20,7 +19,6 @@ RUN $apt_install software-properties-common && \
     apt-add-repository -y ppa:ansible/ansible
 RUN apt-get update -qy && \
     $apt_install $PACKAGES_COMMON && \
-    $apt_install $PACKAGES_INFRA && \
     $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
