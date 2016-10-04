@@ -322,6 +322,29 @@ function configure_control() {
     # END contrail-control-nodemgr.conf
 
 }
+
+function prep_rabbit() {
+    for rabbitmq_server in `echo $RABBITMQ_SERVER_LIST | sed -r 's/[, ]/ /g'`; do
+        if [[ $rabbitmq_server =~ : ]]; then
+            ip=${rabbitmq_server%:*}
+            hostname=${rabbitmq_server#*:}
+            rabbitmq_server_ip_list+="$ip,"
+            rabbitmq_servername_list+="$hostname,"
+
+            if [[ `grep -c "${hostname}-ctrl" /etc/hosts` -eq 0 ]]; then
+                echo "$ip $hostname ${hostname}-ctrl" >> /etc/hosts
+            fi
+        fi
+    done
+
+    rabbitmq_server_ip_list=${rabbitmq_server_ip_list/%,/}
+    rabbitmq_servername_list=${rabbitmq_servername_list/%,/}
+
+    if [[ $DISABLE_RABBITMQ != "yes" ]]; then
+        setup_rabbitmq
+    fi
+}
+
 # Main code start here
 
 cassandra_server_list_w_port=$(echo $CASSANDRA_SERVER_LIST | sed -r -e "s/[, ]+/:$CASSANDRA_SERVER_PORT /g" -e "s/$/:$CASSANDRA_SERVER_PORT/")
@@ -330,27 +353,6 @@ rabbitmq_server_list_w_port=$(echo $RABBITMQ_SERVER_LIST | sed -r -e "s/[, ]+/:$
 ## Rabbitmq server configuration
 # Setup /etc/hosts entries for all rabbitmq hostnames (and hostname-ctrl name) - it is not required if those
 # names are resolvable using dns but it is not expected here
-
-for rabbitmq_server in `echo $RABBITMQ_SERVER_LIST | sed -r 's/[, ]/ /g'`; do
-    if [[ $rabbitmq_server =~ : ]]; then
-        ip=${rabbitmq_server%:*}
-        hostname=${rabbitmq_server#*:}
-        rabbitmq_server_ip_list+="$ip,"
-        rabbitmq_servername_list+="$hostname,"
-
-        if [[ `grep -c "${hostname}-ctrl" /etc/hosts` -eq 0 ]]; then
-            echo "$ip $hostname ${hostname}-ctrl" >> /etc/hosts
-        fi
-    fi
-done
-
-rabbitmq_server_ip_list=${rabbitmq_server_ip_list/%,/}
-rabbitmq_servername_list=${rabbitmq_servername_list/%,/}
-
-if [[ $DISABLE_RABBITMQ != "yes" ]]; then
-    setup_rabbitmq
-fi
-
 
 cat <<EOF > /etc/contrail/ctrl-details
 SERVICE_TOKEN=$KEYSTONE_ADMIN_TOKEN
