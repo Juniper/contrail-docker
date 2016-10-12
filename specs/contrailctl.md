@@ -15,6 +15,7 @@ In essense, contrailctl will do two basic operations at this moment.
 1. Sync the config entries there in /etc/contrailctl with running system inside the container - this is done by updating
 ansible variables in different levels and running ansible inside the container to sync the services in it with new
 configurations updated.
+2. Commit certain section of container config file so that internal service configuration is updated.
 2. Do high level operations like add new node, remove node, disable certain service (e.g one wanted to migrate rabbitmq
 to an external system) etc. In this case, contrailctl will do appropriate changes in config files in /etc/contrailctl
 and sync the services inside the container with the configurations.
@@ -49,5 +50,3 @@ This may be happen automatically in certain (configurable) duration, and/or manu
 
 Essentially what this operation does is that, it will read the config files from /etc/contrailctl and update ansible
 variables in various groupvars/ yaml files appropriately and ansible-playbook reconfigure the services and restart them.
-
-
