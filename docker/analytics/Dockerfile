@@ -7,20 +7,25 @@ ARG SSHPASS
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ARG ANSIBLE_INVENTORY="all-in-one"
-ARG PACKAGES_CONTRAIL_ANALYTICS="contrail-openstack-analytics redis-server crudini jq python-pip"
+ARG PACKAGES_ANSIBLE="ansible"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
     echo "Package: *\nPin: origin \"$var1\"\nPin-Priority: 1001" > /etc/apt/preferences
 RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
+RUN $apt_install software-properties-common && \
+    apt-add-repository -y ppa:ansible/ansible
 RUN apt-get update -qy && \
-    $apt_install $PACKAGES_CONTRAIL_ANALYTICS && \
+    $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
-RUN pip install fabric==1.11.1 paramiko==1.17.0
+ADD $CONTRAIL_ANSIBLE_TAR /
+RUN cd /contrail-ansible/playbooks/ && \
+    ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t install contrail_analytics.yml
+RUN $apt_install python-configparser
+COPY python-contrailctl /python-contrailctl
+RUN cd /python-contrailctl/; python setup.py install
 VOLUME ["/var/log", "/var/crashes"]
 EXPOSE 8081 8086
 COPY *.sh *.j2 /
-COPY redis.conf /etc/redis/
-COPY supervisor_configs/ /etc/contrail/supervisord_analytics_files/
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
