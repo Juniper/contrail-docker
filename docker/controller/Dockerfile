@@ -36,11 +36,6 @@ COPY supervisor_configs/config/ /etc/contrail/supervisord_config_files/
 RUN mkdir /etc/contrail/supervisord_files
 COPY supervisor_configs/main/supervisord.conf /etc/contrail/
 COPY supervisor_configs/main/*.ini /etc/contrail/supervisord_files/
-COPY supervisor_configs/webui/ /etc/contrail/supervisord_webui_files/
-# Workaround for now as 10240 is the maximum default fds for a container, so have to have that changed by external orchestrator
-# Will be done if required
-RUN sed -i '/^minfds=10240/d' /etc/contrail/supervisord_webui.conf
 COPY pyj2.py /usr/local/bin/
-COPY redis.conf /etc/redis/
 RUN chmod +x /entrypoint.sh /usr/local/bin/pyj2.py
 ENTRYPOINT /entrypoint.sh
