@@ -9,7 +9,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ARG ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_CONTRAIL_AGENT="contrail-lib contrail-utils contrail-vrouter-utils python-contrail-vrouter-api \
-    python-opencontrail-vrouter-netns contrail-vrouter-agent contrail-vrouter-init crudini jq"
+    python-opencontrail-vrouter-netns contrail-vrouter-agent contrail-vrouter-init contrail-nodemgr crudini jq"
 
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
