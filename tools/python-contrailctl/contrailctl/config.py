@@ -32,6 +32,6 @@ class Configurator(object):
                 if param in self.param_map[section]:
                     config_dict.update({self.param_map[section][param]: value})
                 else:
-                    config_dict.update({param: value})
+                    config_dict.update({"{}_{}".format(section.lower(), param): value})
 
         return config_dict

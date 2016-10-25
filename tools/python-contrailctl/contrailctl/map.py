@@ -16,12 +16,11 @@ CONTROLLER_PARAM_MAP = dict(
     ZK={},
     RABBITMQ={},
     REDIS={},
-    CONFIG=dict(
-        api_listen_port='api_listen_port',
-        api_listen_address='api_listen_address',
-        api_log_level='api_log_level'
-    ),
+    CONFIG={},
     CONTROL={},
     WEBUI={},
     SCHEMA={},
+    SECURITY={},
+    DB={},
+    DISCOVERY={}
 )

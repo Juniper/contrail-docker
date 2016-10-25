@@ -1,4 +1,5 @@
 import argparse
+import yaml
 import sys
 from contrailctl.config import Configurator
 from contrailctl.map import CONTROLLER_PARAM_MAP
@@ -15,7 +16,8 @@ class ConfigManager(object):
 
     PLAYBOOKS = dict(
         controller="contrail_controller.yml",
-        adb="contrail_adb.yml"
+        analytics="contrail_analytics.yml",
+        analyticsdb="contrail_analyticsdb.yml"
     )
 
     def __init__(self, config_file, component):
@@ -23,21 +25,46 @@ class ConfigManager(object):
         self.config_file = config_file
         self.param_map = self.COMPONENT_PARAM_MAP[component]
 
+    def _update_yml(self, yml, data):
+        """ Update vars yaml file
+        :param yml: yaml file to update
+        :param data: data to be updated
+        :return: True in case the file is changed, False in case the file is not changed
+        """
+        with open(yml, "r+") as f:
+            yml_data = yaml.load(f) or {}
+            yml_data_new = yml_data.copy()
+            yml_data_new.update(data)
+            if yml_data == yml_data_new:
+                return False
+            else:
+                f.seek(0)
+                f.write(yaml.dump(yml_data_new, default_flow_style=False))
+                f.truncate()
+                return True
+
     def sync(self):
         component_config = Configurator(self.config_file, self.param_map)
         config_dict = component_config.map({})
-        print("CONFIGS: ", config_dict)
-        # NOTE: it may make sense to have some of these params to be get from user in later point. But currently they are
-        # constants
-        runner_params = dict(
-            inventory='/contrail-ansible/playbooks/inventory/all-in-one',
-            playbook='/contrail-ansible/playbooks/' + self.PLAYBOOKS.get(self.component),
-            tags=['provision', 'configure'],
-            verbosity=0
-        )
-        ansible_runner = Runner(run_data=config_dict, **self.RUNNER_PARAMS)
-        stats = ansible_runner.run()
-        return stats
+        var_file = "/contrail-ansible/playbooks/vars/" + self.PLAYBOOKS[self.component]
+        playbook = "/contrail-ansible/playbooks/" + self.PLAYBOOKS[self.component]
+        need_ansible_run = self._update_yml(var_file, config_dict)
+        if need_ansible_run:
+            print("CONFIGS: ", config_dict)
+            # NOTE: it may make sense to have some of these params to be get from user in later point.
+            # But currently they are constants
+            runner_params = dict(
+                inventory='/contrail-ansible/playbooks/inventory/all-in-one',
+                playbook=playbook,
+                tags=['provision', 'configure'],
+                verbosity=0
+            )
+            ansible_runner = Runner(**runner_params)
+            stats = ansible_runner.run()
+            return stats
+        else:
+            print("All configs are in sync")
+            return None
 
 
 def main(args=sys.argv[1:]):
