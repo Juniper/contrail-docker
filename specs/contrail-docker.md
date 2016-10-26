@@ -8,8 +8,18 @@ orchestration systems to setup contrail system. It should also provide a very ba
 usable with its native interface. 
 
 # Problem statement
-Current build and deployment system of contrail is very complex even for small, single node setup. Also reconfiguration
-may include editing multiple configuration files and restarting number of contrail services.
+Contrail software is distributed as a set of few packages for each module. These packages have many depenedency chain and its own set of configuration parameters. This presents following deployment issues:
+
+    1. Version of linux distribution in target system need to match exactly with the contrail sw is qualified on. Otherwise, installation may fail due to package depenedency mismatch. 
+
+    2. If the deployment in #1 above succeeds and depenedent packages are picked from different mirror at customer site, then the installation is different than what the software was qualified with.
+
+    3. Change in any package on target system has the risk of breaking contrail software. So any change is risky on the system and qualification of contrail and other components may be required.
+
+    4. Currently provisioning tools (fuel, juju, puppet etc) directly interacts with services in file. Overtime these tools become too complex as it needs to know all the low level details of contrail services params without clear documentation.
+
+
+In this project we intend to solve problems by distributing contrail sw as containers.
 
 # Proposed solution
 
