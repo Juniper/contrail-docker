@@ -1,4 +1,6 @@
 import ConfigParser
+import ast
+import re
 
 
 def read_config(config_file):
@@ -21,6 +23,13 @@ class Configurator(object):
             raise ValueError("Unknown sections - %r"
                              % set(self.master_config.sections()).difference(set(self.param_map.keys())))
 
+    @staticmethod
+    def _eval(data):
+        if re.match(r"^\[.*\]$", data) or re.match(r"^\{.*\}$", data):
+            return ast.literal_eval(data)
+        else:
+            return data
+
     def map(self, config_dict):
         """
         :param config_dict: config dictionary to be populated, the system may have to get multiple instances of
@@ -30,8 +39,8 @@ class Configurator(object):
         for section in self.master_config.sections():
             for param, value in self.master_config.items(section):
                 if param in self.param_map[section]:
-                    config_dict.update({self.param_map[section][param]: value})
+                    config_dict.update({self.param_map[section][param]: self._eval(value)})
                 else:
-                    config_dict.update({"{}_{}".format(section.lower(), param): value})
+                    config_dict.update({"{}_{}".format(section.lower(), param): self._eval(value)})
 
         return config_dict

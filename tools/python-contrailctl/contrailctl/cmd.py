@@ -25,31 +25,31 @@ class ConfigManager(object):
         self.config_file = config_file
         self.param_map = self.COMPONENT_PARAM_MAP[component]
 
-    def _update_yml(self, yml, data):
+    def _update_yml(self, yml, new_vars):
         """ Update vars yaml file
         :param yml: yaml file to update
-        :param data: data to be updated
+        :param new_vars: data to be updated
         :return: True in case the file is changed, False in case the file is not changed
         """
         with open(yml, "r+") as f:
-            yml_data = yaml.load(f) or {}
-            yml_data_new = yml_data.copy()
-            yml_data_new.update(data)
-            if yml_data == yml_data_new:
+            current_vars = yaml.load(f) or {}
+            if current_vars == new_vars:
                 return False
             else:
                 f.seek(0)
-                f.write(yaml.dump(yml_data_new, default_flow_style=False))
+                f.write("## CAUTION! CAUTION! CAUTION! ##\n"
+                        "# This file is managed by contrailctl. All manual configurations will be wiped off\n##\n")
+                f.write(yaml.dump(new_vars, default_flow_style=False))
                 f.truncate()
                 return True
 
-    def sync(self):
+    def sync(self, force=False):
         component_config = Configurator(self.config_file, self.param_map)
         config_dict = component_config.map({})
         var_file = "/contrail-ansible/playbooks/vars/" + self.PLAYBOOKS[self.component]
         playbook = "/contrail-ansible/playbooks/" + self.PLAYBOOKS[self.component]
         need_ansible_run = self._update_yml(var_file, config_dict)
-        if need_ansible_run:
+        if need_ansible_run or force:
             print("CONFIGS: ", config_dict)
             # NOTE: it may make sense to have some of these params to be get from user in later point.
             # But currently they are constants
@@ -79,13 +79,15 @@ def main(args=sys.argv[1:]):
                                          choices=["controller"],
                                          default="controller",
                                          help="Component[s] to be configured")
+    p_config_sync_force = p_config_sync.add_argument("-F", "--force", action='store_true',
+                                         help="Whether to forcefully apply config or not")
     args = ap.parse_args()
 
     if not args.config_file:
         args.config_file = "/etc/contrailctl/%s.conf" % args.component
 
     cm = ConfigManager(args.config_file, args.component)
-    stats = cm.sync()
+    stats = cm.sync(args.force)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

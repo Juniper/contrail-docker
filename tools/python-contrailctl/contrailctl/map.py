@@ -10,7 +10,10 @@
 # Default maps doesnt need to be added here, all non-default map must be specified here.
 
 CONTROLLER_PARAM_MAP = dict(
-    GLOBAL={},
+    GLOBAL=dict(
+        controller_list="controller_list",
+        controller_ip="controller_ip"
+    ),
     IFMAP={},
     CASSANDRA={},
     ZK={},
@@ -21,6 +24,13 @@ CONTROLLER_PARAM_MAP = dict(
     WEBUI={},
     SCHEMA={},
     SECURITY={},
-    DB={},
-    DISCOVERY={}
+    CONFIGDB={},
+    DISCOVERY={},
+    API=dict(
+        ifmap_username="config_ifmap_username",
+        ifmap_password="config_ifmap_password",
+        list_optimization_enabled="list_optimization_enabled",
+        multi_tenancy="multi_tenancy",
+
+    )
 )
