@@ -27,6 +27,7 @@ CONTROLLER_PARAM_MAP = dict(
     CONFIGDB={},
     DISCOVERY={},
     DEVICE_MANAGER={},
+    SVC_MONITOR={},
     API=dict(
         ifmap_username="config_ifmap_username",
         ifmap_password="config_ifmap_password",
