@@ -19,10 +19,6 @@ class Configurator(object):
         self.master_config = read_config(self.master_config_file)
         self.param_map = param_map
 
-        if not set(self.master_config.sections()).issubset(set(self.param_map.keys())):
-            raise ValueError("Unknown sections - %r"
-                             % set(self.master_config.sections()).difference(set(self.param_map.keys())))
-
     @staticmethod
     def _eval(data):
         if re.match(r"^\[.*\]$", data) or re.match(r"^\{.*\}$", data):
@@ -38,7 +34,7 @@ class Configurator(object):
         """
         for section in self.master_config.sections():
             for param, value in self.master_config.items(section):
-                if param in self.param_map[section]:
+                if param in self.param_map.get(section, {}):
                     config_dict.update({self.param_map[section][param]: self._eval(value)})
                 else:
                     config_dict.update({"{}_{}".format(section.lower(), param): self._eval(value)})
