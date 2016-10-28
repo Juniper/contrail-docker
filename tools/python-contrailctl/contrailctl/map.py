@@ -25,3 +25,11 @@ CONTROLLER_PARAM_MAP = dict(
     WEBUI={},
     SCHEMA={},
 )
+
+ANALYTICSDB_PARAM_MAP = dict(
+    GLOBAL=dict(
+        controller_list="controller_list",
+        controller_ip="controller_ip"
+    ),
+)
+ANALYTICS_PARAM_MAP = {}
