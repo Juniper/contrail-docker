@@ -9,6 +9,15 @@
 #
 # Default maps doesnt need to be added here, all non-default map must be specified here.
 
+ANALYTICS_PARAM_MAP = dict(
+    GLOBAL=dict(
+        analyticsdb_list="analyticsdb_list",
+        controller_list="controller_list",
+        controller_ip="controller_ip",
+        uve_partition_count="analytics_uve_partition_count",
+    )
+)
+
 CONTROLLER_PARAM_MAP = dict(
     GLOBAL={},
     IFMAP={},
