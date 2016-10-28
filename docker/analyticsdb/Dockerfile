@@ -26,11 +26,7 @@ COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 VOLUME ["/var/log", "/var/crashes", "/var/lib/cassandra"]
 EXPOSE 9161 9141
-COPY cassandra_start.sh /usr/local/bin/
 COPY  *.sh *.j2 *.py /
-COPY supervisor_configs/database/ /etc/contrail/supervisord_database_files/
-# Workaround for now as 10240 is the maximum default fds for a container, so have to have that changed by external orchestrator
-# Will be done if required
 COPY pyj2.py /usr/local/bin/
 RUN chmod +x /entrypoint.sh /usr/local/bin/pyj2.py
 ENTRYPOINT /entrypoint.sh
