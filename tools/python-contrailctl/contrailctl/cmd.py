@@ -1,7 +1,7 @@
 import argparse
 import sys
 from contrailctl.config import Configurator
-from contrailctl.map import CONTROLLER_PARAM_MAP
+from contrailctl.map import CONTROLLER_PARAM_MAP, ANALYTICSDB_PARAM_MAP, ANALYTICS_PARAM_MAP
 from contrailctl.runner import Runner
 
 
@@ -11,6 +11,8 @@ class ConfigManager(object):
     # it may ended up managing individual components later.
     COMPONENT_PARAM_MAP = {
         "controller": CONTROLLER_PARAM_MAP,
+        "analyticsdb": ANALYTICSDB_PARAM_MAP,
+        "analytics": ANALYTICS_PARAM_MAP,
     }
 
     PLAYBOOKS = dict(
@@ -49,8 +51,8 @@ def main(args=sys.argv[1:]):
     p_config_cfg = p_config_sync.add_argument("-f", "--config-file", type=str,
                                          help="Master config file path")
     p_config_comp = p_config_sync.add_argument("-c", "--component", type=str,
-                                         choices=["controller"],
-                                         default="controller",
+                                         choices=["controller", "analyticsdb", "analytics", "agent"],
+                                         required=True,
                                          help="Component[s] to be configured")
     args = ap.parse_args()
 
