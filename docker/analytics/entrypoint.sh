@@ -6,6 +6,22 @@ DAEMON=/usr/bin/supervisord
 SERVICE=analytics
 NAME=supervisord_${SERVICE}
 DESC=supervisor_${SERVICE}
+ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-"all-in-one"}
+
+IPADDRESS=${IPADDRESS:-${primary_ip}}
+CONFIG_IP=${CONFIG_IP:-$IPADDRESS}
+API_SERVER_IP=${API_SERVER_IP:-${CONTRAIL_INTERNAL_VIP:-$CONFIG_IP}}
+ANALYTICS_IP=${ANALYTICS_IP:-$IPADDRESS}
+
+SERVICE_TENANT=${SERVICE_TENANT:-service}
+KEYSTONE_AUTH_PROTOCOL=${KEYSTONE_AUTH_PROTOCOL:-http}
+KEYSTONE_AUTH_PORT=${KEYSTONE_AUTH_PORT:-35357}
+KEYSTONE_INSECURE=${KEYSTONE_INSECURE:-False}
+KEYSTONE_ADMIN_USER=${OS_USERNAME:-admin}
+KEYSTONE_ADMIN_PASSWORD=${OS_PASSWORD:-admin}
+KEYSTONE_ADMIN_TENANT=${OS_TENANT_NAME:-admin}
+KEYSTONE_ADMIN_TOKEN=${OS_TOKEN:-$ADMIN_TOKEN}
+REGION=${REGION:-RegionOne}
 
 test -x $DAEMON || exit 0
 
@@ -24,7 +40,9 @@ function pre_start() {
     ulimit -d unlimited
     ulimit -v unlimited
     ulimit -n 4096
-    bash /configure.sh
+    cd /contrail-ansible/playbooks/
+    ansible-playbook -i inventory/$ANSIBLE_INVENTORY \
+        -t provision,configure contrail_analytics.yml
 }
 
 function cleanup() {
@@ -39,8 +57,11 @@ pre_start
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
+cd /contrail-ansible/playbooks/
+ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t service contrail_analyticsdb.yml
+
 # Register analytics in config
-retry /usr/share/contrail-utils/provision_analytics_node.py --api_server_ip $CONFIG_IP \
+retry /usr/share/contrail-utils/provision_analytics_node.py --api_server_ip $API_SERVER_IP \
     --host_name ${MYHOSTNAME} --host_ip ${ANALYTICS_IP} --oper add \
     --admin_user ${KEYSTONE_ADMIN_USER} --admin_password ${KEYSTONE_ADMIN_PASSWORD} \
      --admin_tenant_name ${KEYSTONE_ADMIN_TENANT}
