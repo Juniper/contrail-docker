@@ -15,6 +15,12 @@ ANALYTICS_PARAM_MAP = dict(
         controller_list="controller_list",
         controller_ip="controller_ip",
         uve_partition_count="analytics_uve_partition_count",
+        analytics_data_ttl="analytics_data_ttl",
+        analytics_flow_ttl="analytics_flow_ttl",
+        analytics_statistics_ttl="analytics_statistics_ttl",
+        analytics_config_audit_ttl="analytics_config_audit_ttl",
+        aaa_mode="analytics_aaa_mode",
+        sandesh_send_rate_limit="sandesh_send_rate_limit"
     )
 )
 
