@@ -29,10 +29,22 @@ CONTROLLER_PARAM_MAP = dict(
         controller_list="controller_list",
         controller_ip="controller_ip"
     ),
+    CONTROL=dict(
+        bgp_port="bgp_port",
+        xmpp_server_port="xmpp_server_port",
+        sandesh_send_rate_limit="sandesh_send_rate_limit"
+    ),
+    DNS=dict(
+        named_config_file="named_config_file",
+        named_config_directory="named_config_directory",
+        named_log_file="named_log_file",
+        rndc_config_file="rndc_config_file",
+        rndc_secret="rndc_secret",
+        dns_server_port="dns_server_port",
+    ),
     API=dict(
         list_optimization_enabled="list_optimization_enabled",
         multi_tenancy="multi_tenancy",
-
     )
 )
 
@@ -42,4 +54,3 @@ ANALYTICSDB_PARAM_MAP = dict(
         controller_ip="controller_ip"
     ),
 )
-ANALYTICS_PARAM_MAP = {}
