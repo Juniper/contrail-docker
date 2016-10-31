@@ -6,8 +6,8 @@ ARG ENTRY_POINT=docker_entrypoint.sh
 ARG SSHPASS
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
-ARG ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_ANSIBLE="ansible"
+ENV ANSIBLE_INVENTORY="all-in-one"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
     echo "Package: *\nPin: origin \"$var1\"\nPin-Priority: 1001" > /etc/apt/preferences
