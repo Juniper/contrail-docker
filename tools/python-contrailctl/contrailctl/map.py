@@ -25,20 +25,15 @@ ANALYTICS_PARAM_MAP = dict(
 )
 
 CONTROLLER_PARAM_MAP = dict(
-    GLOBAL={},
-    IFMAP={},
-    CASSANDRA={},
-    ZK={},
-    RABBITMQ={},
-    REDIS={},
-    CONFIG=dict(
-        api_listen_port='api_listen_port',
-        api_listen_address='api_listen_address',
-        api_log_level='api_log_level'
+    GLOBAL=dict(
+        controller_list="controller_list",
+        controller_ip="controller_ip"
     ),
-    CONTROL={},
-    WEBUI={},
-    SCHEMA={},
+    API=dict(
+        list_optimization_enabled="list_optimization_enabled",
+        multi_tenancy="multi_tenancy",
+
+    )
 )
 
 ANALYTICSDB_PARAM_MAP = dict(
