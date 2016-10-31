@@ -23,19 +23,17 @@ RUN apt-get update -qy && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
 ADD $CONTRAIL_ANSIBLE_TAR /
-RUN cd /contrail-ansible/playbooks/ && \
-    ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t install contrail_controller.yml
 RUN $apt_install python-configparser
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
+RUN contrailctl config sync -c controller -F -t install
 VOLUME ["/var/log", "/var/crashes", "/var/lib/cassandra", "/var/lib/zookeeper"]
 EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123 8103 9160 2181 9092 8092 8093 8094 8101 8083 179 53 5269 8080 8143
 COPY cassandra_start.sh /usr/local/bin/
-COPY  *.sh *.j2 *.py /
+COPY  *.sh /
 COPY supervisor_configs/config/ /etc/contrail/supervisord_config_files/
-RUN mkdir /etc/contrail/supervisord_files
+RUN mkdir -p /etc/contrail/supervisord_files /etc/contrailctl/
 COPY supervisor_configs/main/supervisord.conf /etc/contrail/
 COPY supervisor_configs/main/*.ini /etc/contrail/supervisord_files/
-COPY pyj2.py /usr/local/bin/
-RUN chmod +x /entrypoint.sh /usr/local/bin/pyj2.py
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
