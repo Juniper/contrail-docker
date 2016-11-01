@@ -14,6 +14,27 @@ if [ -f /etc/default/supervisord ] ; then
 fi
 DAEMON_OPTS="-n -c /etc/contrail/supervisord.conf $DAEMON_OPTS"
 
+function write_ctrl_details() {
+cat <<EOF > /etc/contrail/ctrl-details
+SERVICE_TOKEN=$KEYSTONE_ADMIN_TOKEN
+AUTH_PROTOCOL=$KEYSTONE_AUTH_PROTOCOL
+QUANTUM_PROTOCOL=$NEUTRON_PROTOCOL
+ADMIN_TOKEN=$KEYSTONE_ADMIN_PASSWORD
+CONTROLLER=$KEYSTONE_SERVER
+AMQP_SERVER=$rabbitmq_server_list_w_port
+HYPERVISOR=libvirt
+NOVA_PASSWORD=$NEUTRON_PASSWORD
+NEUTRON_PASSWORD=$NEUTRON_PASSWORD
+SERVICE_TENANT_NAME=$SERVICE_TENANT
+SERVICE_TENANT=$SERVICE_TENANT
+QUANTUM=$NEUTRON_IP
+QUANTUM_PORT=$NEUTRON_PORT
+COMPUTE=$KEYSTONE_SERVER
+CONTROLLER_MGMT=$API_SERVER_IP
+EOF
+}
+
+
 function pre_start() {
     ulimit -s unlimited
     ulimit -c unlimited
@@ -22,7 +43,19 @@ function pre_start() {
     ulimit -n 4096
     chown -R cassandra.cassandra /var/lib/cassandra
     chown -R zookeeper.zookeeper /var/lib/zookeeper
-    bash -x /configure.sh
+    # Write ctrl-details file
+    write_ctrl_details
+    # configure services and start them using ansible code within contrail-ansible
+    contrailctl config sync -c controller -F
+
+    # Setup keystone configuration (only required for openstack setup
+    setup_keystone_auth_config
+    setup_vnc_api_lib
+
+    # FIXME - This must be moved to contrail-ansible
+    for file in /etc/contrail/dns/contrail-rndc.conf /etc/contrail/dns/contrail-named.conf; do
+        sed -i 's/secret \"secret123\";/secret \"${DNS_RNDC_KEY}\";/g' $file
+    done
 }
 
 function cleanup() {
@@ -36,11 +69,9 @@ trap cleanup SIGHUP SIGINT SIGTERM
 pre_start
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
-
 sleep 5
-
-cd /contrail-ansible/playbooks/
-ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t service contrail_controller.yml
+# run contrailctl to run code to make sure services are running
+contrailctl config sync -c controller -F -t service
 
 # Register config node in config db
 wait_for_url http://${API_SERVER_IP}:${API_SERVER_PORT}
