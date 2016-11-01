@@ -45,7 +45,14 @@ class ConfigManager(object):
                 f.truncate()
                 return True
 
-    def sync(self, force=False):
+    def sync(self, force=False, tags=None):
+        """Sync configuration from container master config to internal service configs
+        :param force: Forcefully run the sync even if there is no difference in configurations
+        :param tags: specific ansible tags to run
+        """
+        if not tags:
+            tags = ['provision', 'configure']
+
         component_config = Configurator(self.config_file, self.param_map)
         config_dict = component_config.map({})
         var_file = "/contrail-ansible/playbooks/vars/" + self.PLAYBOOKS[self.component]
@@ -58,7 +65,7 @@ class ConfigManager(object):
             runner_params = dict(
                 inventory='/contrail-ansible/playbooks/inventory/all-in-one',
                 playbook=playbook,
-                tags=['provision', 'configure'],
+                tags=tags,
                 verbosity=0
             )
             ansible_runner = Runner(**runner_params)
@@ -83,13 +90,15 @@ def main(args=sys.argv[1:]):
                                          help="Component[s] to be configured")
     p_config_sync_force = p_config_sync.add_argument("-F", "--force", action='store_true',
                                          help="Whether to forcefully apply config or not")
+    p_config_tag = p_config_sync.add_argument("-t", "--tags", type=lambda x: x.split(','),
+                                         help="comma separated list of tags to run specific set of ansible code")
     args = ap.parse_args()
 
     if not args.config_file:
         args.config_file = "/etc/contrailctl/%s.conf" % args.component
 
     cm = ConfigManager(args.config_file, args.component)
-    stats = cm.sync(args.force)
+    stats = cm.sync(args.force, args.tags)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
