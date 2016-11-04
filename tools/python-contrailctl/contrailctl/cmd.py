@@ -3,7 +3,7 @@ import yaml
 import sys
 from contrailctl.config import Configurator
 from contrailctl.map import CONTROLLER_PARAM_MAP, ANALYTICSDB_PARAM_MAP,\
-        ANALYTICS_PARAM_MAP, LOADBALANCER_PARAM_MAP
+        ANALYTICS_PARAM_MAP, LB_PARAM_MAP
 from contrailctl.runner import Runner
 
 
@@ -16,14 +16,14 @@ class ConfigManager(object):
         "controller": CONTROLLER_PARAM_MAP,
         "analyticsdb": ANALYTICSDB_PARAM_MAP,
         "analytics": ANALYTICS_PARAM_MAP,
-        "loadbalancer": LOADBALANCER_PARAM_MAP,
+        "lb": LB_PARAM_MAP,
     }
 
     PLAYBOOKS = dict(
         controller="contrail_controller.yml",
         analytics="contrail_analytics.yml",
         analyticsdb="contrail_analyticsdb.yml",
-        loadbalancer="contrail_loadbalancer.yml"
+        lb="contrail_lb.yml"
     )
 
     def __init__(self, config_file, component):
@@ -96,7 +96,7 @@ def main(args=sys.argv[1:]):
                                help="Master config file path")
     p_config_sync.add_argument("-c", "--component", type=str, required=True,
                                choices=["controller", "analyticsdb",
-                                        "analytics", "agent", "loadbalancer"],
+                                        "analytics", "agent", "lb"],
                                help="Component[s] to be configured")
     p_config_sync.add_argument("-F", "--force", action='store_true',
                                help="Whether to apply config forcibly")

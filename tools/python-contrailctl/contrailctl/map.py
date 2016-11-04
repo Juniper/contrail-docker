@@ -13,7 +13,7 @@
 # Default maps doesnt need to be added here, all non-default map must be
 # specified here.
 
-LOADBALANCER_PARAM_MAP = dict(
+LB_PARAM_MAP = dict(
     GLOBAL=dict(
         controller_list="controller_list",
     ),
