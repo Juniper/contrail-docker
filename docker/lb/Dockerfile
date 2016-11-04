@@ -24,7 +24,7 @@ ADD $CONTRAIL_ANSIBLE_TAR /
 RUN $apt_install python-configparser
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
-RUN contrailctl config sync -c loadbalancer -F -t install
+RUN contrailctl config sync -c lb -F -t install
 VOLUME ["/var/log", "/dev/log:/dev/log"]
 EXPOSE 8082 5998 9696 8081
 COPY entrypoint.sh /
