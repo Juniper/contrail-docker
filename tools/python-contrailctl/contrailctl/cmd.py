@@ -2,24 +2,28 @@ import argparse
 import yaml
 import sys
 from contrailctl.config import Configurator
-from contrailctl.map import CONTROLLER_PARAM_MAP, ANALYTICSDB_PARAM_MAP, ANALYTICS_PARAM_MAP
+from contrailctl.map import CONTROLLER_PARAM_MAP, ANALYTICSDB_PARAM_MAP,\
+        ANALYTICS_PARAM_MAP, LOADBALANCER_PARAM_MAP
 from contrailctl.runner import Runner
 
 
 class ConfigManager(object):
-    # This name (component_map) may not make sense here, in any time we wanted to handle individual services within
-    # the container with contrailctl. Here the assumption is that contrailctl always handle high level configs, but
-    # it may ended up managing individual components later.
+    # This name (component_map) may not make sense here, in any time we wanted
+    # to handle individual services within the container with contrailctl.
+    # Here the assumption is that contrailctl always handle high level configs,
+    # but it may ended up managing individual components later.
     COMPONENT_PARAM_MAP = {
         "controller": CONTROLLER_PARAM_MAP,
         "analyticsdb": ANALYTICSDB_PARAM_MAP,
         "analytics": ANALYTICS_PARAM_MAP,
+        "loadbalancer": LOADBALANCER_PARAM_MAP,
     }
 
     PLAYBOOKS = dict(
         controller="contrail_controller.yml",
         analytics="contrail_analytics.yml",
-        analyticsdb="contrail_analyticsdb.yml"
+        analyticsdb="contrail_analyticsdb.yml",
+        loadbalancer="contrail_loadbalancer.yml"
     )
 
     def __init__(self, config_file, component):
@@ -31,7 +35,8 @@ class ConfigManager(object):
         """ Update vars yaml file
         :param yml: yaml file to update
         :param new_vars: data to be updated
-        :return: True in case the file is changed, False in case the file is not changed
+        :return: True in case the file is changed, False in case the file is
+                 not changed
         """
         with open(yml, "r+") as f:
             current_vars = yaml.load(f) or {}
@@ -40,14 +45,17 @@ class ConfigManager(object):
             else:
                 f.seek(0)
                 f.write("## CAUTION! CAUTION! CAUTION! ##\n"
-                        "# This file is managed by contrailctl. All manual configurations will be wiped off\n##\n")
+                        "# This file is managed by contrailctl. ##\n"
+                        "# All manual configurations will be wiped off\n##\n")
                 f.write(yaml.dump(new_vars, default_flow_style=False))
                 f.truncate()
                 return True
 
     def sync(self, force=False, tags=None):
-        """Sync configuration from container master config to internal service configs
-        :param force: Forcefully run the sync even if there is no difference in configurations
+        """Sync configuration from container master config to internal service
+        configs
+        :param force: Forcefully run the sync even if there is no difference in
+                      configurations
         :param tags: specific ansible tags to run
         """
         if not tags:
@@ -55,13 +63,15 @@ class ConfigManager(object):
 
         component_config = Configurator(self.config_file, self.param_map)
         config_dict = component_config.map({})
-        var_file = "/contrail-ansible/playbooks/vars/" + self.PLAYBOOKS[self.component]
-        playbook = "/contrail-ansible/playbooks/" + self.PLAYBOOKS[self.component]
+        var_file = "/contrail-ansible/playbooks/vars/%s" % (
+                self.PLAYBOOKS[self.component])
+        playbook = "/contrail-ansible/playbooks/%s" % (
+                self.PLAYBOOKS[self.component])
         need_ansible_run = self._update_yml(var_file, config_dict)
         if need_ansible_run or force:
             print("CONFIGS: ", config_dict)
-            # NOTE: it may make sense to have some of these params to be get from user in later point.
-            # But currently they are constants
+            # NOTE: it may make sense to have some of these params to be get
+            # from user in later point.  But currently they are constants
             runner_params = dict(
                 inventory='/contrail-ansible/playbooks/inventory/all-in-one',
                 playbook=playbook,
@@ -82,23 +92,24 @@ def main(args=sys.argv[1:]):
     p_config = sp.add_parser("config", help="manage configuration")
     sp_config = p_config.add_subparsers(dest="action")
     p_config_sync = sp_config.add_parser("sync", help="Sync the config")
-    p_config_cfg = p_config_sync.add_argument("-f", "--config-file", type=str,
-                                         help="Master config file path")
-    p_config_comp = p_config_sync.add_argument("-c", "--component", type=str,
-                                         choices=["controller", "analyticsdb", "analytics", "agent"],
-                                         required=True,
-                                         help="Component[s] to be configured")
-    p_config_sync_force = p_config_sync.add_argument("-F", "--force", action='store_true',
-                                         help="Whether to forcefully apply config or not")
-    p_config_tag = p_config_sync.add_argument("-t", "--tags", type=lambda x: x.split(','),
-                                         help="comma separated list of tags to run specific set of ansible code")
+    p_config_sync.add_argument("-f", "--config-file", type=str,
+                               help="Master config file path")
+    p_config_sync.add_argument("-c", "--component", type=str, required=True,
+                               choices=["controller", "analyticsdb",
+                                        "analytics", "agent", "loadbalancer"],
+                               help="Component[s] to be configured")
+    p_config_sync.add_argument("-F", "--force", action='store_true',
+                               help="Whether to apply config forcibly")
+    p_config_sync.add_argument("-t", "--tags", type=lambda x: x.split(','),
+                               help="comma separated list of tags to run" +
+                                    "specific set of ansible code")
     args = ap.parse_args()
 
     if not args.config_file:
         args.config_file = "/etc/contrailctl/%s.conf" % args.component
 
     cm = ConfigManager(args.config_file, args.component)
-    stats = cm.sync(args.force, args.tags)
+    cm.sync(args.force, args.tags)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
