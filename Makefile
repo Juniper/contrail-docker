@@ -157,9 +157,15 @@ endif
 
 push: $(CONTAINER_TARS)
 ifdef CONTAINER_REGISTRY
-		$(eval CONTAINERS := $(CONTAINER_TARS:%-$(CONTRAIL_VERSION).tar.gz=$(CONTAINER_REGISTRY)/%:$(CONTRAIL_VERSION)))
-		@echo "Tagging container images to $(CONTAINERS)"
-		@echo "Pushing container images $(CONTAINERS)"
+		@for i in $(CONTAINERS); do\
+			CONTAINER_NAME=contrail-$$i;\
+			CONTAINER_TAG=$$(docker images | grep "^$$CONTAINER_NAME " | awk '{print $$3}');\
+			CONTAINER_REG_NAME=$$CONTAINER_REGISTRY/$$CONTAINER_NAME:$$CONTRAIL_VERSION;\
+		    echo "Tagging container $$CONTAINER_REG_NAME";\
+			docker tag $$CONTAINER_TAG $$CONTAINER_REG_NAME;\
+		    echo "Pushing container $$CONTAINER_REG_NAME";\
+			docker push $$CONTAINER_REG_NAME;\
+		done
 else
 		$(error CONTAINER_REGISTRY is undefined)
 endif
