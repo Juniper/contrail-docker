@@ -58,7 +58,7 @@ $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
 cd /contrail-ansible/playbooks/
-ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t service contrail_analyticsdb.yml
+ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t service contrail_analytics.yml
 
 # Register analytics in config
 retry /usr/share/contrail-utils/provision_analytics_node.py --api_server_ip $API_SERVER_IP \
