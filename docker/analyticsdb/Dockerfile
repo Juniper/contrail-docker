@@ -1,4 +1,4 @@
-FROM hkumar/ubuntu-14.04.2:latest
+FROM ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
 ARG CONTRAIL_ANSIBLE_TAR
@@ -12,7 +12,7 @@ RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1
     echo "Package: *\nPin: origin \"$var1\"\nPin-Priority: 1001" > /etc/apt/preferences
 RUN echo; cat /etc/apt/preferences
 RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
-RUN $apt_install software-properties-common && \
+RUN apt-get update -qy && $apt_install software-properties-common && \
     apt-add-repository -y ppa:ansible/ansible
 RUN apt-get update -qy && \
     $apt_install $PACKAGES_ANSIBLE && \
