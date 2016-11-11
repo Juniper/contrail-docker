@@ -1,4 +1,4 @@
-FROM hkumar/ubuntu-14.04.2:latest
+FROM ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_INSTALL_PACKAGE_URL
 ARG CONTRAIL_REPO_URL
