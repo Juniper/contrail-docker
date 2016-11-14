@@ -22,7 +22,7 @@ ifndef SSHUSER
 endif
 
 # Define all containers to be built
-CONTAINERS = controller analytics agent analyticsdb lb
+CONTAINERS = controller analytics agent analyticsdb lb kube-manager
 
 # CONTRAIL_VERSION is requisite so fail, if not provided
 ifndef CONTRAIL_VERSION
