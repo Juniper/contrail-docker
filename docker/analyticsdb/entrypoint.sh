@@ -40,9 +40,7 @@ function pre_start() {
     ulimit -d unlimited
     ulimit -v unlimited
     ulimit -n 4096
-    cd /contrail-ansible/playbooks/
-    ansible-playbook -i inventory/$ANSIBLE_INVENTORY \
-        -t provision,configure contrail_analyticsdb.yml
+    contrailctl config sync -c analyticsdb -F
 }
 
 function cleanup() {
@@ -57,8 +55,8 @@ pre_start
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
-cd /contrail-ansible/playbooks/
-ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t service contrail_analyticsdb.yml
+# run contrailctl to run code to make sure services are running
+contrailctl config sync -c analyticsdb -F -t service
 
 # Register contrail-database in config
 retry /usr/share/contrail-utils/provision_database_node.py --api_server_ip $API_SERVER_IP \
