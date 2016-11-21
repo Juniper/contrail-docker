@@ -22,7 +22,9 @@ ifndef SSHUSER
 endif
 
 # Define all containers to be built
+ifndef CONTAINERS
 CONTAINERS = controller analytics agent analyticsdb lb kube-manager
+endif
 
 # CONTRAIL_VERSION is requisite so fail, if not provided
 ifndef CONTRAIL_VERSION
@@ -46,7 +48,7 @@ CONTRAIL_ANSIBLE = contrail-ansible
 
 all: $(CONTAINER_TARS)
 
-$(CONTAINERS): $(CONTAINER_TARS)
+contrail-%: contrail-%-$(CONTRAIL_VERSION).tar.gz
 	@touch $@
 
 $(CONTAINER_TARS): prep
@@ -161,9 +163,9 @@ ifdef CONTAINER_REGISTRY
 			CONTAINER_NAME=contrail-$$i;\
 			CONTAINER_TAG=$$(docker images | grep "^$$CONTAINER_NAME " | awk '{print $$3}');\
 			CONTAINER_REG_NAME=$$CONTAINER_REGISTRY/$$CONTAINER_NAME:$$CONTRAIL_VERSION;\
-		    echo "Tagging container $$CONTAINER_REG_NAME";\
+			echo "Tagging container $$CONTAINER_REG_NAME";\
 			docker tag $$CONTAINER_TAG $$CONTAINER_REG_NAME;\
-		    echo "Pushing container $$CONTAINER_REG_NAME";\
+			echo "Pushing container $$CONTAINER_REG_NAME";\
 			docker push $$CONTAINER_REG_NAME;\
 		done
 else
