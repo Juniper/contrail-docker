@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
+set -x
 source /env.sh
-
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/supervisord
 SERVICE=analytics
@@ -40,9 +40,7 @@ function pre_start() {
     ulimit -d unlimited
     ulimit -v unlimited
     ulimit -n 4096
-    cd /contrail-ansible/playbooks/
-    ansible-playbook -i inventory/$ANSIBLE_INVENTORY \
-        -t provision,configure contrail_analytics.yml
+    contrailctl config sync -c analytics -F
 }
 
 function cleanup() {
@@ -57,8 +55,8 @@ pre_start
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
-cd /contrail-ansible/playbooks/
-ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t service contrail_analytics.yml
+# run contrailctl to run code to make sure services are running
+contrailctl config sync -c analytics -F -t service
 
 # Register analytics in config
 retry /usr/share/contrail-utils/provision_analytics_node.py --api_server_ip $API_SERVER_IP \
