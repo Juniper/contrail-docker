@@ -109,7 +109,14 @@ def main(args=sys.argv[1:]):
         args.config_file = "/etc/contrailctl/%s.conf" % args.component
 
     cm = ConfigManager(args.config_file, args.component)
-    cm.sync(args.force, args.tags)
+    stats = cm.sync(args.force, args.tags)
+    if stats:
+        if stats.failures:
+            return 1
+        else:
+            return 0
+    return 0
+
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))
