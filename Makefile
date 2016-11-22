@@ -38,7 +38,7 @@ endif
 
 # Define all containers to be built
 ifndef CONTAINERS
-CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
+CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager vrouter-compiler-centos7
 endif
 
 # OS - operaing system release code
@@ -79,7 +79,7 @@ contrail-%: contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz
 	@touch $@
 
 $(CONTAINER_TARS): prep
-	$(eval CONTRAIL_BUILD_ARGS := --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) )
+	$(eval CONTRAIL_BUILD_ARGS := )
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
 	$(eval CONTRAIL_BUILD_ARGS += $(http_proxy_build_arg))
 	$(eval CONTRAIL_BUILD_ARGS += $(repo_snapshot_build_arg))
@@ -92,7 +92,12 @@ $(CONTAINER_TARS): prep
 		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
 	fi
 	cd $(TEMP); \
-	docker build $(CONTRAIL_BUILD_ARGS) -t $(CONTAINER):$(CONTRAIL_VERSION) .
+	if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
+		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_CENTOS_REPO_PORT) -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
+	else \
+		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_UBUNTU_REPO_PORT)  -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
+	fi
+
 ifndef NO_CACHE
 	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 endif
