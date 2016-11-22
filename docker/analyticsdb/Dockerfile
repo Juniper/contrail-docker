@@ -23,7 +23,6 @@ COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 RUN contrailctl config sync -c analyticsdb -F -t install
 RUN mkdir -p /etc/contrailctl/
-VOLUME ["/var/log", "/var/crashes", "/var/lib/cassandra"]
 EXPOSE 9161 9141
 COPY *.sh /
 RUN chmod +x /entrypoint.sh

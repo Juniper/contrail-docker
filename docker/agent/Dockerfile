@@ -21,7 +21,6 @@ RUN apt-get update -qy && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
 RUN cp -rf /usr/src/ /usr/src.orig/
-VOLUME ["/var/log", "/var/crashes", "/usr/src"]
 COPY *.sh *.j2 /
 EXPOSE 8081 8086
 RUN chmod +x /entrypoint.sh

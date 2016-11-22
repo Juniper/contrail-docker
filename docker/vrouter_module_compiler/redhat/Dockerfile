@@ -6,7 +6,6 @@ ARG PACKAGES="wget tar make gcc"
 RUN yum install -y $PACKAGES
 RUN rpm -ivh $CONTRAIL_VROUTER_SOURCE_RPM_URL
 RUN cp -rf /usr/src/ /usr/src.orig/
-VOLUME ["/var/log", "/var/crashes", "/usr/src"]
 COPY entrypoint.sh /
 EXPOSE 8081 8086
 RUN chmod +x /entrypoint.sh

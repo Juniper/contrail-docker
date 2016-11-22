@@ -23,7 +23,6 @@ COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 RUN contrailctl config sync -c analytics -F -t install
 RUN mkdir -p /etc/contrailctl/
-VOLUME ["/var/log", "/var/crashes"]
 EXPOSE 8081 8086
 COPY *.sh /
 RUN chmod +x /entrypoint.sh
