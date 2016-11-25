@@ -69,3 +69,9 @@ ANALYTICSDB_PARAM_MAP = dict(
         controller_ip="controller_ip"
     ),
 )
+
+AGENT_PARAM_MAP = dict(
+    GLOBAL=dict(
+        controller_ip="controller_ip"
+    ),
+)
