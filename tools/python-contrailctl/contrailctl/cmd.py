@@ -2,8 +2,7 @@ import argparse
 import yaml
 import sys
 from contrailctl.config import Configurator
-from contrailctl.map import CONTROLLER_PARAM_MAP, ANALYTICSDB_PARAM_MAP,\
-        ANALYTICS_PARAM_MAP, LB_PARAM_MAP
+from contrailctl.map import *
 from contrailctl.runner import Runner
 
 
@@ -17,13 +16,15 @@ class ConfigManager(object):
         "analyticsdb": ANALYTICSDB_PARAM_MAP,
         "analytics": ANALYTICS_PARAM_MAP,
         "lb": LB_PARAM_MAP,
+        "agent": AGENT_PARAM_MAP,
     }
 
     PLAYBOOKS = dict(
         controller="contrail_controller.yml",
         analytics="contrail_analytics.yml",
         analyticsdb="contrail_analyticsdb.yml",
-        lb="contrail_lb.yml"
+        lb="contrail_lb.yml",
+        agent="contrail_agent.yml",
     )
 
     def __init__(self, config_file, component):
