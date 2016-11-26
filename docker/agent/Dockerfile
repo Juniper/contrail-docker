@@ -25,5 +25,6 @@ RUN mkdir -p /etc/contrailctl/
 EXPOSE 8081 8086
 RUN cp -rf /usr/src/ /usr/src.orig/
 COPY *.sh /
+RUN $apt_install crudini
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
