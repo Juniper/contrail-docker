@@ -1,4 +1,4 @@
-FROM centos:7.1.1503
+FROM hkumar/centos:7.1.1503
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_VROUTER_SOURCE_RPM_URL
 ARG ENTRY_POINT=entrypoint.sh

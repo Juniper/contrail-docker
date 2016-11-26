@@ -1,4 +1,4 @@
-FROM ubuntu:trusty
+FROM hkumarmk/ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_INSTALL_PACKAGE_TAR_URL
 ARG http_proxy

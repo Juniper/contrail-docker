@@ -1,4 +1,4 @@
-FROM ubuntu:14.04.5
+FROM hkumar/ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG ENTRY_POINT=docker_entrypoint.sh
 ARG DEBIAN_FRONTEND=noninteractive
