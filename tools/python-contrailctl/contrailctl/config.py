@@ -36,6 +36,8 @@ class Configurator(object):
             for param, value in self.master_config.items(section):
                 if param in self.param_map.get(section, {}):
                     config_dict.update({self.param_map[section][param]: self._eval(value)})
+                elif section == 'GLOBAL':
+                    config_dict.update({param: self._eval(value)})
                 else:
                     config_dict.update({"{}_{}".format(section.lower(), param): self._eval(value)})
 

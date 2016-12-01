@@ -14,35 +14,13 @@
 # specified here.
 
 LB_PARAM_MAP = dict(
-    GLOBAL=dict(
-        controller_list="controller_list",
-    ),
     HAPROXY=dict(
         user="haproxy_auth_user",
         password="haproxy_auth_password",
     )
 )
 
-ANALYTICS_PARAM_MAP = dict(
-    GLOBAL=dict(
-        analyticsdb_list="analyticsdb_list",
-        controller_list="controller_list",
-        controller_ip="controller_ip",
-        uve_partition_count="analytics_uve_partition_count",
-        analytics_data_ttl="analytics_data_ttl",
-        analytics_flow_ttl="analytics_flow_ttl",
-        analytics_statistics_ttl="analytics_statistics_ttl",
-        analytics_config_audit_ttl="analytics_config_audit_ttl",
-        aaa_mode="analytics_aaa_mode",
-        sandesh_send_rate_limit="sandesh_send_rate_limit"
-    )
-)
-
 CONTROLLER_PARAM_MAP = dict(
-    GLOBAL=dict(
-        controller_list="controller_list",
-        controller_ip="controller_ip"
-    ),
     CONTROL=dict(
         bgp_port="bgp_port",
         xmpp_server_port="xmpp_server_port",
@@ -62,16 +40,6 @@ CONTROLLER_PARAM_MAP = dict(
     )
 )
 
-ANALYTICSDB_PARAM_MAP = dict(
-    GLOBAL=dict(
-        analyticsdb_list="analyticsdb_list",
-        controller_list="controller_list",
-        controller_ip="controller_ip"
-    ),
-)
-
-AGENT_PARAM_MAP = dict(
-    GLOBAL=dict(
-        controller_ip="controller_ip"
-    ),
-)
+ANALYTICS_PARAM_MAP = {}
+ANALYTICSDB_PARAM_MAP = {}
+AGENT_PARAM_MAP = {}
