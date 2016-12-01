@@ -22,9 +22,8 @@ COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 RUN contrailctl config sync -c agent -F -t install
 RUN mkdir -p /etc/contrailctl/
-EXPOSE 8081 8086
+EXPOSE 8085 9090
 RUN cp -rf /usr/src/ /usr/src.orig/
-COPY *.sh /
-RUN $apt_install crudini
+COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
