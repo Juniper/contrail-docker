@@ -2,7 +2,6 @@ FROM hkumar/ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
 ARG CONTRAIL_ANSIBLE_TAR
-ARG ENTRY_POINT=docker_entrypoint.sh
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV ANSIBLE_INVENTORY="all-in-one"
@@ -24,6 +23,6 @@ RUN cd /python-contrailctl/; python setup.py install
 RUN contrailctl config sync -c analytics -F -t install
 RUN mkdir -p /etc/contrailctl/
 EXPOSE 8081 8086
-COPY *.sh /
+COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
