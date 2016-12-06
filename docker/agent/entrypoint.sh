@@ -36,5 +36,6 @@ $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
 # run contrailctl to run code to make sure services are running
-contrailctl config sync -c agent -F -t service,provision
+contrailctl config sync -c agent -F -t service
+contrailctl config sync -c agent -F -t provision
 wait "$child"
