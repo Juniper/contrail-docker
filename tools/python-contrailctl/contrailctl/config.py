@@ -1,7 +1,7 @@
 import ConfigParser
 import ast
 import re
-
+import os
 
 def read_config(config_file):
     config = ConfigParser.ConfigParser()
@@ -23,6 +23,8 @@ class Configurator(object):
     def _eval(data):
         if re.match(r"^\[.*\]$", data) or re.match(r"^\{.*\}$", data):
             return ast.literal_eval(data)
+        elif data.lower() in ("yes", "true", "no", "false"):
+            return data.lower() in ("yes", "true")
         else:
             return data
 
@@ -32,6 +34,7 @@ class Configurator(object):
         Configurator in which case this config_dict should not be overwritten, so it always get updated
         :return: loaded config_dict
         """
+        cctl_envs={k.replace('CCTL_','').lower(): self._eval(v) for k, v in os.environ.items() if 'CCTL_' in k}
         for section in self.master_config.sections():
             for param, value in self.master_config.items(section):
                 if param in self.param_map.get(section, {}):
@@ -41,4 +44,5 @@ class Configurator(object):
                 else:
                     config_dict.update({"{}_{}".format(section.lower(), param): self._eval(value)})
 
-        return config_dict
+        cctl_envs.update(config_dict)
+        return cctl_envs
