@@ -26,12 +26,17 @@ ifndef CONTAINERS
 CONTAINERS = controller analytics agent analyticsdb lb kube-manager
 endif
 
+# OS - operating system family and release version in lower case e.g ubuntu-14.04
+ifndef OS
+$(error OS is undefined)
+endif
+
 # CONTRAIL_VERSION is requisite so fail, if not provided
 ifndef CONTRAIL_VERSION
 $(error CONTRAIL_VERSION is undefined)
 endif
 
-CONTAINER_TARS = $(CONTAINERS:%=contrail-%-$(CONTRAIL_VERSION).tar.gz)
+CONTAINER_TARS = $(CONTAINERS:%=contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz)
 
 CONTRAIL_INSTALL_PACKAGE_TAR = contrail-install-packages_$(CONTRAIL_VERSION)-$(CONTRAIL_SKU).tgz
 
@@ -48,7 +53,7 @@ CONTRAIL_ANSIBLE = contrail-ansible
 
 all: $(CONTAINER_TARS)
 
-contrail-%: contrail-%-$(CONTRAIL_VERSION).tar.gz
+contrail-%: contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz
 	@touch $@
 
 $(CONTAINER_TARS): prep
@@ -56,9 +61,12 @@ $(CONTAINER_TARS): prep
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
 	$(eval TEMP := $(shell mktemp -d))
 	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
-	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(CONTRAIL_VERSION).tar.gz,,$@)))
+	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(OS)-$(CONTRAIL_VERSION).tar.gz,,$@)))
 	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
 	cp -rf tools/python-contrailctl $(CONTRAIL_ANSIBLE_TAR) docker/*.sh docker/*.py docker/$(CONTAINER_NAME)/* $(TEMP)
+	if [ -d $(TEMP)/$(OS) ]; then \
+		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
+	fi
 	cd $(TEMP); \
 	docker build $(CONTRAIL_BUILD_ARGS) -t $(CONTAINER):$(CONTRAIL_VERSION) .
 ifndef NO_CACHE
