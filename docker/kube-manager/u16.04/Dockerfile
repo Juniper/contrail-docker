@@ -1,0 +1,35 @@
+FROM hkumar/ubuntu:16.04
+MAINTAINER Juniper Contrail <contrail@juniper.net>
+ARG CONTRAIL_REPO_URL
+ARG CONTRAIL_ANSIBLE_TAR
+ARG DEBIAN_FRONTEND=noninteractive
+ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
+ENV ANSIBLE_INVENTORY="all-in-one"
+ARG PACKAGES_ANSIBLE="ansible iproute2"
+RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
+RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
+RUN apt-get update -qy && $apt_install software-properties-common && \
+    apt-add-repository -y ppa:ansible/ansible
+RUN apt-get update -qy && \
+    $apt_install $PACKAGES_ANSIBLE && \
+    apt-get autoremove -yq  &&\
+    rm -fr /usr/share/doc/* /usr/share/man/*
+RUN cd /lib/systemd/system/sysinit.target.wants/; ls | grep -v systemd-tmpfiles-setup | xargs rm -f $1 \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*; \
+rm -f /lib/systemd/system/plymouth*; \
+rm -f /lib/systemd/system/systemd-update-utmp*;
+RUN systemctl set-default multi-user.target
+ENV init /lib/systemd/systemd
+RUN $apt_install python-configparser
+COPY python-contrailctl /python-contrailctl
+RUN cd /python-contrailctl/; python setup.py install
+ADD $CONTRAIL_ANSIBLE_TAR /
+RUN contrailctl config sync -c kubemanager -F -t install
+ENTRYPOINT ["/lib/systemd/systemd"]
+CMD ["systemd.unit=multi-user.target"]
