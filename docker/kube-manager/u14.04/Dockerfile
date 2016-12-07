@@ -20,8 +20,6 @@ RUN apt-get update -qy && \
 ADD $CONTRAIL_ANSIBLE_TAR /
 RUN cd /contrail-ansible/playbooks/ && \
     ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t install contrail_kube_manager.yml
-COPY *.sh /
-COPY supervisor/ /etc/contrail/
-RUN rm -f /etc/supervisor/supervisord.conf; ln -s /etc/contrail/supervisord_kubernetes.conf /etc/supervisor/supervisord.conf
+COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
