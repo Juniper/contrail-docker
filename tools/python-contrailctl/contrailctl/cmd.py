@@ -18,6 +18,7 @@ class ConfigManager(object):
         "lb": LB_PARAM_MAP,
         "agent": AGENT_PARAM_MAP,
         "kubemanager": KUBEMANAGER_PARAM_MAP,
+        "mesosmanager": MESOSMANAGER_PARAM_MAP,
     }
 
     PLAYBOOKS = dict(
@@ -26,7 +27,8 @@ class ConfigManager(object):
         analyticsdb="contrail_analyticsdb.yml",
         lb="contrail_lb.yml",
         agent="contrail_agent.yml",
-        kubemanager="contrail_kube_manager.yml"
+        kubemanager="contrail_kube_manager.yml",
+        mesosmanager="contrail_mesos_manager.yml"
     )
 
     def __init__(self, config_file, component):
@@ -100,7 +102,7 @@ def main(args=sys.argv[1:]):
     p_config_sync.add_argument("-c", "--component", type=str, required=True,
                                choices=["controller", "analyticsdb",
                                         "analytics", "agent", "lb",
-                                        "kubemanager"],
+                                        "kubemanager", "mesosmanager"],
                                help="Component[s] to be configured")
     p_config_sync.add_argument("-F", "--force", action='store_true',
                                help="Whether to apply config forcibly")
