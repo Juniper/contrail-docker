@@ -23,7 +23,7 @@ endif
 
 # Define all containers to be built
 ifndef CONTAINERS
-CONTAINERS = controller analytics agent analyticsdb lb kube-manager
+CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
 endif
 
 # OS - operating system family and release version in lower case e.g ubuntu-14.04
