@@ -170,7 +170,7 @@ ifdef CONTAINER_REGISTRY
 		@for i in $(CONTAINERS); do\
 			CONTAINER_NAME=contrail-$$i;\
 			CONTAINER_TAG=$$(docker images | grep "^$$CONTAINER_NAME " | awk '{print $$3}');\
-			CONTAINER_REG_NAME=$$CONTAINER_REGISTRY/$$CONTAINER_NAME:$$CONTRAIL_VERSION;\
+			CONTAINER_REG_NAME=$$CONTAINER_REGISTRY/$$CONTAINER_NAME-$$OS:$$CONTRAIL_VERSION;\
 			echo "Tagging container $$CONTAINER_REG_NAME";\
 			docker tag $$CONTAINER_TAG $$CONTAINER_REG_NAME;\
 			echo "Pushing container $$CONTAINER_REG_NAME";\
