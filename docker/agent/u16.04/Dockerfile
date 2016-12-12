@@ -5,7 +5,7 @@ ARG CONTRAIL_ANSIBLE_TAR
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV ANSIBLE_INVENTORY="all-in-one"
-ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser"
+ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser vim"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
 RUN apt-get update -qy && $apt_install software-properties-common && \
@@ -29,6 +29,7 @@ ENV init /lib/systemd/systemd
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
-RUN contrailctl config sync -c kubemanager -F -t install
+RUN contrailctl config sync -c agent -F -t package
+RUN contrailctl config sync -c agent -F -t install
 ENTRYPOINT ["/lib/systemd/systemd"]
 CMD ["systemd.unit=multi-user.target"]
