@@ -20,6 +20,7 @@ ADD $CONTRAIL_ANSIBLE_TAR /
 RUN $apt_install python-configparser
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
+RUN contrailctl config sync -c agent -F -t package
 RUN contrailctl config sync -c agent -F -t install
 RUN mkdir -p /etc/contrailctl/
 EXPOSE 8085 9090
