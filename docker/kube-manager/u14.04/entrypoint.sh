@@ -15,7 +15,5 @@ ulimit -c unlimited
 ulimit -d unlimited
 ulimit -v unlimited
 ulimit -n 4096
-cd /contrail-ansible/playbooks/
-ansible-playbook -i inventory/$ANSIBLE_INVENTORY -t provision,configure contrail_kube_manager.yml
-mkdir -p /var/log/contrail/
+contrailctl config sync -c kubemanager -F -t configure,provision
 $DAEMON $DAEMON_OPTS
