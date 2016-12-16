@@ -12,6 +12,7 @@ xtrace_status() {
 }
 
 yum_install="yum install -y "
+$yum_install epel-release
 
 if [[ -z $CONTRAIL_INSTALL_PACKAGE_TAR_URL ]]; then
     echo "ERROR CONTRAIL_INSTALL_PACKAGE_TAR_URL undefined"
@@ -36,7 +37,7 @@ elif [[ $CONTRAIL_INSTALL_PACKAGE_TAR_URL =~ ^ssh:// ]]; then
     fi
     export SSHPASS=${SSHPASS:-passwd}
     [[ -n $xtrace ]] && set -x
-    $yum_install sshpass openssh-client
+    $yum_install sshpass openssh-clients tar
     sshpass -e scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SSHUSER}@${server}:${path} /tmp/contrail-install-packages.tar.gz
 else
     echo "ERROR, Unknown url format, only http[s], ssh supported"
@@ -47,6 +48,5 @@ mkdir -p /opt/contrail/contrail_install_repo
 cd /opt/contrail/contrail_install_repo
 tar zxf /tmp/contrail-install-packages.tar.gz
 rm -f /tmp/contrail-install-packages.tar.gz
-$yum_install epel-release
 $yum_install $PACKAGES_CONTRAIL_REPO
 createrepo -v /opt/contrail/contrail_install_repo
