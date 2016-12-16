@@ -8,8 +8,8 @@ ENV ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser vim"
 RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
 RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
-RUN apt-get update -qy && $apt_install software-properties-common && \
-    apt-add-repository -y ppa:ansible/ansible
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80  --recv 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367 && \
+    echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu xenial main" > /etc/apt/sources.list.d/ansible.list
 RUN apt-get update -qy && \
     $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
