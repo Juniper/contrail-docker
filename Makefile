@@ -26,10 +26,13 @@ ifndef CONTAINERS
 CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
 endif
 
-# OS - operating system family and release version in lower case e.g ubuntu-14.04
+# OS - operaing system release code
+# ubuntu 14.04 - u14.04, ubuntu 16.04 - u16.04, centos 7.1 - c7.1
 ifndef OS
-$(error OS is undefined)
+$(warning OS is undefined, default to u14.04)
+    export OS := u14.04
 endif
+
 
 # CONTRAIL_VERSION is requisite so fail, if not provided
 ifndef CONTRAIL_VERSION
