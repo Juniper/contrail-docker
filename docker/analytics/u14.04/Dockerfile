@@ -22,5 +22,6 @@ ENTRYPOINT /entrypoint.sh
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
+RUN contrailctl config sync -c analytics -F -t package
 RUN contrailctl config sync -c analytics -F -t install
 EXPOSE 8081 8086
