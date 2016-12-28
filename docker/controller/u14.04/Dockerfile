@@ -2,6 +2,9 @@ FROM hkumar/ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
 ARG CONTRAIL_ANSIBLE_TAR
+ARG http_proxy
+ARG https_proxy
+ARG no_proxy
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV ANSIBLE_INVENTORY="all-in-one"
@@ -22,6 +25,7 @@ ENTRYPOINT /entrypoint.sh
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
+RUN contrailctl config sync -c controller -F -t package
 RUN contrailctl config sync -c controller -F -t install
 EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123 8103 9160 2181 9092 8092 8093 8094 8101 8083 179 53 5269 8080 8143
 COPY supervisor_configs/config/ /etc/contrail/supervisord_config_files/
