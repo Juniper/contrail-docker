@@ -21,6 +21,13 @@ ifndef SSHUSER
 	export SSHUSER := root
 endif
 
+ifdef docker_http_proxy
+	export http_proxy_build_arg :=  --build-arg http_proxy=$(docker_http_proxy) --build-arg https_proxy=$(docker_http_proxy) --build-arg no_proxy=$(CONTRAIL_REPO_IP)
+else
+	export http_proxy_build_arg :=
+endif
+
+
 # Define all containers to be built
 ifndef CONTAINERS
 CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
@@ -30,7 +37,7 @@ endif
 # ubuntu 14.04 - u14.04, ubuntu 16.04 - u16.04, centos 7.1 - c7.1
 ifndef OS
 $(warning OS is undefined, default to u14.04)
-    export OS := u14.04
+	export OS := u14.04
 endif
 
 
@@ -62,6 +69,7 @@ contrail-%: contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz
 $(CONTAINER_TARS): prep
 	$(eval CONTRAIL_BUILD_ARGS := --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) )
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
+	$(eval CONTRAIL_BUILD_ARGS += $(http_proxy_build_arg))
 	$(eval TEMP := $(shell mktemp -d))
 	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
 	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(OS)-$(CONTRAIL_VERSION).tar.gz,,$@)))
@@ -122,6 +130,8 @@ ifdef CONTRAIL_INSTALL_PACKAGE_TAR_URL
 else
 	$(error CONTRAIL_INSTALL_PACKAGE_TAR_URL is undefined)
 endif
+
+	$(eval CONTRAIL_REPO_BUILD_ARGS +=  $(http_proxy_build_arg))
 
 ifdef SSHPASS
 	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHPASS=$(SSHPASS) )

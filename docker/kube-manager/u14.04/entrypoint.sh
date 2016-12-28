@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -x
-source /common.sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/supervisord
 CONFIG=/etc/contrail/contrail-kubernetes.conf
