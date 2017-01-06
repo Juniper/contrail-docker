@@ -9,7 +9,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser vim"
-RUN sed -i "1ideb $CONTRAIL_REPO_URL ./" /etc/apt/sources.list
+ARG CONTRAIL_REPO_MIRROR_SNAPSHOT=10072016
+COPY contrail-ubuntu-mirror.key /
+RUN apt-key add /contrail-ubuntu-mirror.key;\
+    echo "deb $CONTRAIL_REPO_URL ./" > /etc/apt/sources.list.d/contrail-local.list;\
+    echo "deb [arch=amd64] http://10.84.34.201:8080/xenial/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial main universe" > /etc/apt/sources.list.d/xenial.list ;\
+    echo "deb [arch=amd64] http://10.84.34.201:8080/xenial-updates/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial-updates main universe" > /etc/apt/sources.list.d/xenial-updates.list ;\
+    echo "deb [arch=amd64] http://10.84.34.201:8080/xenial-security/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial-security main universe" > /etc/apt/sources.list.d/xenial-security.list
 RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80  --recv 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367 && \
     echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu xenial main" > /etc/apt/sources.list.d/ansible.list
