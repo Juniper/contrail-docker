@@ -78,7 +78,7 @@ $(CONTAINER_TARS): prep
 	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
 	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(OS)-$(CONTRAIL_VERSION).tar.gz,,$@)))
 	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
-	cp -rf tools/python-contrailctl $(CONTRAIL_ANSIBLE_TAR) docker/*.sh docker/*.key docker/$(CONTAINER_NAME)/* $(TEMP)
+	cp -rf tools/python-contrailctl $(CONTRAIL_ANSIBLE_TAR) docker/*.sh docker/*.py docker/$(CONTAINER_NAME)/* $(TEMP)
 	if [ -d $(TEMP)/$(OS) ]; then \
 		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
 	fi
