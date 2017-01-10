@@ -15,5 +15,4 @@ RUN echo "server_names_hash_bucket_size 64;" > /etc/nginx/conf.d/server_names_ha
 RUN sed -i '1idaemon off;' /etc/nginx/nginx.conf
 RUN echo "echo \"Repo is up on port 1567, point apt source.list to 'deb http://<ip of repo>:1567 ./'\"; /usr/sbin/nginx" > /entrypoint.sh; \
     chmod +x /entrypoint.sh
-EXPOSE 1567
 ENTRYPOINT /entrypoint.sh

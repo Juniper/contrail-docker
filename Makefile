@@ -9,15 +9,6 @@ ifndef CONTRAIL_SKU
 	export CONTRAIL_SKU := mitaka
 endif
 
-ifndef CONTRAIL_UBUNTU_REPO_PORT
-	export CONTRAIL_UBUNTU_REPO_PORT := 1567
-endif
-
-ifndef CONTRAIL_CENTOS_REPO_PORT
-	export CONTRAIL_CENTOS_REPO_PORT := 2567
-endif
-
-
 ifndef CONTRAIL_REPO_IP
 	export CONTRAIL_REPO_IP := $(shell ifconfig docker0 | awk '/inet.addr:/ {print $$2}' | cut -f2 -d:)
 endif
@@ -33,7 +24,7 @@ else
 endif
 
 ifdef CONTRAIL_REPO_MIRROR_SNAPSHOT
-    export repo_snapshot_build_arg := --build-arg CONTRAIL_REPO_MIRROR_SNAPSHOT=$(CONTRAIL_REPO_MIRROR_SNAPSHOT)
+	export repo_snapshot_build_arg := --build-arg CONTRAIL_REPO_MIRROR_SNAPSHOT=$(CONTRAIL_REPO_MIRROR_SNAPSHOT)
 endif
 
 # Define all containers to be built
@@ -58,13 +49,25 @@ CONTAINER_TARS = $(CONTAINERS:%=contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz)
 
 CONTRAIL_INSTALL_PACKAGE_TAR = contrail-install-packages_$(CONTRAIL_VERSION)-$(CONTRAIL_SKU).tgz
 
-CONTRAIL_UBUNTU_REPO_CONTAINER = contrail-repo-ubuntu
-CONTRAIL_UBUNTU_REPO_CONTAINER_TAR = $(CONTRAIL_UBUNTU_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+CONTRAIL_REPO_INTERNAL_PORT=1567
 
-CONTRAIL_CENTOS_REPO_CONTAINER = contrail-repo-centos
-CONTRAIL_CENTOS_REPO_CONTAINER_TAR = $(CONTRAIL_CENTOS_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+ifndef CONTRAIL_REPO_PORT
+	export CONTRAIL_REPO_PORT := 1567
+endif
 
-CONTRAIL_REPO_CONTAINER_TARS = $(CONTRAIL_UBUNTU_REPO_CONTAINER_TAR) $(CONTRAIL_CENTOS_REPO_CONTAINER_TAR)
+ifneq (,$(filter u14.04 u16.04,$(OS)))
+	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
+	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+	export DOCKER_DIRECTORY=contrail_repo_ubuntu
+	export CONTRAIL_REPO_INTERNAL_PORT=1567
+endif
+
+ifneq (,$(filter c7.1 c7.2,$(OS)))
+	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
+	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+	export DOCKER_DIRECTORY=contrail_repo_ubuntu
+endif
+
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
 CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible.git"
 CONTRAIL_ANSIBLE_REF = "master"
@@ -77,6 +80,7 @@ all: $(CONTAINER_TARS)
 
 contrail-%: contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz
 	@touch $@
+
 
 $(CONTAINER_TARS): prep
 	$(eval CONTRAIL_BUILD_ARGS := )
@@ -93,9 +97,9 @@ $(CONTAINER_TARS): prep
 	fi
 	cd $(TEMP); \
 	if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
-		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_CENTOS_REPO_PORT) -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
+		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
 	else \
-		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_UBUNTU_REPO_PORT)  -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
+		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT)  -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
 	fi
 
 ifndef NO_CACHE
@@ -110,8 +114,7 @@ prep: contrail-repo contrail-ansible
 contrail-ansible: $(CONTRAIL_ANSIBLE_TAR)
 	@touch contrail-ansible
 
-
-contrail-repo: $(CONTRAIL_UBUNTU_REPO_CONTAINER_TAR) $(CONTRAIL_CENTOS_REPO_CONTAINER_TAR)
+contrail-repo:  $(CONTRAIL_REPO_CONTAINER_TAR)
 	@touch contrail-repo
 
 $(CONTRAIL_ANSIBLE_TAR):
@@ -140,14 +143,12 @@ endif
 		rm -fr $(CONTRAIL_ANSIBLE);\
 	fi
 
-$(CONTRAIL_UBUNTU_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
-	$(eval CONTRAIL_REPO_BUILD_ARGS := )
-ifdef CONTRAIL_INSTALL_PACKAGE_UBUNTU_TAR_URL
-	$(eval CONTRAIL_REPO_BUILD_ARGS +=  --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_UBUNTU_TAR_URL) )
-else
-	$(error CONTRAIL_INSTALL_PACKAGE_UBUNTU_TAR_URL is undefined)
+$(CONTRAIL_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
+ifndef CONTRAIL_INSTALL_PACKAGE_TAR_URL
+$(error CONTRAIL_INSTALL_PACKAGE_TAR_URL is undefined)
 endif
 
+	$(eval CONTRAIL_REPO_BUILD_ARGS := --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_TAR_URL))
 	$(eval CONTRAIL_REPO_BUILD_ARGS +=  $(http_proxy_build_arg))
 
 ifdef SSHPASS
@@ -157,41 +158,21 @@ endif
 ifdef SSHUSER
 	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHUSER=$(SSHUSER))
 endif
-
-	@echo "Building Contrail ubuntu repo container"
-	cd docker/contrail_repo_ubuntu/; \
+	$(eval TEMP := $(shell mktemp -d))
+	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
+	$(eval CONTAINER_NAME := $(subst -$(OS)-$(CONTRAIL_VERSION).tar.gz,,$@))
+	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
+	cp -rf docker/*.sh docker/*.key docker/$(CONTAINER_NAME)/* $(TEMP)
+	if [ -d $(TEMP)/$(OS) ]; then \
+		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
+	fi
+	cd $(TEMP); \
 	docker build $(CONTRAIL_REPO_BUILD_ARGS) \
-		-t $(CONTRAIL_UBUNTU_REPO_CONTAINER):$(CONTRAIL_VERSION) .
+		-t $(CONTAINER):$(CONTRAIL_VERSION) .
 	@echo "Starting contrail repo container"
-	docker run -d -p $(CONTRAIL_UBUNTU_REPO_PORT):1567 --name $(CONTRAIL_UBUNTU_REPO_CONTAINER) $(CONTRAIL_UBUNTU_REPO_CONTAINER):$(CONTRAIL_VERSION)
-	@echo "Saving the container $(CONTRAIL_UBUNTU_REPO_CONTAINER):$(CONTRAIL_VERSION)"
-	docker save $(CONTRAIL_UBUNTU_REPO_CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
-
-$(CONTRAIL_CENTOS_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
-	$(eval CONTRAIL_REPO_BUILD_ARGS := )
-ifdef CONTRAIL_INSTALL_PACKAGE_CENTOS_TAR_URL
-	$(eval CONTRAIL_REPO_BUILD_ARGS +=  --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_CENTOS_TAR_URL) )
-else
-	$(error CONTRAIL_INSTALL_PACKAGE_CENTOS_TAR_URL is undefined)
-endif
-
-ifdef SSHPASS
-	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHPASS=$(SSHPASS) )
-endif
-
-ifdef SSHUSER
-	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHUSER=$(SSHUSER))
-endif
-
-	@echo "Building Contrail centos repo container"
-	cd docker/contrail_repo_centos/; \
-	docker build $(CONTRAIL_REPO_BUILD_ARGS) \
-		-t $(CONTRAIL_CENTOS_REPO_CONTAINER):$(CONTRAIL_VERSION) .
-	@echo "Starting contrail ubuntu repo container"
-	docker run -d -p $(CONTRAIL_CENTOS_REPO_PORT):2567 --name $(CONTRAIL_CENTOS_REPO_CONTAINER) $(CONTRAIL_CENTOS_REPO_CONTAINER):$(CONTRAIL_VERSION)
-	@echo "Saving the container $(CONTRAIL_CENTOS_REPO_CONTAINER):$(CONTRAIL_VERSION)"
-	docker save $(CONTRAIL_CENTOS_REPO_CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
-
+	docker run -d -p $(CONTRAIL_REPO_PORT):$(CONTRAIL_REPO_INTERNAL_PORT) --name $(CONTAINER)_$(CONTRAIL_REPO_PORT) $(CONTAINER):$(CONTRAIL_VERSION)
+	@echo "Saving the container $(CONTAINER):$(CONTRAIL_VERSION)"
+	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 
 $(CONTRAIL_INSTALL_PACKAGE):
 	@echo "Making Contrail packages"
@@ -202,7 +183,7 @@ $(CONTRAIL_INSTALL_PACKAGE):
 
 clean:
 	@echo "Cleaning the workspace"
-	docker rm -f contrail-apt-repo | true
+	docker rm -f $(CONTRAIL_REPO_CONTAINER)_$(CONTRAIL_REPO_PORT) | true
 ifndef KEEP_IMAGES
 	$(foreach i,$(CONTAINERS),docker rmi -f contrail-$(i):$(CONTRAIL_VERSION) | true;)
 	docker rmi -f $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) | true
