@@ -16,6 +16,8 @@ RUN apt-key add /contrail-ubuntu-mirror.key;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/xenial/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial main universe" > /etc/apt/sources.list.d/xenial.list ;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/xenial-updates/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial-updates main universe" > /etc/apt/sources.list.d/xenial-updates.list ;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/xenial-security/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial-security main universe" > /etc/apt/sources.list.d/xenial-security.list
+RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
+    echo "Package: *\nPin: origin \"$var1\"\nPin-Priority: 1001" > /etc/apt/preferences
 RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80  --recv 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367 && \
     echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu xenial main" > /etc/apt/sources.list.d/ansible.list
