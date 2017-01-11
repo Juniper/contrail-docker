@@ -12,6 +12,7 @@ ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser vim"
 ARG CONTRAIL_REPO_MIRROR_SNAPSHOT=10072016
 COPY contrail-ubuntu-mirror.key /
 RUN apt-key add /contrail-ubuntu-mirror.key;\
+    echo > /etc/apt/sources.list ;\
     echo "deb $CONTRAIL_REPO_URL ./" > /etc/apt/sources.list.d/contrail-local.list;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/xenial/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial main universe" > /etc/apt/sources.list.d/xenial.list ;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/xenial-updates/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ xenial-updates main universe" > /etc/apt/sources.list.d/xenial-updates.list ;\
