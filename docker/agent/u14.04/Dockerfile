@@ -12,6 +12,7 @@ ARG PACKAGES_ANSIBLE="ansible python-configparser"
 ARG CONTRAIL_REPO_MIRROR_SNAPSHOT=12032016
 COPY contrail-ubuntu-mirror.key /
 RUN apt-key add /contrail-ubuntu-mirror.key;\
+    echo > /etc/apt/sources.list ;\
     echo "deb $CONTRAIL_REPO_URL ./" > /etc/apt/sources.list.d/contrail-local.list;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/trusty/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ trusty main universe" > /etc/apt/sources.list.d/trusty.list ;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/trusty-updates/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ trusty-updates main universe" > /etc/apt/sources.list.d/trusty-updates.list ;\
