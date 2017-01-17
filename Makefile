@@ -29,7 +29,7 @@ endif
 
 # Define all containers to be built
 ifndef CONTAINERS
-CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager vrouter-compiler-centos7
+CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
 endif
 
 # OS - operaing system release code
@@ -65,6 +65,7 @@ endif
 ifneq (,$(filter c7.1 c7.2,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+	export CONTAINERS = vrouter-compiler-centos7
 	export DOCKER_DIRECTORY=contrail_repo_ubuntu
 endif
 
@@ -97,16 +98,19 @@ $(CONTAINER_TARS): prep
 	fi
 	cd $(TEMP); \
 	if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
-		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
+		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) -t contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) .; \
 	else \
 		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT)  -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
 	fi
 
 ifndef NO_CACHE
-	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
+    if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
+        docker save contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) | gzip -c > $@ ; \
+    else \
+	    docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@ ;\
+    fi
 endif
 	rm -fr $(TEMP)
-
 
 prep: contrail-repo contrail-ansible
 	@touch prep
@@ -159,20 +163,18 @@ ifdef SSHUSER
 	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHUSER=$(SSHUSER))
 endif
 	$(eval TEMP := $(shell mktemp -d))
-	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
-	$(eval CONTAINER_NAME := $(subst -$(OS)-$(CONTRAIL_VERSION).tar.gz,,$@))
-	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
-	cp -rf docker/*.sh docker/*.key docker/$(CONTAINER_NAME)/* $(TEMP)
+	@echo "Building the container $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION)"
+	cp -rf docker/*.sh docker/*.key docker/contrail-repo/* $(TEMP)
 	if [ -d $(TEMP)/$(OS) ]; then \
 		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
 	fi
 	cd $(TEMP); \
 	docker build $(CONTRAIL_REPO_BUILD_ARGS) \
-		-t $(CONTAINER):$(CONTRAIL_VERSION) .
+		-t $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) .
 	@echo "Starting contrail repo container"
-	docker run -d -p $(CONTRAIL_REPO_PORT):$(CONTRAIL_REPO_INTERNAL_PORT) --name $(CONTAINER)_$(CONTRAIL_REPO_PORT) $(CONTAINER):$(CONTRAIL_VERSION)
-	@echo "Saving the container $(CONTAINER):$(CONTRAIL_VERSION)"
-	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
+	docker run -d -p $(CONTRAIL_REPO_PORT):$(CONTRAIL_REPO_INTERNAL_PORT) --name $(CONTRAIL_REPO_CONTAINER)_$(CONTRAIL_REPO_PORT) $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION)
+	@echo "Saving the container $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION)"
+	docker save $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 
 $(CONTRAIL_INSTALL_PACKAGE):
 	@echo "Making Contrail packages"
