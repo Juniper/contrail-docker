@@ -104,11 +104,11 @@ $(CONTAINER_TARS): prep
 	fi
 
 ifndef NO_CACHE
-    if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
-        docker save contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) | gzip -c > $@ ; \
-    else \
-	    docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@ ;\
-    fi
+	if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
+		docker save contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) | gzip -c > $@ ; \
+	else \
+		docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@ ;\
+	fi
 endif
 	rm -fr $(TEMP)
 
@@ -185,10 +185,10 @@ $(CONTRAIL_INSTALL_PACKAGE):
 
 clean:
 	@echo "Cleaning the workspace"
-	docker rm -f $(CONTRAIL_REPO_CONTAINER)_$(CONTRAIL_REPO_PORT) | true
+	docker rm -f $(CONTRAIL_REPO_CONTAINER)_$(CONTRAIL_REPO_PORT) || true
 ifndef KEEP_IMAGES
-	$(foreach i,$(CONTAINERS),docker rmi -f contrail-$(i):$(CONTRAIL_VERSION) | true;)
-	docker rmi -f $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) | true
+	$(foreach i,$(CONTAINERS),docker rmi -f contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;)
+	docker rmi -f $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) || true
 endif
 	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR) prep contrail-repo contrail-ansible
 
