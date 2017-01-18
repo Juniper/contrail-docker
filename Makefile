@@ -104,11 +104,11 @@ $(CONTAINER_TARS): prep
 	fi
 
 ifndef NO_CACHE
-    if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
-        docker save contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) | gzip -c > $@ ; \
-    else \
-	    docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@ ;\
-    fi
+	if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
+		docker save contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) | gzip -c > $@ ; \
+	else \
+		docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@ ;\
+	fi
 endif
 	rm -fr $(TEMP)
 
