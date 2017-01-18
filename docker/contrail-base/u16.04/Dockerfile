@@ -40,6 +40,5 @@ ENV init /lib/systemd/systemd
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
-RUN contrailctl config sync -c kubemanager -F -t install
 ENTRYPOINT ["/lib/systemd/systemd"]
 CMD ["systemd.unit=multi-user.target"]

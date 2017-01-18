@@ -1,0 +1,7 @@
+FROM contrail-base-u14.04:{{ contrail_version }}
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT /entrypoint.sh
+RUN contrailctl config sync -c analytics -F -t package
+RUN contrailctl config sync -c analytics -F -t install
+EXPOSE 8081 8086
