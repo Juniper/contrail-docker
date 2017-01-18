@@ -16,12 +16,11 @@ RUN apt-key add /contrail-ubuntu-mirror.key;\
     echo "deb $CONTRAIL_REPO_URL ./" > /etc/apt/sources.list.d/contrail-local.list;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/trusty/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ trusty main universe" > /etc/apt/sources.list.d/trusty.list ;\
     echo "deb [arch=amd64] http://10.84.34.201:8080/trusty-updates/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ trusty-updates main universe" > /etc/apt/sources.list.d/trusty-updates.list ;\
-    echo "deb [arch=amd64] http://10.84.34.201:8080/trusty-security/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ trusty-security main universe" > /etc/apt/sources.list.d/trusty-security.list
+    echo "deb [arch=amd64] http://10.84.34.201:8080/trusty-security/$CONTRAIL_REPO_MIRROR_SNAPSHOT/ trusty-security main universe" > /etc/apt/sources.list.d/trusty-security.list ;\
+    echo "deb [arch=all] http://10.84.34.201:8080/contrail-ansible-packages-trusty/01172017/ trusty main" > /etc/apt/sources.list.d/contrail-ansible-packages-trusty.list
 RUN var1=$(echo $CONTRAIL_REPO_URL | sed -r 's#http[s]?://([[:digit:]\.]+):.*#\1#') ; \
     echo "Package: *\nPin: origin \"$var1\"\nPin-Priority: 1001" > /etc/apt/preferences
 RUN echo "APT::Get::AllowUnauthenticated \"true\";" > /etc/apt/apt.conf.d/99allowunauth
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80  --recv 6125E2A8C77F2818FB7BD15B93C4A3FD7BB9C367 && \
-    echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" > /etc/apt/sources.list.d/ansible.list
 RUN apt-get update -qy && \
     $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
