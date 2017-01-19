@@ -8,7 +8,3 @@ RUN echo -e "[contrail-repo]\nname=Contrail Repository\nbaseurl=$CONTRAIL_REPO_U
 RUN yum clean all && \
     yum install -y $PACKAGES
 RUN cp -rf /usr/src/ /usr/src.orig/
-COPY entrypoint.sh /
-EXPOSE 8081 8086
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT /entrypoint.sh

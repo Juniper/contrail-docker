@@ -48,7 +48,7 @@ endif
 CONTAINER_TARS = $(CONTAINERS:%=contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz)
 
 CONTRAIL_INSTALL_PACKAGE_TAR = contrail-install-packages_$(CONTRAIL_VERSION)-$(CONTRAIL_SKU).tgz
-
+CONTRAIL_BASE_TAR = contrail-base-$(OS)-$(CONTRAIL_VERSION).tar.gz
 CONTRAIL_REPO_INTERNAL_PORT=1567
 
 ifndef CONTRAIL_REPO_PORT
@@ -58,7 +58,6 @@ endif
 ifneq (,$(filter u14.04 u16.04,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
-	export DOCKER_DIRECTORY=contrail_repo_ubuntu
 	export CONTRAIL_REPO_INTERNAL_PORT=1567
 endif
 
@@ -66,7 +65,6 @@ ifneq (,$(filter c7.1 c7.2,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 	export CONTAINERS = vrouter-compiler-centos7
-	export DOCKER_DIRECTORY=contrail_repo_ubuntu
 endif
 
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
@@ -82,44 +80,57 @@ all: $(CONTAINER_TARS)
 contrail-%: contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz
 	@touch $@
 
-
-$(CONTAINER_TARS): prep
-	$(eval CONTRAIL_BUILD_ARGS := )
-	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
-	$(eval CONTRAIL_BUILD_ARGS += $(http_proxy_build_arg))
-	$(eval CONTRAIL_BUILD_ARGS += $(repo_snapshot_build_arg))
+$(CONTAINER_TARS): prep contrail-base
 	$(eval TEMP := $(shell mktemp -d))
+ifeq ($@, contrail-vrouter-compiler-centos7-$(OS)-$(CONTRAIL_VERSION).tar.gz)
+	$(eval CONTAINER := "contrail-vrouter-compiler-centos7")
+else
 	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
+endif
 	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(OS)-$(CONTRAIL_VERSION).tar.gz,,$@)))
 	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
-	cp -rf tools/python-contrailctl $(CONTRAIL_ANSIBLE_TAR) docker/*.sh docker/*.key docker/$(CONTAINER_NAME)/* $(TEMP)
+	cp -rf  docker/pyj2.py docker/$(CONTAINER_NAME)/* $(TEMP)
 	if [ -d $(TEMP)/$(OS) ]; then \
 		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
 	fi
 	cd $(TEMP); \
-	if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
-		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) -t contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) .; \
-	else \
-		docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT)  -t $(CONTAINER):$(CONTRAIL_VERSION) .; \
-	fi
+	if [ -f Dockerfile.j2 ]; then \
+	    python pyj2.py -t Dockerfile.j2 -o Dockerfile -v contrail_version=$(CONTRAIL_VERSION); \
+	fi; \
+	docker build  -t $(CONTAINER):$(CONTRAIL_VERSION) .
 
 ifndef NO_CACHE
-	if echo $@ | grep -Eq "contrail-vrouter-compiler-centos7"; then \
-		docker save contrail-vrouter-compiler-centos7:$(CONTRAIL_VERSION) | gzip -c > $@ ; \
-	else \
-		docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@ ;\
-	fi
+	docker save $(CONTAINER):$(CONTRAIL_VERSION) | gzip -c > $@
 endif
 	rm -fr $(TEMP)
 
 prep: contrail-repo contrail-ansible
 	@touch prep
 
+contrail-base: $(CONTRAIL_BASE_TAR)
+	@touch contrail-base
+
 contrail-ansible: $(CONTRAIL_ANSIBLE_TAR)
 	@touch contrail-ansible
 
 contrail-repo:  $(CONTRAIL_REPO_CONTAINER_TAR)
 	@touch contrail-repo
+
+$(CONTRAIL_BASE_TAR): contrail-ansible contrail-repo
+	$(eval CONTRAIL_BUILD_ARGS := )
+	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
+	$(eval CONTRAIL_BUILD_ARGS += $(http_proxy_build_arg))
+	$(eval CONTRAIL_BUILD_ARGS += $(repo_snapshot_build_arg))
+	$(eval TEMP := $(shell mktemp -d))
+	@echo "Building the container contrail-base:$(CONTRAIL_VERSION)"
+	cp -rf tools/python-contrailctl $(CONTRAIL_ANSIBLE_TAR) docker/*.sh docker/*.py docker/*.key docker/contrail-base/* $(TEMP)
+	if [ -d $(TEMP)/$(OS) ]; then \
+		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
+	fi
+	cd $(TEMP); \
+	docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT)  -t contrail-base-$(OS):$(CONTRAIL_VERSION) .
+	rm -fr $(TEMP)
+	@touch $@
 
 $(CONTRAIL_ANSIBLE_TAR):
 ifdef $(CONTRAIL_ANSIBLE_ARTIFACT)
@@ -149,7 +160,7 @@ endif
 
 $(CONTRAIL_REPO_CONTAINER_TAR): $(CONTRAIL_INSTALL_PACKAGE)
 ifndef CONTRAIL_INSTALL_PACKAGE_TAR_URL
-$(error CONTRAIL_INSTALL_PACKAGE_TAR_URL is undefined)
+	$(error CONTRAIL_INSTALL_PACKAGE_TAR_URL is undefined)
 endif
 
 	$(eval CONTRAIL_REPO_BUILD_ARGS := --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_TAR_URL))
@@ -190,7 +201,7 @@ ifndef KEEP_IMAGES
 	$(foreach i,$(CONTAINERS),docker rmi -f contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;)
 	docker rmi -f $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) || true
 endif
-	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR) prep contrail-repo contrail-ansible
+	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTRAIL_ANSIBLE_TAR) prep contrail-repo contrail-ansible contrail-base $(CONTRAIL_BASE_TAR)
 
 .PHONY: save
 

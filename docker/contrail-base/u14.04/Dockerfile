@@ -25,10 +25,7 @@ RUN apt-get update -qy && \
     $apt_install $PACKAGES_ANSIBLE && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
-COPY entrypoint.sh /
-RUN mkdir -p /etc/contrailctl/ ; chmod +x /entrypoint.sh
-ENTRYPOINT /entrypoint.sh
+RUN mkdir -p /etc/contrailctl/
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
-RUN contrailctl config sync -c mesosmanager -F -t install
