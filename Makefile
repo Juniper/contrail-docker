@@ -64,7 +64,7 @@ endif
 ifneq (,$(filter c7.1 c7.2,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
-	export CONTAINERS = vrouter-compiler-centos7
+	export CONTAINERS = vrouter-compiler
 endif
 
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
@@ -82,11 +82,7 @@ contrail-%: contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz
 
 $(CONTAINER_TARS): prep contrail-base
 	$(eval TEMP := $(shell mktemp -d))
-ifeq ($@, contrail-vrouter-compiler-centos7-$(OS)-$(CONTRAIL_VERSION).tar.gz)
-	$(eval CONTAINER := "contrail-vrouter-compiler-centos7")
-else
 	$(eval CONTAINER := $(subst -$(CONTRAIL_VERSION).tar.gz,,$@))
-endif
 	$(eval CONTAINER_NAME := $(subst contrail-,,$(subst -$(OS)-$(CONTRAIL_VERSION).tar.gz,,$@)))
 	@echo "Building the container $(CONTAINER):$(CONTRAIL_VERSION)"
 	cp -rf  docker/pyj2.py docker/$(CONTAINER_NAME)/* $(TEMP)
