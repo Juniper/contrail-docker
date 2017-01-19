@@ -1,0 +1,5 @@
+FROM contrail-base-c7.1:{{ contrail_version }}
+COPY entrypoint.sh /
+EXPOSE 8081 8086
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT /entrypoint.sh

@@ -58,7 +58,6 @@ endif
 ifneq (,$(filter u14.04 u16.04,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
-	export DOCKER_DIRECTORY=contrail_repo_ubuntu
 	export CONTRAIL_REPO_INTERNAL_PORT=1567
 endif
 
@@ -66,7 +65,6 @@ ifneq (,$(filter c7.1 c7.2,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 	export CONTAINERS = vrouter-compiler-centos7
-	export DOCKER_DIRECTORY=contrail_repo_ubuntu
 endif
 
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
@@ -82,7 +80,7 @@ all: $(CONTAINER_TARS)
 contrail-%: contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz
 	@touch $@
 
-$(CONTAINER_TARS): prep
+$(CONTAINER_TARS): prep contrail-base
 	$(eval TEMP := $(shell mktemp -d))
 ifeq ($@, contrail-vrouter-compiler-centos7-$(OS)-$(CONTRAIL_VERSION).tar.gz)
 	$(eval CONTAINER := "contrail-vrouter-compiler-centos7")
@@ -96,7 +94,9 @@ endif
 		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
 	fi
 	cd $(TEMP); \
-	python pyj2.py -t Dockerfile.j2 -o Dockerfile -v contrail_version=$(CONTRAIL_VERSION); \
+	if [ -f Dockerfile.j2 ]; then \
+	    python pyj2.py -t Dockerfile.j2 -o Dockerfile -v contrail_version=$(CONTRAIL_VERSION); \
+	fi; \
 	docker build  -t $(CONTAINER):$(CONTRAIL_VERSION) .
 
 ifndef NO_CACHE
@@ -104,7 +104,7 @@ ifndef NO_CACHE
 endif
 	rm -fr $(TEMP)
 
-prep: contrail-repo contrail-ansible contrail-base
+prep: contrail-repo contrail-ansible
 	@touch prep
 
 contrail-base: $(CONTRAIL_BASE_TAR)
