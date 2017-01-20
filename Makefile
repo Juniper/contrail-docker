@@ -150,7 +150,6 @@ endif
 		cd $(CONTRAIL_ANSIBLE) ;\
 		git checkout $(CONTRAIL_ANSIBLE_REF) ;\
 		git reset --hard; \
-		ansible-galaxy install -r requirements.yml -p playbooks/roles/ ;\
 		rm -fr .git* ;\
 		cd .. ; \
 		echo "Saving to $(CONTRAIL_ANSIBLE_TAR)";\
