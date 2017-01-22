@@ -67,6 +67,11 @@ ifneq (,$(filter c7.1 c7.2,$(OS)))
 	export CONTAINERS = vrouter-compiler
 endif
 
+ifneq (,$(filter centos7 redhat7,$(OS)))
+	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
+	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+endif
+
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
 CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible.git"
 CONTRAIL_ANSIBLE_REF = "master"
@@ -115,6 +120,8 @@ contrail-repo:  $(CONTRAIL_REPO_CONTAINER_TAR)
 $(CONTRAIL_BASE_TAR): contrail-ansible contrail-repo
 	$(eval CONTRAIL_BUILD_ARGS := )
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
+	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_VERSION=$(CONTRAIL_VERSION) )
+	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg OS=$(OS) )
 	$(eval CONTRAIL_BUILD_ARGS += $(http_proxy_build_arg))
 	$(eval CONTRAIL_BUILD_ARGS += $(repo_snapshot_build_arg))
 	$(eval TEMP := $(shell mktemp -d))
@@ -160,6 +167,9 @@ endif
 
 	$(eval CONTRAIL_REPO_BUILD_ARGS := --build-arg CONTRAIL_INSTALL_PACKAGE_TAR_URL=$(CONTRAIL_INSTALL_PACKAGE_TAR_URL))
 	$(eval CONTRAIL_REPO_BUILD_ARGS +=  $(http_proxy_build_arg))
+	$(eval CONTRAIL_REPO_BUILD_ARGS +=  --build-arg CONTRAIL_VERSION=$(CONTRAIL_VERSION) )
+	$(eval CONTRAIL_REPO_BUILD_ARGS +=  --build-arg CONTRAIL_REPO_PORT=$(CONTRAIL_REPO_PORT) )
+	$(eval CONTRAIL_REPO_BUILD_ARGS +=  --build-arg OS=$(OS) )
 
 ifdef SSHPASS
 	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg SSHPASS=$(SSHPASS) )
