@@ -1,0 +1,6 @@
+[contrail-install-repo]
+name=contrail-install-repo
+baseurl=baseurl
+enabled=1
+priority=1
+gpgcheck=0
