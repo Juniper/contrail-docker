@@ -7,7 +7,6 @@ ANSIBLE_INVENTORY=${ANSIBLE_INVENTORY:-"all-in-one"}
 test -x $DAEMON || exit 1
 
 LOG=/var/log/supervisord.log
-SOCKETFILE=$(awk '/^file=/ {print $1}' /etc/contrail/supervisord_${SERVICE}.conf | cut -f2 -d=)
 
 # Include supervisor defaults if available
 if [ -f /etc/default/supervisord ] ; then
@@ -16,8 +15,8 @@ fi
 DAEMON_OPTS="-n -c /etc/contrail/supervisord.conf $DAEMON_OPTS"
 
 function cleanup() {
-    supervisorctl -s unix://${SOCKETFILE} stop all
-    supervisorctl -s unix://${SOCKETFILE} shutdown
+    supervisorctl -c /etc/contrail/supervisord.conf stop all
+    supervisorctl -c /etc/contrail/supervisord.conf shutdown
     rm -f $SOCKETFILE
 }
 
