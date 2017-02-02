@@ -64,7 +64,7 @@ class ConfigManager(object):
         :param tags: specific ansible tags to run
         """
         if not tags:
-            tags = ['provision', 'configure']
+            tags = ['configure', 'service', 'provision']
 
         component_config = Configurator(self.config_file, self.param_map)
         config_dict = component_config.map({})
