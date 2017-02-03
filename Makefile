@@ -203,26 +203,27 @@ clean:
 	@echo "Cleaning the workspace"
 	docker rm -f $(CONTRAIL_REPO_CONTAINER)_$(CONTRAIL_REPO_PORT) || true
 ifndef KEEP_IMAGES
-	$(foreach i,$(CONTAINERS),docker rmi -f contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;)
-	docker rmi -f $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) || true
+	$(foreach i,$(CONTAINERS) repo, \
+		docker rmi -f $(CONTAINER_REGISTRY)/contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;\
+		docker rmi -f contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;)
+	docker rmi -f contrail-base-$(OS):$(CONTRAIL_VERSION) || true
 endif
 	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTRAIL_ANSIBLE_TAR) prep contrail-repo contrail-ansible contrail-base $(CONTRAIL_BASE_TAR)
 
 .PHONY: save
 
-save: $(CONTAINER_TARS)
+save: $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTAINER_TARS)
 ifndef CONTAINER_SAVE_LOCATION
 	$(error CONTAINER_SAVE_LOCATION is undefined)
 endif
 	@echo "Saving container images in $(CONTAINER_SAVE_LOCATION)"
-	install -t  $(CONTAINER_SAVE_LOCATION) $(CONTAINER_TARS)
-	install -t  $(CONTAINER_SAVE_LOCATION) $(CONTRAIL_REPO_CONTAINER_TAR)
+	install -t $(CONTAINER_SAVE_LOCATION) $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTAINER_TARS)
 
 .PHONY: push
 
-push: $(CONTAINER_TARS)
+push: $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTAINER_TARS)
 ifdef CONTAINER_REGISTRY
-		@for i in $(CONTAINERS); do\
+		@for i in repo $(CONTAINERS); do\
 			CONTAINER_NAME=contrail-$$i;\
 			CONTAINER_TAG=$$(docker images | grep "^$$CONTAINER_NAME-$$OS " | awk '{print $$3}');\
 			CONTAINER_REG_NAME=$$CONTAINER_REGISTRY/$$CONTAINER_NAME-$$OS:$$CONTRAIL_VERSION;\
