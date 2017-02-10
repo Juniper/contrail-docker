@@ -14,10 +14,6 @@ LABEL Name=contrail-base-$OS \
 # installation at the app containers
 COPY contrail-install.repo /etc/yum.repos.d/contrail-install.repo
 
-# Disable all upstream repos inherited from hypervisor
-RUN rm -f /etc/yum.repos.d/redhat.repo
-COPY redhat.repo.alldisabled /etc/yum.repos.d/redhat.repo
-
 # Copy required files to Docker
 COPY python-contrailctl /python-contrailctl
 
@@ -36,10 +32,10 @@ RUN echo $CONTRAIL_REPO_URL && \
     yum repolist
 RUN yum -y install --disablerepo=* --enablerepo=contrail-install-repo \
       yum-plugin-priorities python-setuptools $ANSIBLE_PACKAGES \
-      iproute net-tools openssh-clients wget tar telnet vim which
+      iproute net-tools openssh-clients wget tar telnet vim which initscripts
+
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
-VOLUME [ "/sys/fs/cgroup" ]
 RUN systemctl set-default multi-user.target
 ENV init /lib/systemd/systemd
 ENTRYPOINT ["/lib/systemd/systemd"]

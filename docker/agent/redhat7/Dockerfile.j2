@@ -1,4 +1,4 @@
-FROM contrail-base-redhat:{{ contrail_version }}
+FROM contrail-base-redhat7:{{ contrail_version }}
 ARG CONTRAIL_VERSION
 ARG OS
 LABEL Name=contrail-agent-$OS \
@@ -8,9 +8,6 @@ LABEL Name=contrail-agent-$OS \
 RUN contrailctl config sync -c agent -F -t package
 RUN contrailctl config sync -c agent -F -t install
 EXPOSE 8085 9090
-
-# Copy Empty repo file so will be overridden by hypervisor's subscription
-COPY redhat.repo.empty /etc/yum.repos.d/redhat.repo
 
 # Repo cleanup
 RUN [ -f /etc/yum.repos.d/contrail-install.repo ] && \

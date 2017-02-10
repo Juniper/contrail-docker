@@ -1,4 +1,4 @@
-FROM contrail-base-redhat:{{ contrail_version }}
+FROM contrail-base-redhat7:{{ contrail_version }}
 ARG CONTRAIL_VERSION
 ARG OS
 LABEL Name=contrail-controller-$OS \
@@ -7,13 +7,17 @@ LABEL Name=contrail-controller-$OS \
 
 RUN contrailctl config sync -c controller -F -t package
 RUN contrailctl config sync -c controller -F -t install
+
 EXPOSE 53 68 123 179 2181 4369 \
        5269 5672 5997 5998 \
        8080 8082 8083 8084 8087 8088 8092 8093 8094 8096 8100 8101 8103 8143 8443 8444 \
        9092 9160
 
-# Copy Empty repo file so will be overridden by hypervisor's subscription
-COPY redhat.repo.empty /etc/yum.repos.d/redhat.repo
+# Copy Supervisor configs
+COPY supervisor_configs/config/ /etc/contrail/supervisord_config_files/
+RUN mkdir -p /etc/contrail/supervisord_files
+COPY supervisor_configs/main/supervisord.conf /etc/contrail/
+COPY supervisor_configs/main/*.ini /etc/contrail/supervisord_files/
 
 # Repo cleanup
 RUN [ -f /etc/yum.repos.d/contrail-install.repo ] && \
