@@ -1,21 +1,90 @@
-# contrailctl - a tool to configure and do high level operations for contrail-docker containers
-It is decided to use a per container ini config file which would be kep in the base host to make that config file
-management easy - users doesnt have to login to the container to update that file. The default location of these config
-files is /etc/contrailctl/ under which per container files are placed e.g controller.conf is for controller,
-analytics.conf for analytics, adb.conf for analytics db etc.
-
+#1. Introduction
 contrailctl is a tool which help to configure the services inside the container to be in sync with container specific
-config files. Also it is used to do certain high level operations like adding a controller node etc, and may be in future
-it may be used to do various other operations too.
+config files. Also it is used to do certain high level operations like add/remove nodes, operational tasks like
+start/stop/disable/enable components or services etc.
 
-## contrailctl design in more detail
+#2. Problem statement
+It is complex to provision and manage various services in contrail containers. There should be a simpler interface to
+the user to provision and operate contrail services packaged in the containers. This tool should help on various
+operational tasks like add/remove nodes, enable/disable components or services etc.
 
-In essense, contrailctl will do two basic operations at this moment.
+#3. Proposed solution
+contrailctl is the tool that is installed within the container which is driven by single ini based configuration file
+per container e.g /etc/contrailctl/controller.conf for controller container. Any state changes of the services within
+the container by this tools should be according to the configuration noted in the contrailctl config file for that
+container. The contrailctl configuration files should be available on the node with a default location of /etc/contrailctl/
+and the same are to be mounted to the containers so that any changes made to those files in the node is available
+within the container.
+
+This tool should support following operations:
+
+* syncing the configurations in contrailctl configuration files to the services configurations within the container
+* Enable/disable components/services within the containers
+* Add/remove nodes of different type i.e controller, analytics, analyticsdb etc
+
+contrailctl should implement subcommands to support all supported operations. E.g "contrailctl add node" to add a node.
+
+Note: each contrail container should have separate contrailctl configuration files i.e
+    controller - /etc/contrailctl/controller.conf
+    analytics -  /etc/contrailctl/analytics.conf
+    analyticsdb - /etc/contrailctl/analyticsdb.conf
+    vrouter agent - /etc/contrailctl/agent.conf
+
+##3.1 Alternatives considered
+None
+
+##3.2 API schema changes
+None
+
+##3.3 User workflow impact
+contrailctl is used within the container startup to configure and start the services within the container. Also users
+can use this tool to do any above mentioned operations.
+
+```
+$ contrailctl config sync -h
+usage: contrailctl config sync [-h] [-f CONFIG_FILE] -c
+                               {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager}
+                               [-F] [-t TAGS]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f CONFIG_FILE, --config-file CONFIG_FILE
+                        Master config file path
+  -c {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager}, --component {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager}
+                        Component[s] to be configured
+  -F, --force           Whether to apply config forcibly
+  -t TAGS, --tags TAGS  comma separated list of tags to runspecific set of
+                        ansible code
+
+```
+### Update service configurations within the container
+
+Users can update the configurations by editing appropriate configuration file under /etc/contrailctl and can run
+"docker exec <container name> contrailctl config sync -c <component name> ".
+For example, if somebody want to update a service configuration within controller container, one can update
+/etc/contrailctl/controller.conf within the node that hold the container, and then run below command to sync the change
+to the services running within the container
+
+```
+$ docker exec controller contrailctl config sync -c controller
+
+```
+
+### Add or remove a node on service configuration
+
+TBD
+
+### Enable/Disable components or services
+
+TBD
+
+#4. Implementation
+
+In essence, contrailctl will handle below mentioned set of operations:
 
 1. Sync the config entries there in /etc/contrailctl with running system inside the container - this is done by updating
-ansible variables in different levels and running ansible inside the container to sync the services in it with new
-configurations updated.
-2. Commit certain section of container config file so that internal service configuration is updated.
+ansible variables with respect to the configuration entries and running ansible inside the container to sync the
+services in it with new configurations updated.
 2. Do high level operations like add new node, remove node, disable certain service (e.g one wanted to migrate rabbitmq
 to an external system) etc. In this case, contrailctl will do appropriate changes in config files in /etc/contrailctl
 and sync the services inside the container with the configurations.
@@ -31,7 +100,6 @@ NOTE: In case of #1, we would have handle any situation when all individual serv
  operations, which may cause a downtime. This may be handled by adding some coordination code, which may be done later
  In case of #2, there are chances that users updated the config files and missed to do manual "sync", and this may cause
  inconsistencies in the internal service configurations.
-
 
 ### contrailctl to manage files under /etc/contrailctl/
 This would be required when somebody decided to run contrailctl subcommands to do some high level operations (as
@@ -83,3 +151,6 @@ Here are the major operations identified in initial stage.
 3. contrailctl node delete node_name - delete the node from various configurations. This will trigger reconfigurations
     on various configs and cluster reformations.
 4. contrailctl config/node show/info/list - get infos about various configs
+
+#11. References
+* [Contrailctl configuration examples](https://github.com/Juniper/contrail-docker/tree/master/tools/python-contrailctl/examples/configs)
