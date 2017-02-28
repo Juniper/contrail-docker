@@ -1,9 +1,37 @@
 import argparse
 import yaml
 import sys
+import os
+import fcntl
+import time
 from contrailctl.config import Configurator
 from contrailctl.map import *
 from contrailctl.runner import Runner
+
+LOCK_PATH = "/var/lock/contrailctl"
+
+
+class SingleInstance:
+    def __init__(self):
+        self.fh = None
+        self.is_running = False
+        try:
+            self.fh = open(LOCK_PATH, 'w')
+            fcntl.lockf(self.fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except EnvironmentError as err:
+            if self.fh is not None:
+                self.is_running = True
+            else:
+                raise
+
+    def clean_up(self):
+        try:
+            if self.fh is not None:
+                fcntl.lockf(self.fh, fcntl.LOCK_UN)
+                self.fh.close()
+                os.unlink(LOCK_PATH)
+        except Exception as err:
+            raise
 
 
 class ConfigManager(object):
@@ -114,15 +142,31 @@ def main(args=sys.argv[1:]):
     if not args.config_file:
         args.config_file = "/etc/contrailctl/%s.conf" % args.component
 
-    cm = ConfigManager(args.config_file, args.component)
-    stats = cm.sync(args.force, args.tags)
-    if stats:
-        if stats.failures:
-            return 1
-        else:
-            return 0
-    return 0
+    timeout = 1800
+    poll = 10
+    total_wait_time = 0
+    while True:
+        si = SingleInstance()
+        if si.is_running:
+            if total_wait_time > timeout:
+                print("Wait timeout after %s seconds" % timeout)
+                return 1
+            if total_wait_time < poll:
+                print("Waiting for already running process to finish")
 
+            time.sleep(poll)
+            total_wait_time += poll
+        else:
+            cm = ConfigManager(args.config_file, args.component)
+            stats = cm.sync(args.force, args.tags)
+            return_value = 0
+            if stats:
+                if stats.failures:
+                    return_value = 1
+                else:
+                    return_value = 0
+            si.clean_up()
+            return return_value
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
