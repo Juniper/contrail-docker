@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrail-agent-config
+  namespace: kube-system
+data:
+  agent-config: |
+    [GLOBAL]
+    copy_vrouter_module = False
+    compile_vrouter_module = True
+    vrouter_physical_interface = eth0
+    controller_list = ["192.168.0.109"]
+    analytics_list = ["192.168.0.109"]
+
+---
+
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-controller
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-controller
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        scheduler.alpha.kubernetes.io/affinity: >
+          {
+            "nodeAffinity": {
+              "requiredDuringSchedulingIgnoredDuringExecution": {
+                "nodeSelectorTerms": [
+                  {
+                    "matchExpressions": [
+                      {
+                        "key": "kubeadm.alpha.kubernetes.io/role",
+                        "operator": "In",
+                        "values": ["master"]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        scheduler.alpha.kubernetes.io/tolerations: >
+          [
+            {
+              "key":"dedicated",
+              "value":"master",
+              "effect":"NoSchedule"
+            },
+           {
+              "key":"CriticalAddonsOnly",
+              "operator":"Exists"
+           }
+          ]
+    spec:
+      hostNetwork: true
+      containers:
+      - name: contrail-kube-manager
+        image: 10.84.34.155:5000/contrail-kube-manager-u16.04:4.0.0.0-3042
+        securityContext:
+          privileged: true
+      - name: contrail-controller
+        image: 10.84.34.155:5000/contrail-controller-u16.04:4.0.0.0-3042
+        securityContext:
+          privileged: true
+      - name: contrail-analytics
+        image: 10.84.34.155:5000/contrail-analytics-u16.04:4.0.0.0-3042
+        securityContext:
+          privileged: true
+      - name: contrail-analytics-db
+        image: 10.84.34.155:5000/contrail-analyticsdb-u16.04:4.0.0.0-3042
+        securityContext:
+          privileged: true
+
+---
+
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-agent
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-agent
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        scheduler.alpha.kubernetes.io/affinity: >
+          {
+            "nodeAffinity": {
+              "requiredDuringSchedulingIgnoredDuringExecution": {
+                "nodeSelectorTerms": [
+                  {
+                    "matchExpressions": [
+                      {
+                        "key": "kubeadm.alpha.kubernetes.io/role",
+                        "operator": "NotIn",
+                        "values": ["master"]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        scheduler.alpha.kubernetes.io/tolerations: >
+          [
+            {
+              "key":"dedicated",
+              "value":"master",
+              "effect":"NoSchedule"
+            },
+           {
+              "key":"CriticalAddonsOnly",
+              "operator":"Exists"
+           }
+          ]
+
+    spec:
+      hostNetwork: true
+      containers:
+      - name: contrail-agent
+        image: 10.84.34.155:5000/contrail-agent-u16.04:4.0.0.0-3042-dev
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: etc-contrailctl
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /usr/src
+          name: usr-src
+        - mountPath: /host/usr_lib
+          name: usr-lib
+        - mountPath: /host/opt_cni_bin
+          name: opt-cni-bin
+        - mountPath: /host/etc_cni
+          name: etc-cni
+      volumes:
+      - name: etc-contrailctl
+        configMap:
+          name: contrail-agent-config
+          items:
+          - key: agent-config
+            path: agent.conf
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: usr-src
+        hostPath:
+          path: /usr/src
+      - name: usr-lib
+        hostPath:
+          path: /usr/lib
+      - name: opt-cni-bin
+        hostPath:
+          path: /opt/cni/bin
+      - name: etc-cni
+        hostPath:
+          path: /etc/cni
