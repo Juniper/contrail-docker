@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ template "fullname" . }}
+  namespace: kube-system
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Values.contrailVersion }}"
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        scheduler.alpha.kubernetes.io/affinity: >
+          {
+            "nodeAffinity": {
+              "requiredDuringSchedulingIgnoredDuringExecution": {
+                "nodeSelectorTerms": [
+                  {
+                    "matchExpressions": [
+                      {
+                        "key": "kubeadm.alpha.kubernetes.io/role",
+                        "operator": "In",
+                        "values": ["master"]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        scheduler.alpha.kubernetes.io/tolerations: >
+          [
+            {
+              "key":"dedicated",
+              "value":"master",
+              "effect":"NoSchedule"
+            },
+           {
+              "key":"CriticalAddonsOnly",
+              "operator":"Exists"
+           }
+          ]
+    spec:
+      hostNetwork: true
+      containers:
+      - name: contrail-controller
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-controller" .Values.controllerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+      - name: contrail-analyticsdb
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-analyticsdb" .Values.analyticsdbImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+      - name: contrail-analytics
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-analytics" .Values.analyticsImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+      - name: contrail-kube-manager
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true

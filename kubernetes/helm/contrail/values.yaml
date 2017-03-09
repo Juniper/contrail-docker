@@ -1,0 +1,37 @@
+# Default values for contrail.
+# contrailVersion
+contrailVersion: 4.0.0.0-3042
+
+# osRelease - operating system release
+# ubuntu 14.04 - u14.04
+# ubuntu 16.04 - u16.04
+# centos 7.1 - c7.1
+# centos 7.2 - c7.2
+osRelease: u16.04
+
+# image repository, pull policy etc
+imageRepo: 10.84.34.155:5000
+
+#
+# Agent configurations
+#
+# vrouterPhysicalInterface - physical interface to use for vrouter
+vrouterPhysicalInterface: eth0
+
+# controllerList - list of controller nodes
+controllerList: [192.168.0.109]
+
+# analyticsList - list of analytics nodes
+analyticsList: [192.168.0.109]
+
+## Specify a imagePullPolicy: 'Always' if imageTag is 'latest', else set to 'IfNotPresent'.
+## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+##
+imagePullPolicy: IfNotPresent
+
+# container image names
+# controllerImageName: contrail-controller
+# analyticsImageName: contrail-analytics
+# analyticsdbImageName: contrail-analyticsdb
+# kubeManagerImageName: contrail-kube-manager
+# agentImageName: contrail-agent
