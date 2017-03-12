@@ -2,10 +2,20 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Values.contrailVersion }}"
   namespace: kube-system
 data:
   agent-config: |
-    [GLOBAL]
-    vrouter_physical_interface = {{ .Values.vrouterPhysicalInterface | quote }}
-    controller_list = {{ .Values.controllerList }}
-    analytics_list = {{ .Values.analyticsList }}
+    {{ template "globalConfig" . }}
+  controller-config: |
+    {{ template "globalConfig" . }}
+    {{ template "webuiConfig" . }}
+  analyticsdb-config: |
+    {{ template "globalConfig" . }}
+  analytics-config: |
+    {{ template "globalConfig" . }}
+  kube-manager-config: |
+    {{ template "globalConfig" . }}
