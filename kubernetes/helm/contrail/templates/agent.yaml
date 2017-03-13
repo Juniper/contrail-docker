@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "agent.fullname" . }}
   namespace: kube-system
   labels:
-    app: {{ template "fullname" . }}
+    app: {{ template "agent.fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
+        app: {{ template "agent.fullname" . }}
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
         scheduler.alpha.kubernetes.io/affinity: >
@@ -44,7 +44,6 @@ spec:
               "operator":"Exists"
            }
           ]
-
     spec:
       hostNetwork: true
       containers:
@@ -60,8 +59,6 @@ spec:
           name: lib-modules
         - mountPath: /usr/src
           name: usr-src
-        - mountPath: /host/usr_lib
-          name: usr-lib
         - mountPath: /host/opt_cni_bin
           name: opt-cni-bin
         - mountPath: /host/etc_cni
@@ -69,7 +66,7 @@ spec:
       volumes:
       - name: etc-contrailctl
         configMap:
-          name: contrail-agent-config
+          name: {{ template "fullname" . }}
           items:
           - key: agent-config
             path: agent.conf
@@ -79,9 +76,6 @@ spec:
       - name: usr-src
         hostPath:
           path: /usr/src
-      - name: usr-lib
-        hostPath:
-          path: /usr/lib
       - name: opt-cni-bin
         hostPath:
           path: /opt/cni/bin

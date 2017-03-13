@@ -1,17 +1,17 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "controller.fullname" . }}
   namespace: kube-system
   labels:
-    app: {{ template "fullname" . }}
+    app: {{ template "controller.fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "fullname" . }}
+        app: {{ template "controller.fullname" . }}
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
         scheduler.alpha.kubernetes.io/affinity: >
@@ -52,18 +52,55 @@ spec:
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-controller
       - name: contrail-analyticsdb
         image: "{{ .Values.imageRepo }}/{{ default "contrail-analyticsdb" .Values.analyticsdbImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-analyticsdb
       - name: contrail-analytics
         image: "{{ .Values.imageRepo }}/{{ default "contrail-analytics" .Values.analyticsImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-analytics
       - name: contrail-kube-manager
         image: "{{ .Values.imageRepo }}/{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-kube-manager
+      volumes:
+      - name: contrailctl-controller
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: controller-config
+            path: controller.conf
+      - name: contrailctl-analyticsdb
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: analyticsdb-config
+            path: analyticsdb.conf
+      - name: contrailctl-analytics
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: analytics-config
+            path: analytics.conf
+      - name: contrailctl-kube-manager
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: kube-manager-config
+            path: kubemanager.conf
