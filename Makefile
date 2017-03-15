@@ -27,11 +27,6 @@ ifdef CONTRAIL_REPO_MIRROR_SNAPSHOT
 	export repo_snapshot_build_arg := --build-arg CONTRAIL_REPO_MIRROR_SNAPSHOT=$(CONTRAIL_REPO_MIRROR_SNAPSHOT)
 endif
 
-# Define all containers to be built
-ifndef CONTAINERS
-CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
-endif
-
 # OS - operaing system release code
 # ubuntu 14.04 - u14.04, ubuntu 16.04 - u16.04, centos 7.1 - c7.1
 ifndef OS
@@ -59,17 +54,25 @@ ifneq (,$(filter u14.04 u16.04,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 	export CONTRAIL_REPO_INTERNAL_PORT=1567
+ifndef CONTAINERS
+	export CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
+endif
 endif
 
 ifneq (,$(filter c7.1 c7.2,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+ifndef CONTAINERS
 	export CONTAINERS = vrouter-compiler
+endif
 endif
 
 ifneq (,$(filter centos7 redhat7,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
+ifndef CONTAINERS
+	export CONTAINERS = controller analytics agent analyticsdb lb
+endif
 endif
 
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
