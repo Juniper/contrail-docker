@@ -75,10 +75,10 @@ ifndef CONTAINERS
 endif
 endif
 
-CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
-CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible.git"
+CONTRAIL_ANSIBLE_TAR = contrail-ansible-internal-$(CONTRAIL_VERSION).tar.gz
+CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible-internal.git"
 CONTRAIL_ANSIBLE_REF = "master"
-CONTRAIL_ANSIBLE = contrail-ansible
+CONTRAIL_ANSIBLE = contrail-ansible-internal
 
 # This is the default target which should build all containers
 .PHONY: all
@@ -108,19 +108,19 @@ ifndef NO_CACHE
 endif
 	rm -fr $(TEMP)
 
-prep: contrail-repo contrail-ansible
+prep: contrail-repo ansible-internal
 	@touch prep
 
 contrail-base: $(CONTRAIL_BASE_TAR)
 	@touch contrail-base
 
-contrail-ansible: $(CONTRAIL_ANSIBLE_TAR)
-	@touch contrail-ansible
+ansible-internal: $(CONTRAIL_ANSIBLE_TAR)
+	@touch ansible-internal
 
 contrail-repo:  $(CONTRAIL_REPO_CONTAINER_TAR)
 	@touch contrail-repo
 
-$(CONTRAIL_BASE_TAR): contrail-ansible contrail-repo
+$(CONTRAIL_BASE_TAR): ansible-internal contrail-repo
 	$(eval CONTRAIL_BUILD_ARGS := )
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_VERSION=$(CONTRAIL_VERSION) )
@@ -211,7 +211,7 @@ ifndef KEEP_IMAGES
 		docker rmi -f contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;)
 	docker rmi -f contrail-base-$(OS):$(CONTRAIL_VERSION) || true
 endif
-	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTRAIL_ANSIBLE_TAR) prep contrail-repo contrail-ansible contrail-base $(CONTRAIL_BASE_TAR)
+	rm -f $(CONTAINER_TARS) $(CONTRAIL_INSTALL_PACKAGE) $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTRAIL_ANSIBLE_TAR) prep contrail-repo ansible-internal contrail-base $(CONTRAIL_BASE_TAR)
 
 .PHONY: save
 
