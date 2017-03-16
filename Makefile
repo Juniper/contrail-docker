@@ -75,8 +75,8 @@ ifndef CONTAINERS
 endif
 endif
 
-CONTRAIL_ANSIBLE_TAR = contrail-ansible-$(CONTRAIL_VERSION).tar.gz
-CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible.git"
+CONTRAIL_ANSIBLE_TAR = contrail-ansible-internal-$(CONTRAIL_VERSION).tar.gz
+CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible-internal.git"
 CONTRAIL_ANSIBLE_REF = "master"
 CONTRAIL_ANSIBLE = contrail-ansible
 
@@ -123,8 +123,6 @@ contrail-repo:  $(CONTRAIL_REPO_CONTAINER_TAR)
 $(CONTRAIL_BASE_TAR): contrail-ansible contrail-repo
 	$(eval CONTRAIL_BUILD_ARGS := )
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
-	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_VERSION=$(CONTRAIL_VERSION) )
-	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg OS=$(OS) )
 	$(eval CONTRAIL_BUILD_ARGS += $(http_proxy_build_arg))
 	$(eval CONTRAIL_BUILD_ARGS += $(repo_snapshot_build_arg))
 	$(eval TEMP := $(shell mktemp -d))
