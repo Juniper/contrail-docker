@@ -32,6 +32,17 @@ class Configurator(object):
         else:
             return data
 
+    def get_config_dict(self):
+        """ Get the config data as dictionary
+        :return: config dictionary
+        """
+        config_dict = {}
+        for section in self.master_config.sections():
+            config_dict[section] = {}
+            for option in self.master_config.options(section):
+                config_dict[section][option] = Configurator.eval(self.master_config.get(section, option))
+        return config_dict
+
     def map(self, config_dict):
         """
         :param config_dict: config dictionary to be populated, the system may have to get multiple instances of

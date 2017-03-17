@@ -14,6 +14,9 @@
 #   limitations under the License.
 #
 from setuptools import setup, find_packages
+from glob import glob
+
+schema_files = glob('schema/*')
 
 with open('requirements.txt', 'r') as fp:
     requirements = [x.strip() for x in fp]
@@ -28,6 +31,7 @@ setup(
     install_requires=requirements,
     tests_require=['mock', 'nose'],
     test_suite='nose.collector',
-    entry_points={'console_scripts': ['contrailctl=contrailctl.cmd:main']}
+    entry_points={'console_scripts': ['contrailctl=contrailctl.cmd:main']},
+    data_files=[('/usr/share/contrailctl/schema', schema_files)]
 )
 

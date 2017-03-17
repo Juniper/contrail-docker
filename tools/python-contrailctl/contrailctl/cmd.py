@@ -7,6 +7,8 @@ import time
 from .config import Configurator, read_config
 from .map import *
 from .runner import Runner
+from jsonschema import validate,FormatChecker, exceptions
+import json
 
 LOCK_PATH = "/var/lock/contrailctl"
 
@@ -63,6 +65,9 @@ class ConfigManager(object):
         self.component = component
         self.config_file = config_file
         self.param_map = self.COMPONENT_PARAM_MAP[component]
+        configurator = Configurator(self.config_file, self.param_map)
+        self.config_dict = configurator.get_config_dict()
+        self.mapped_dict = configurator.map({})
 
     def _update_yml(self, yml, new_vars):
         """ Update vars yaml file
@@ -84,6 +89,23 @@ class ConfigManager(object):
                 f.truncate()
                 return True
 
+    def validate(self, data=None):
+        if not data:
+            data = self.config_dict
+        schema_path="/usr/share/contrailctl/schema/{}.json".format(self.component)
+        try:
+            schema=open(schema_path,'r').read()
+        except IOError as error:
+            print("Schema file is missing - {}".format(schema_path))
+            print(error)
+            return False
+        try:
+            validate(data, json.loads(schema), format_checker=FormatChecker())
+            return True
+        except exceptions.ValidationError as error:
+            print(error.message)
+            return False
+
     def sync(self, force=False, tags=None):
         """Sync configuration from container master config to internal service
         configs
@@ -93,16 +115,16 @@ class ConfigManager(object):
         """
         if not tags:
             tags = ['configure', 'service', 'provision']
-
-        component_config = Configurator(self.config_file, self.param_map)
-        config_dict = component_config.map({})
+        valid = self.validate()
+        if not valid:
+            return None
         var_file = "/contrail-ansible/playbooks/vars/%s" % (
                 self.PLAYBOOKS[self.component])
         playbook = "/contrail-ansible/playbooks/%s" % (
                 self.PLAYBOOKS[self.component])
-        need_ansible_run = self._update_yml(var_file, config_dict)
+        need_ansible_run = self._update_yml(var_file, self.mapped_dict)
         if need_ansible_run or force:
-            print("CONFIGS: ", config_dict)
+            print("CONFIGS: ", self.mapped_dict)
             # NOTE: it may make sense to have some of these params to be get
             # from user in later point.  But currently they are constants
             runner_params = dict(
@@ -126,13 +148,7 @@ class ConfigManager(object):
         config_servers: Optional comma separated config_server list, only required
                         if newly added servers have config disabled.
         """
-        config = read_config(self.config_file)
-        config_dict = {}
-        for section in config.sections():
-            config_dict[section] = {}
-            for option in config.options(section):
-                config_dict[section][option] = Configurator.eval(config.get(section, option))
-
+        config_dict = self.config_dict
         if 'GLOBAL' not in config_dict:
             config_dict['GLOBAL'] = {}
         if type == 'controller':
@@ -179,6 +195,8 @@ def config_sync(config_file, component, force=False, tags=None):
             return 1
         else:
             return 0
+    else:
+        return 1
 
 
 def main(args=sys.argv[1:]):
@@ -215,6 +233,10 @@ def main(args=sys.argv[1:]):
     p_config_sync.add_argument("-t", "--tags", type=lambda x: x.split(','),
                                help="comma separated list of tags to run" +
                                     "specific set of ansible code")
+
+    p_config_validate = sp_config.add_parser("validate", help="Validate the config",
+                                             parents=[ap_common])
+
 
     p_config_node = sp_config.add_parser(
         "node", help="add/remove/swap nodes in the cluster configuration")
@@ -265,6 +287,13 @@ def main(args=sys.argv[1:]):
             if args.resource == 'config':
                 if args.action == 'sync':
                     return_value = config_sync(args.config_file, args.component, args.force, args.tags)
+                elif args.action == 'validate':
+                    cm = ConfigManager(args.config_file, args.component)
+                    valid = cm.validate()
+                    if valid:
+                        print("All configurations are valid")
+                    else:
+                        return_value = 1
                 elif args.action == 'node':
                     if args.subaction == 'add':
                             cm = ConfigManager(args.config_file, args.component)
@@ -272,7 +301,7 @@ def main(args=sys.argv[1:]):
                             if stats:
                                 if stats.failures:
                                     print("contrailctl configuration failed")
-                                    return 2
+                                    return_value = 2
                                 else:
                                     return_value = config_sync(args.config_file, args.component)
             si.clean_up()
