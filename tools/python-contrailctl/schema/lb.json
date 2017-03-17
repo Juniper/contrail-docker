@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail lb configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    },
+    "HAPROXY": {
+      "type": "object",
+      "description": "HAPROXY config section",
+      "additionalProperties": false,
+      "properties": {
+        "haproxy_auth_user": {
+          "description": "auth user to access haproxy stats",
+          "type": "string"
+        },
+        "haproxy_auth_password": {
+          "description": "auth user's password to access haproxy stats",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

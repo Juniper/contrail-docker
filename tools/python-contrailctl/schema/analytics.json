@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail analytics configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    },
+    "KEYSTONE": {
+      "$ref": "definitions.json#/definitions/keystone_config"
+    },
+    "ALARM_GEN": {
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    },
+    "ANALYTICS_API": {
+      "allOf": [
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+        },
+        {
+          "properties": {
+            "aaa_mode": {
+              "description": "aaa_mode: no-auth - no authentication, cloud-admin - authentication is performed and only cloud-admin role has, rbac RBAC - authentication is performed and access granted based on role",
+              "type": "string",
+              "enum": [
+                "no-auth",
+                "cloud-admin",
+                "rbac"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "ANALYTICS_COLLECTOR": {
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    },
+    "QUERY_ENGINE": {
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    },
+    "SNMP_COLLECTOR": {
+      "allOf": [
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+        },
+        {
+          "properties": {
+            "scan_frequency": {
+              "description": "snmp scan frequency",
+              "type": "string"
+            },
+            "fast_scan_frequency": {
+              "description": "snmp fast scan frequency",
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "TOPOLOGY": {
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    }
+  }
+}

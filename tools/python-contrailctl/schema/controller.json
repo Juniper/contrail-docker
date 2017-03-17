@@ -1,0 +1,104 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail controller configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    },
+    "KEYSTONE": {
+      "$ref": "definitions.json#/definitions/keystone_config"
+    },
+    "WEBUI": {
+      "id": "webui",
+      "type": "object",
+      "description": "WEBUI section",
+      "additionalProperties": false,
+      "properties": {
+        "http_listen_port": {
+          "description": "http listen port",
+          "type": "string"
+        },
+        "https_listen_port": {
+          "description": "https listen port",
+          "type": "string"
+        }
+      }
+    },
+    "CONTROL": {
+      "allOf":[
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+        },
+        {
+          "properties": {
+            "asn": {
+              "description": "asn for control node",
+              "type": "string"
+            },
+            "external_routers": {
+              "description": "external router list",
+              "type": "array"
+            },
+            "bgp_port": {
+              "description": "bgp port",
+              "type": "string"
+            },
+            "xmpp_server_port": {
+              "description": "xmpp server port",
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "DNS": {
+      "allOf": [
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+        },
+        {
+          "properties": {
+            "named_log_file": {
+              "description": "named log file",
+              "type": "string"
+            },
+            "dns_server_port": {
+              "description": "dns server port",
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "CASSANDRA": {
+      "$ref": "definitions.json#/definitions/cassandra_config"
+    },
+    "API": {
+      "allOf": [
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+        },
+        {
+          "properties": {
+            "list_optimization_enabled": {
+              "description": "Enable optimizations to list resources",
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "SCHEMA": {
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    },
+    "SVC_MONITOR": {
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    },
+    "DEVICE_MANAGER": {
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    }
+  }
+}
