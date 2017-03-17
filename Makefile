@@ -10,7 +10,7 @@ ifndef CONTRAIL_SKU
 endif
 
 ifndef CONTRAIL_REPO_IP
-	export CONTRAIL_REPO_IP := $(shell ip a l docker0 | awk '/inet / {print $$2}' | cut -f1 -d'/')
+	export CONTRAIL_REPO_IP := $(shell ifconfig docker0 | awk '/inet.addr:/ {print $$2}' | cut -f2 -d:)
 endif
 
 ifndef SSHUSER
