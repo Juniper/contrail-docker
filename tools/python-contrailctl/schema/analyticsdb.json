@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail analyticsdb configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    },
+    "KEYSTONE": {
+      "$ref": "definitions.json#/definitions/keystone_config"
+    },
+    "CASSANDRA": {
+      "$ref": "definitions.json#/definitions/cassandra_config"
+    }
+  }
+}

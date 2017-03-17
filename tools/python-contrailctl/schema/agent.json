@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail controller configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    },
+    "KEYSTONE": {
+      "$ref": "definitions.json#/definitions/keystone_config"
+    },
+    "AGENT": {
+      "id": "agent",
+      "type": "object",
+      "description": "AGENT configuration section",
+      "additionalProperties": false,
+      "properties": {
+        "vrouter_physical_interface": {
+          "description": "physical interface used by vhost interface",
+          "type": "string"
+        },
+        "compile_vrouter_module": {
+          "description": "Whether to compile vrouter module or not",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
