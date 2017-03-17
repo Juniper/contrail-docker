@@ -7,7 +7,7 @@ import time
 from .config import Configurator, read_config
 from .map import *
 from .runner import Runner
-from jsonschema import validate,FormatChecker, exceptions
+from jsonschema import validate,FormatChecker, exceptions, RefResolver
 import json
 
 LOCK_PATH = "/var/lock/contrailctl"
@@ -92,7 +92,9 @@ class ConfigManager(object):
     def validate(self, data=None):
         if not data:
             data = self.config_dict
-        schema_path="/usr/share/contrailctl/schema/{}.json".format(self.component)
+        schema_dir = "/usr/share/contrailctl/schema/"
+        schema_path="{}/{}.json".format(schema_dir, self.component)
+        resolver = RefResolver("file://{}/".format(schema_dir), None)
         try:
             schema=open(schema_path,'r').read()
         except IOError as error:
@@ -100,7 +102,7 @@ class ConfigManager(object):
             print(error)
             return False
         try:
-            validate(data, json.loads(schema), format_checker=FormatChecker())
+            validate(data, json.loads(schema), format_checker=FormatChecker(), resolver=resolver)
             return True
         except exceptions.ValidationError as error:
             print(error.message)

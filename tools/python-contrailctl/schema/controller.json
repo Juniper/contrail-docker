@@ -6,165 +6,10 @@
   "additionalProperties": false,
   "properties": {
     "GLOBAL": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
-      "id": "global",
-      "type": "object",
-      "additionalProperties": false,
-      "description": "Controller configuration GLOBAL section",
-      "properties": {
-        "log_level": {
-          "description": "Default log_level",
-          "type": "string",
-          "enum": [
-            "SYS_NOTICE",
-            "SYS_INFO"
-          ]
-        },
-        "cloud_orchestrator": {
-          "description": "cloud orchestrator is being used",
-          "type": "string",
-          "enum": [
-            "openstack",
-            "kubernetes",
-            "mesos",
-            "openshift"
-          ]
-        },
-        "external_lb": {
-          "description": "Flag to identify the whether the loadbalancer is internaly or externally hosted",
-          "type": "boolean"
-        },
-        "controller_list": {
-          "description": "controller server IP addresses - this will be used to configure rabbitmq, zookeeper, cassandra servers in various contrail service configurations and configure load balancer for variuos contrail services that needed to be loadbalanced",
-          "type": "array",
-          "variable_name": "contrail_control_list",
-          "default_value": "hite"
-        },
-        "controller_ip": {
-          "description": "An IP address using which one can connect to all public services within controller container. This can be a virtual IP handled by load balancer in case of multi-node controllers.",
-          "type": "string",
-          "format": "ipv4"
-        },
-        "config_ip": {
-          "description": "IP Address to connect config api. Usually this is same as controller_ip and that is the default, but in case if you have set of controllers without configs then this ip can be different.",
-          "type": "string",
-          "format": "ipv4"
-        },
-        "analytics_list": {
-          "description": "List of analytics server addresses",
-          "type": "array"
-        },
-        "analytics_ip": {
-          "description": "An IP address using which one can connect to analytics-api service within analytics container. This can be a virtual IP handled by load balancer in case of multi-node analytics. This will be configured in various contrail services configurations for connectting to contrail-analytics-api.",
-          "type": "string",
-          "format": "ipv4"
-        },
-        "external_rabbitmq_servers": {
-          "description": "List of externally managed rabbitmq servers to be used for controller services.",
-          "type": "array"
-        },
-        "external_zookeeper_servers": {
-          "description": "List of externally managed zookeeper servers to be used for controller services.",
-          "type": "array"
-        },
-        "external_configdb_servers": {
-          "description": "List of externally managed cassandra(configdb) servers to be used for controller services.",
-          "type": "array"
-        },
-        "multi_tenancy": {
-          "description": "Enable or disable multi_tenancy The effects of this configuration are: 1. multi_tenancy for config_api is enabled/disabled, 2. static_auth is used in webui in case of multi_tenancy disabled",
-          "type": "boolean"
-        },
-        "enable_config_service": {
-          "description": "Whether to enable config service or not, by default it is enabled",
-          "type": "boolean"
-        },
-        "enable_control_service": {
-          "description": "Whether to enable control service or not, by default it is enabled",
-          "type": "boolean"
-        },
-        "enable_webui_service": {
-          "description": "Whether to enable config_service or not, by default it is enabled",
-          "type": "boolean"
-        },
-        "config_server_list": {
-          "description": "While making config component optional within controller container, it fails the assumption that all nodes in controller_list has config running and thus need to set another optional entry to be configured in case config is not running on all controller nodes",
-          "type": "array"
-        },
-        "config_seed_list": {
-          "description": "config_seed_list is to support adding new nodes to existing cluster, in which case config_seed_list is the list of existing servers in the cluster and this list will be used for various clusters like rabbitmq, cassandra to join new nodes to them",
-          "type": "array"
-        },
-        "analyticsdb_list": {
-          "description": "analyticsdb list",
-          "type": "array"
-        },
-        "compute_list": {
-          "description": "compute node list",
-          "type": "array"
-        }
-      }
+      "$ref": "definitions.json#/definitions/global_config"
     },
     "KEYSTONE": {
-      "id": "keystone",
-      "type": "object",
-      "description": "Controller configuration KEYSTONE section",
-      "additionalProperties": false,
-      "properties": {
-        "version": {
-          "description": "Keystone version to be used",
-          "type": "string",
-          "enum": [
-            "v2.0",
-            "v3"
-          ]
-        },
-        "ip": {
-          "description": "Ip address of the host running keystone",
-          "type": "string",
-          "format": "ipv4"
-        },
-        "admin_port": {
-          "description": "Keystone admin port in which the keystone is listening, default 35357",
-          "type": "integer"
-        },
-        "public_port": {
-          "description": "Keystone public port in which the keystone is listening default 5000",
-          "type": "integer"
-        },
-        "auth_protocol": {
-          "description": "Keystone auth protocol",
-          "type": "string",
-          "enum": [
-            "http",
-            "https"
-          ]
-        },
-        "admin_user": {
-          "description": "Keystone admin user",
-          "type": "string"
-        },
-        "admin_password": {
-          "description": "Keystone admin password",
-          "type": "string"
-        },
-        "admin_tenant": {
-          "description": "Keystone admin tenant",
-          "type": "string"
-        }
-      }
-    },
-    "OPENSHIFT": {
-      "id": "openshift",
-      "type": "object",
-      "description": "OPENSHIFT section",
-      "additionalProperties": false,
-      "properties": {
-        "token": {
-          "description": "openshift master token",
-          "type": "string"
-        }
-      }
+      "$ref": "definitions.json#/definitions/keystone_config"
     },
     "WEBUI": {
       "id": "webui",
@@ -183,164 +28,77 @@
       }
     },
     "CONTROL": {
-      "id": "control",
-      "type": "object",
-      "description": "CONTROL section",
-      "additionalProperties": false,
-      "properties": {
-        "asn": {
-          "description": "asn for control node",
-          "type": "string"
+      "allOf":[
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
         },
-        "external_routers": {
-          "description": "external router list",
-          "type": "array"
-        },
-        "bgp_port": {
-          "description": "bgp port",
-          "type": "string"
-        },
-        "introspect_port": {
-          "description": "Control introspect port",
-          "type": "string"
-        },
-        "xmpp_server_port": {
-          "description": "xmpp server port",
-          "type": "string"
-        },
-        "log": {
-          "description": "log file",
-          "type": "string"
-        },
-        "log_level": {
-          "description": "",
-          "type": "string"
+        {
+          "properties": {
+            "asn": {
+              "description": "asn for control node",
+              "type": "string"
+            },
+            "external_routers": {
+              "description": "external router list",
+              "type": "array"
+            },
+            "bgp_port": {
+              "description": "bgp port",
+              "type": "string"
+            },
+            "xmpp_server_port": {
+              "description": "xmpp server port",
+              "type": "string"
+            }
+          }
         }
-      }
+      ]
     },
     "DNS": {
-      "id": "dns",
-      "type": "object",
-      "description": "DNS section",
-      "additionalProperties": false,
-      "properties": {
-        "log": {
-          "description": "log file",
-          "type": "string"
+      "allOf": [
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
         },
-        "log_level": {
-          "description": "",
-          "type": "string"
-        },
-        "named_log_file": {
-          "description": "named log file",
-          "type": "string"
-        },
-        "introspect_port": {
-          "description": "dns introspect port",
-          "type": "string"
-        },
-        "dns_server_port": {
-          "description": "dns server port",
-          "type": "string"
+        {
+          "properties": {
+            "named_log_file": {
+              "description": "named log file",
+              "type": "string"
+            },
+            "dns_server_port": {
+              "description": "dns server port",
+              "type": "string"
+            }
+          }
         }
-      }
+      ]
     },
     "CASSANDRA": {
-      "id": "cassandra",
-      "type": "object",
-      "description": "CASSANDRA section",
-      "additionalProperties": false,
-      "properties": {
-        "commitlog_dir": {
-          "description": "Directory to store commitlogs",
-          "type": "string"
-        },
-        "saved_caches_dir": {
-          "description": "The directory location where table key and row caches are stored",
-          "type": "string"
-        },
-        "data_dirs": {
-          "description": "A list of directory locations where table data is stored",
-          "type": "array"
-        },
-        "java_max_heap_size": {
-          "description": "Java maximum heap size",
-          "type": "string"
-        },
-        "java_max_heap_newsize": {
-          "description": "Java maximum newgen heap size",
-          "type": "array"
-        }
-      }
+      "$ref": "definitions.json#/definitions/cassandra_config"
     },
     "API": {
-      "id": "api",
-      "type": "object",
-      "description": "API section",
-      "additionalProperties": false,
-      "properties": {
-        "log": {
-          "description": "log file",
-          "type": "string"
+      "allOf": [
+        {
+          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
         },
-        "log_level": {
-          "description": "",
-          "type": "string"
-        },
-        "list_optimization_enabled": {
-          "description": "Enable optimizations to list resources",
-          "type": "boolean"
+        {
+          "properties": {
+            "list_optimization_enabled": {
+              "description": "Enable optimizations to list resources",
+              "type": "boolean"
+            }
+          }
         }
-      }
+      ]
     },
     "SCHEMA": {
-      "id": "schema",
-      "type": "object",
-      "description": "SCHEMA section",
-      "additionalProperties": false,
-      "properties": {
-        "log": {
-          "description": "log file",
-          "type": "string"
-        },
-        "log_level": {
-          "description": "",
-          "type": "string"
-        }
-      }
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
     },
     "SVC_MONITOR": {
-      "id": "svc_monitor",
-      "type": "object",
-      "description": "SVC_MONITOR section",
-      "additionalProperties": false,
-      "properties": {
-        "log": {
-          "description": "log file",
-          "type": "string"
-        },
-        "log_level": {
-          "description": "",
-          "type": "string"
-        }
-      }
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
     },
     "DEVICE_MANAGER": {
-      "id": "device_manager",
-      "type": "object",
-      "description": "DEVICE_MANAGER section",
-      "additionalProperties": false,
-      "properties": {
-        "log": {
-          "description": "log file",
-          "type": "string"
-        },
-        "log_level": {
-          "description": "",
-          "type": "string"
-        }
-      }
+      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
     }
   }
 }
