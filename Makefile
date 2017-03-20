@@ -78,7 +78,7 @@ endif
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-internal-$(CONTRAIL_VERSION).tar.gz
 CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible-internal.git"
 CONTRAIL_ANSIBLE_REF = "master"
-CONTRAIL_ANSIBLE = contrail-ansible-internal
+CONTRAIL_ANSIBLE = contrail-ansible
 
 # This is the default target which should build all containers
 .PHONY: all
