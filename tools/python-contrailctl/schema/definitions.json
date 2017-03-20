@@ -160,6 +160,14 @@
           "description": "compute node list",
           "type": "array"
         },
+        "xmpp_auth_enable": {
+          "description": "Whether to enable contrail control and contrail vrouter agent to communicate over SSL",
+          "type": "boolean"
+        },
+        "xmpp_dns_auth_enable": {
+          "description": "Whether to enable contrail dns and contrail vrouter agent to communicate over SSL",
+          "type": "boolean"
+        },
         "uve_partition_count": {
           "description": "UVE data is partitioned to improve analytics performance, this configuration set number of partitions",
           "type": "string"
