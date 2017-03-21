@@ -10,6 +10,7 @@ metadata:
 data:
   agent-config: |
     {{ template "globalConfig" . }}
+    {{ template "agentConfig" . }}
   controller-config: |
     {{ template "globalConfig" . }}
     {{ template "webuiConfig" . }}

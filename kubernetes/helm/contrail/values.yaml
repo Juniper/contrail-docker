@@ -1,6 +1,7 @@
 # Default values for contrail.
-# contrailVersion
-contrailVersion: 4.0.0.0-3042
+# contrailVersion - example 4.0.0.0-3042
+# This variable cannot be blank.
+# contrailVersion:
 
 # osRelease - operating system release
 # ubuntu 14.04 - u14.04
@@ -22,9 +23,6 @@ global:
   # analytics_list - list of analytics nodes
   analytics_list: '["192.168.0.109"]'
 
-  # vrouter_physical_interface - physical interface to use for vrouter
-  vrouter_physical_interface: eth0
-
   # cloud_orchestrator: values - kubernetes, mesos, openshift, openstack
   cloud_orchestrator: kubernetes
 
@@ -41,6 +39,13 @@ webui:
 
   # https_listen_port: default 8143
   # https_listen_port:
+
+#
+# agent configurations
+#
+agent:
+  # vrouter_physical_interface - physical interface to use for vrouter
+  vrouter_physical_interface: eth0
 
 #
 # Other optional parameters which rarely changed
