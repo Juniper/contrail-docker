@@ -4,14 +4,14 @@ import sys
 import os
 import fcntl
 import time
-from .config import Configurator, read_config
+from .config import Configurator
 from .map import *
 from .runner import Runner
 from jsonschema import validate,FormatChecker, exceptions, RefResolver
 import json
 
 LOCK_PATH = "/var/lock/contrailctl"
-
+PLAYBOOK_DIR = "/contrail-ansible-internal"
 
 class SingleInstance:
     def __init__(self):
@@ -65,7 +65,7 @@ class ConfigManager(object):
         self.component = component
         self.config_file = config_file
         self.param_map = self.COMPONENT_PARAM_MAP[component]
-        configurator = Configurator(self.config_file, self.param_map)
+        configurator = Configurator(self.config_file, self.param_map, self.component)
         self.config_dict = configurator.get_config_dict()
         self.mapped_dict = configurator.map({})
 
@@ -99,8 +99,7 @@ class ConfigManager(object):
             schema=open(schema_path,'r').read()
         except IOError as error:
             print("Schema file is missing - {}".format(schema_path))
-            print(error)
-            return False
+            return True
         try:
             validate(data, json.loads(schema), format_checker=FormatChecker(), resolver=resolver)
             return True
@@ -120,17 +119,17 @@ class ConfigManager(object):
         valid = self.validate()
         if not valid:
             return None
-        var_file = "/contrail-ansible/playbooks/vars/%s" % (
-                self.PLAYBOOKS[self.component])
-        playbook = "/contrail-ansible/playbooks/%s" % (
-                self.PLAYBOOKS[self.component])
+        var_file = "{}/playbooks/vars/{}".format(
+            PLAYBOOK_DIR, self.PLAYBOOKS[self.component])
+        playbook = "{}/playbooks/{}".format(
+            PLAYBOOK_DIR, self.PLAYBOOKS[self.component])
         need_ansible_run = self._update_yml(var_file, self.mapped_dict)
         if need_ansible_run or force:
             print("CONFIGS: ", self.mapped_dict)
             # NOTE: it may make sense to have some of these params to be get
             # from user in later point.  But currently they are constants
             runner_params = dict(
-                inventory='/contrail-ansible/playbooks/inventory/all-in-one',
+                inventory="{}/playbooks/inventory/all-in-one".format(PLAYBOOK_DIR),
                 playbook=playbook,
                 tags=tags,
                 verbosity=0
@@ -177,9 +176,9 @@ class ConfigManager(object):
             server_list = list(set(servers))
             config_dict['GLOBAL'].update({'analyticsdb_list': server_list})
             config_dict['GLOBAL'].update({'analyticsdb_seed_list': seed_list})
-        playbook = "/contrail-ansible/playbooks/contrailctl_config.yml"
+        playbook = "{}/playbooks/contrailctl_config.yml".format(PLAYBOOK_DIR)
         runner_params = dict(
-            inventory='/contrail-ansible/playbooks/inventory/all-in-one',
+            inventory='{}/playbooks/inventory/all-in-one'.format(PLAYBOOK_DIR),
             playbook=playbook,
             run_data={'contrailctl_config_file': self.config_file, 'contrailctl_config_data': config_dict},
             verbosity=0

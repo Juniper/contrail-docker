@@ -12,13 +12,14 @@ def read_config(config_file):
 
 class Configurator(object):
 
-    def __init__(self, master_config_file, param_map):
+    def __init__(self, master_config_file, param_map, component):
         """Prepare configuration dict in a form that can be passed to ansible as variables
         :param master_config_file: container specific master config file
         """
         self.master_config_file = master_config_file
         self.master_config = read_config(self.master_config_file)
         self.param_map = param_map
+        self.component = component
 
     @staticmethod
     def eval(data):
@@ -40,7 +41,7 @@ class Configurator(object):
         for section in self.master_config.sections():
             config_dict[section] = {}
             for option in self.master_config.options(section):
-                config_dict[section][option] = Configurator.eval(self.master_config.get(section, option))
+                config_dict[section][option] = self.eval(self.master_config.get(section, option))
         return config_dict
 
     def map(self, config_dict):
@@ -54,7 +55,7 @@ class Configurator(object):
             for param, value in self.master_config.items(section):
                 if param in self.param_map.get(section, {}):
                     config_dict.update({self.param_map[section][param]: self.eval(value)})
-                elif section == 'GLOBAL':
+                elif section == 'GLOBAL' or section == self.component.upper():
                     config_dict.update({param: self.eval(value)})
                 else:
                     config_dict.update({"{}_{}".format(section.lower(), param): self.eval(value)})
