@@ -32,6 +32,13 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 {{- end -}}
 
+{{- define "agentConfig" -}}
+    [AGENT]
+{{- range $key, $val := .Values.agent }}
+    {{ $key }} = {{ $val }}
+{{- end -}}
+{{- end -}}
+
 {{- define "webuiConfig" -}}
     [WEBUI]
 {{- range $key, $val := .Values.webui }}
