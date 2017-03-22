@@ -63,6 +63,11 @@ spec:
           name: opt-cni-bin
         - mountPath: /host/etc_cni
           name: etc-cni
+        - mountPath: /var/lib/contrail/ports/vm/
+          name: contrail-ports
+        # This is a workaround just to make sure the directory is created on host
+        - mountPath: /var/log/contrail/cni
+          name: log-cni
       volumes:
       - name: etc-contrailctl
         configMap:
@@ -82,3 +87,9 @@ spec:
       - name: etc-cni
         hostPath:
           path: /etc/cni
+      - name: contrail-ports
+        hostPath:
+          path: /var/lib/contrail/ports/vm/
+      - name: log-cni
+        hostPath:
+          path: /var/log/contrail/cni/
