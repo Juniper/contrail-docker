@@ -195,11 +195,11 @@
         },
         "admin_port": {
           "description": "Keystone admin port in which the keystone is listening, default 35357",
-          "type": "integer"
+          "type": "string"
         },
         "public_port": {
           "description": "Keystone public port in which the keystone is listening default 5000",
-          "type": "integer"
+          "type": "string"
         },
         "auth_protocol": {
           "description": "Keystone auth protocol",
