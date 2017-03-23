@@ -5,8 +5,8 @@ LABEL Name=contrail-controller-$OS \
       Version="$CONTRAIL_VERSION" \
       Description="Dockerimage for Contrail Controller" Vendor="Juniper Networks"
 
-RUN contrailctl config sync -c controller -F -t package
-RUN contrailctl config sync -c controller -F -t install
+RUN contrailctl config sync -c controller -F -v -t package
+RUN contrailctl config sync -c controller -F -v -t install
 
 EXPOSE 53 68 123 179 2181 4369 \
        5269 5672 5997 5998 \

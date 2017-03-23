@@ -28,13 +28,13 @@ ulimit -d unlimited
 ulimit -v unlimited
 ulimit -n 4096
 # configure services and start them using ansible code within contrail-ansible
-contrailctl config sync -c controller -F -t configure
+contrailctl config sync -c controller -F -v -t configure
 
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 sleep 5
 
 # run contrailctl to run code to make sure services are running
-contrailctl config sync -c controller -F -t service,provision
+contrailctl config sync -c controller -F -v -t service,provision
 
 wait "$child"

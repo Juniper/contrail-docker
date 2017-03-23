@@ -1,3 +1,3 @@
 FROM contrail-base-u16.04:{{ contrail_version }}
-RUN contrailctl config sync -c lb -F -t install
+RUN contrailctl config sync -c lb -F -v -t install
 EXPOSE 8082 5998 9696 8081

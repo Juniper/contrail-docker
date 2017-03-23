@@ -14,5 +14,6 @@ ulimit -c unlimited
 ulimit -d unlimited
 ulimit -v unlimited
 ulimit -n 4096
-contrailctl config sync -c kubemanager -F -t configure,provision
+contrailctl config sync -c kubemanager -F -v -t configure
 $DAEMON $DAEMON_OPTS
+contrailctl config sync -c kubemanager -F -v -t service,provision
