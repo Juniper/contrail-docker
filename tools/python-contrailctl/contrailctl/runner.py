@@ -1,6 +1,19 @@
-import logging
-import pprint
-import datetime
+from __future__ import (absolute_import, division, print_function)
+from __future__ import unicode_literals
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
+try:
+    import shutil
+    term_size = shutil.get_terminal_size
+except:
+    term_size = lambda:(80,24)
+
+__metaclass__ = type
+
 import os
 from ansible.inventory import Inventory
 from ansible.vars import VariableManager
@@ -8,65 +21,26 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.executor import playbook_executor
 from ansible.utils.display import Display
 from ansible.plugins.callback import CallbackBase
+from ansible.errors import AnsibleParserError
 
 
-class LoggingCallback(CallbackBase):
+class DisplayErrorCallback(CallbackBase):
     CALLBACK_VERSION = 2.0
     CALLBACK_TYPE = 'notification'
     CALLBACK_NAME = 'log'
     CALLBACK_NEEDS_WHITELIST = False
 
     def __init__(self):
-        super(LoggingCallback, self).__init__()
-        self.start_time = datetime.now()
+        self.results = {}
+        super(DisplayErrorCallback, self).__init__()
 
-    def log(self, level, msg, *args, **kwargs):
-        logging.log(level, msg, *args, **kwargs)
-
-    def _on_any(self, level, label, host, orig_result):
-        result = orig_result.copy()
-        result.pop('invocation', None)
-        result.pop('verbose_always', True)
-        item = result.pop('item', None)
-        if not result:
-            msg = ''
-        elif len(result) == 1:
-            msg = ' | {0}'.format(result.values().pop())
-        else:
-            msg = '\n' + pprint.pformat(result)
-        if item:
-            self.log(level, '{0} (item={1}): {2}{3}'.format(host, item, label, msg))
-        else:
-            self.log(level, '{0}: {1}{2}'.format(host, label, msg))
+    def _log(self, result):
+        msg = self._dump_results(result._result)
+        self._display.display(msg)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
-        delegated_vars = result._result.get('_ansible_delegated_vars', None)
-
-        if ignore_errors:
-            level = logging.INFO
-            label = 'FAILED (ignored)'
-        else:
-            level = logging.ERROR
-            label = 'FAILED'
-
-        if delegated_vars:
-            host = "{1} -> {2}".format(result._host.get_name(), delegated_vars['ansible_host'])
-        else:
-            host = result._host.get_name()
-
-        self._on_any(level, label, host, result)
-
-    def v2_runner_on_ok(self, result):
-        self._clean_results(result._result, result._task.action)
-        delegated_vars = result._result.get('_ansible_delegated_vars', None)
-        msg = ""
-
-        if delegated_vars:
-            host = "{1} -> {2}".format(result._host.get_name(), delegated_vars['ansible_host'])
-        else:
-            host = result._host.get_name()
-
-        self._on_any(logging.INFO, 'SUCCESS', host, result)
+        if not ignore_errors:
+            self._log(result)
 
 
 class Options(object):
@@ -167,9 +141,16 @@ class Runner(object):
             options=self.options,
             passwords=passwords)
 
-    def run(self):
-        # Results of PlaybookExecutor
-        self.pbex.run()
+    def run(self, verbose=False):
+        if not verbose:
+            # Results of PlaybookExecutor
+            cb = DisplayErrorCallback()
+            self.pbex._tqm._stdout_callback = cb
+        try:
+            res = self.pbex.run()
+        except AnsibleParserError as err:
+            print(err)
+            return None
         stats = self.pbex._tqm._stats
 
         # Test if success for record_logs
