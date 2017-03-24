@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -x
+set -e
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/supervisord
 SERVICE=database

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-
 set -x
+set -e
 function fail() {
     echo "$@"
     exit 1
