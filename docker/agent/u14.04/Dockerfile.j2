@@ -2,7 +2,7 @@ FROM contrail-base-u14.04:{{ contrail_version }}
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
-RUN contrailctl config sync -c agent -F -t package
-RUN contrailctl config sync -c agent -F -t install
+RUN contrailctl config sync -c agent -F -v -t package
+RUN contrailctl config sync -c agent -F -v -t install
 EXPOSE 8085 9090
 RUN cp -rf /usr/src/ /usr/src.orig/

@@ -5,7 +5,7 @@ LABEL Name=contrail-lb-$OS \
       Version="$CONTRAIL_VERSION" \
       Description="Dockerimage for Contrail LB" Vendor="Juniper Networks"
 
-RUN contrailctl config sync -c lb -F -t install
+RUN contrailctl config sync -c lb -F -v -t install
 EXPOSE 5998 8081 8082 9696
 
 # Repo cleanup

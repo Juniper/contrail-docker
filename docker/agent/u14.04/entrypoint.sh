@@ -31,11 +31,10 @@ ulimit -c unlimited
 ulimit -d unlimited
 ulimit -v unlimited
 ulimit -n 4096
-contrailctl config sync -c agent -F -t configure
+contrailctl config sync -c agent -F -v -t configure
 $DAEMON $DAEMON_OPTS 2>&1 | tee -a $LOG &
 child=$!
 
 # run contrailctl to run code to make sure services are running
-contrailctl config sync -c agent -F -t service
-contrailctl config sync -c agent -F -t provision
+contrailctl config sync -c agent -F -v -t service,provision
 wait "$child"

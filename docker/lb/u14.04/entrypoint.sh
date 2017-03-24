@@ -3,7 +3,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 test -x $DAEMON || exit 0
 
 # configure services and start them using ansible code within contrail-ansible
-contrailctl config sync -c lb -F
+contrailctl config sync -c lb -F -v
 
 ## Setup haproxy
 if [ -f /etc/default/haproxy ] ; then

@@ -107,7 +107,7 @@ class ConfigManager(object):
             print(error.message)
             return False
 
-    def sync(self, force=False, tags=None):
+    def sync(self, force=False, tags=None, verbose=False):
         """Sync configuration from container master config to internal service
         configs
         :param force: Forcefully run the sync even if there is no difference in
@@ -125,7 +125,6 @@ class ConfigManager(object):
             PLAYBOOK_DIR, self.PLAYBOOKS[self.component])
         need_ansible_run = self._update_yml(var_file, self.mapped_dict)
         if need_ansible_run or force:
-            print("CONFIGS: ", self.mapped_dict)
             # NOTE: it may make sense to have some of these params to be get
             # from user in later point.  But currently they are constants
             runner_params = dict(
@@ -135,7 +134,7 @@ class ConfigManager(object):
                 verbosity=0
             )
             ansible_runner = Runner(**runner_params)
-            stats = ansible_runner.run()
+            stats = ansible_runner.run(verbose)
             return stats
         else:
             print("All configs are in sync")
@@ -188,9 +187,9 @@ class ConfigManager(object):
         return stats
 
 
-def config_sync(config_file, component, force=False, tags=None):
+def config_sync(config_file, component, force=False, tags=None, verbose=False):
     cm = ConfigManager(config_file, component)
-    stats = cm.sync(force, tags)
+    stats = cm.sync(force, tags, verbose)
     if stats:
         if stats.failures:
             return 1
@@ -234,6 +233,8 @@ def main(args=sys.argv[1:]):
     p_config_sync.add_argument("-t", "--tags", type=lambda x: x.split(','),
                                help="comma separated list of tags to run" +
                                     "specific set of ansible code")
+    p_config_sync.add_argument("-v", "--verbose", action='store_true',
+                               help="Verbose")
 
     p_config_validate = sp_config.add_parser("validate", help="Validate the config",
                                              parents=[ap_common])
@@ -287,7 +288,7 @@ def main(args=sys.argv[1:]):
             return_value = 0
             if args.resource == 'config':
                 if args.action == 'sync':
-                    return_value = config_sync(args.config_file, args.component, args.force, args.tags)
+                    return_value = config_sync(args.config_file, args.component, args.force, args.tags, args.verbose)
                 elif args.action == 'validate':
                     cm = ConfigManager(args.config_file, args.component)
                     valid = cm.validate()

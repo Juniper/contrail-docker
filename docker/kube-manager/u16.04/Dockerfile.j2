@@ -1,2 +1,2 @@
 FROM contrail-base-u16.04:{{ contrail_version }}
-RUN contrailctl config sync -c kubemanager -F -t install
+RUN contrailctl config sync -c kubemanager -F -v -t install
