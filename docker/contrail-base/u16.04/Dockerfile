@@ -8,7 +8,7 @@ ARG no_proxy
 ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV ANSIBLE_INVENTORY="all-in-one"
-ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser vim"
+ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser vim ssh-client"
 ARG CONTRAIL_REPO_MIRROR_SNAPSHOT=10072016
 COPY contrail-ubuntu-mirror.key /
 RUN apt-key add /contrail-ubuntu-mirror.key;\
