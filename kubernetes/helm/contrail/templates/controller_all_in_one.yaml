@@ -1,4 +1,4 @@
-{{ if .Values.contrailHA }}
+{{ if not .Values.contrailHA }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -24,9 +24,9 @@ spec:
                   {
                     "matchExpressions": [
                       {
-                        "key": "contrail.role",
+                        "key": "kubeadm.alpha.kubernetes.io/role",
                         "operator": "In",
-                        "values": ["controller"]
+                        "values": ["master"]
                       }
                     ]
                   }
@@ -61,6 +61,32 @@ spec:
           name: configdb-data
         - mountPath: /var/lib/zookeeper
           name: zookeeper-data
+      - name: contrail-analyticsdb
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-analyticsdb" .Values.analyticsdbImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-analyticsdb
+        - mountPath: /var/lib/cassandra
+          name: analyticsdb-data
+      - name: contrail-analytics
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-analytics" .Values.analyticsImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-analytics
+      - name: contrail-kube-manager
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-kube-manager
       volumes:
       - name: contrailctl-controller
         configMap:
@@ -68,7 +94,27 @@ spec:
           items:
           - key: controller-config
             path: controller.conf
+      - name: contrailctl-analyticsdb
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: analyticsdb-config
+            path: analyticsdb.conf
+      - name: contrailctl-analytics
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: analytics-config
+            path: analytics.conf
+      - name: contrailctl-kube-manager
+        configMap:
+          name: {{ template "fullname" . }}
+          items:
+          - key: kube-manager-config
+            path: kubemanager.conf
       - name: configdb-data
+        emptyDir: {}
+      - name: analyticsdb-data
         emptyDir: {}
       - name: zookeeper-data
         emptyDir: {}

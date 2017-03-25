@@ -20,6 +20,21 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "analytics.fullname" -}}
+{{- $name := default "analytics" .Values.analyticsNameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "analyticsdb.fullname" -}}
+{{- $name := default "analyticsdb" .Values.analyticsdbNameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "kubemanager.fullname" -}}
+{{- $name := default "kubemanager" .Values.kubemanagerNameOverride -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "agent.fullname" -}}
 {{- $name := default "agent" .Values.agentNameOverride -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
