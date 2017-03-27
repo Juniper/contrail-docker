@@ -2,17 +2,17 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ template "controller.fullname" . }}
+  name: {{ template "analyticsdb.fullname" . }}
   namespace: kube-system
   labels:
-    app: {{ template "controller.fullname" . }}
+    app: {{ template "analyticsdb.fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "controller.fullname" . }}
+        app: {{ template "analyticsdb.fullname" . }}
         contrail_function: "contrail-controller"
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
@@ -49,27 +49,23 @@ spec:
     spec:
       hostNetwork: true
       containers:
-      - name: contrail-controller
-        image: "{{ .Values.imageRepo }}/{{ default "contrail-controller" .Values.controllerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+      - name: contrail-analyticsdb
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-analyticsdb" .Values.analyticsdbImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         volumeMounts:
         - mountPath: /etc/contrailctl
-          name: contrailctl-controller
+          name: contrailctl-analyticsdb
         - mountPath: /var/lib/cassandra
-          name: configdb-data
-        - mountPath: /var/lib/zookeeper
-          name: zookeeper-data
+          name: analyticsdb-data
       volumes:
-      - name: contrailctl-controller
+      - name: contrailctl-analyticsdb
         configMap:
           name: {{ template "fullname" . }}
           items:
-          - key: controller-config
-            path: controller.conf
-      - name: configdb-data
-        emptyDir: {}
-      - name: zookeeper-data
+          - key: analyticsdb-config
+            path: analyticsdb.conf
+      - name: analyticsdb-data
         emptyDir: {}
 {{ end }}
