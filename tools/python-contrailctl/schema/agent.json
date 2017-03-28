@@ -21,6 +21,18 @@
           "description": "physical interface used by vhost interface",
           "type": "string"
         },
+        "vrouter_physical_interface_detected": {
+          "description": "physical interface used by vhost interface that is detected by agent container ansible code",
+          "type": "string"
+        },
+        "ctrl_data_network": {
+          "description": "Control data network(Optional)",
+          "type": "string"
+        },
+        "ctrl_data_ip": {
+          "description": "Control data ip provided (Optional)",
+          "type": "string"
+        },
         "compile_vrouter_module": {
           "description": "Whether to compile vrouter module or not",
           "type": "boolean"
