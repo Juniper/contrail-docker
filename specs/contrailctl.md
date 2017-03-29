@@ -55,7 +55,7 @@ optional arguments:
   -F, --force           Whether to apply config forcibly
   -t TAGS, --tags TAGS  comma separated list of tags to runspecific set of
                         ansible code
-
+  -v, --verbose         Verbose 
 ```
 ### Update service configurations within the container
 
@@ -66,19 +66,10 @@ For example, if somebody want to update a service configuration within controlle
 to the services running within the container
 
 ```
-$ docker exec controller contrailctl config sync -c controller
+$ docker exec controller contrailctl config sync -c controller -v
 
 ```
-
-### Add or remove a node on service configuration
-
-TBD
-
-### Enable/Disable components or services
-
-TBD
-
-#4. Implementation
+# 4. Implementation
 
 In essence, contrailctl will handle below mentioned set of operations:
 
@@ -141,16 +132,36 @@ In its basic form, contrailctl does below things:
 ## contrailctl operations
 Here are the major operations identified in initial stage.
 
-1. contrailctl config sync [section] [param] [-f|--force] - This is to sync the entire configs from master_configs within
+1. contrailctl config sync  - This is to sync the entire configs from master_configs within
     /etc/contrailctl to service configs within the container. Optional section and param will restrict the data to be
     synced to specific section/param. Optional force option would do ansible run even if there is no config change to be
     synced.
-2. contrailctl node add <node_type> <node details> - This operation is to add a node of type node_type, various node
-    details like node_ip etc need to be provided. This will trigger reconfigurations on various configs and cluster
-    reformations.
-3. contrailctl node delete node_name - delete the node from various configurations. This will trigger reconfigurations
-    on various configs and cluster reformations.
-4. contrailctl config/node show/info/list - get infos about various configs
+```
+$ contrailctl config sync -c controller -F -v 
+
+PLAY [Setup Controller] ********************************************************
+
+TASK [setup] *******************************************************************
+ok: [localhost]
+
+TASK [include_vars] ************************************************************
+ok: [localhost]
+
+TASK [common : make sure /var/run/utmp exist] **********************************
+ok: [localhost]
+...........
+............
+............
+```
+2. contrailctl config validate - This subcommand is to validate contrailctl configuration found under /etc/contrailctl/
+
+```
+$  contrailctl config validate -c controller
+All configurations are valid
+
+$ contrailctl config validate -c analytics
+All configurations are valid
+```
 
 #11. References
 * [Contrailctl configuration examples](https://github.com/Juniper/contrail-docker/tree/master/tools/python-contrailctl/examples/configs)
