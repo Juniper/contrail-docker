@@ -1,14 +1,14 @@
-#1. Introduction
+# 1. Introduction
 contrailctl is a tool which help to configure the services inside the container to be in sync with container specific
 config files. Also it is used to do certain high level operations like add/remove nodes, operational tasks like
 start/stop/disable/enable components or services etc.
 
-#2. Problem statement
+# 2. Problem statement
 It is complex to provision and manage various services in contrail containers. There should be a simpler interface to
 the user to provision and operate contrail services packaged in the containers. This tool should help on various
 operational tasks like add/remove nodes, enable/disable components or services etc.
 
-#3. Proposed solution
+# 3. Proposed solution
 contrailctl is the tool that is installed within the container which is driven by single ini based configuration file
 per container e.g /etc/contrailctl/controller.conf for controller container. Any state changes of the services within
 the container by this tools should be according to the configuration noted in the contrailctl config file for that
@@ -30,13 +30,13 @@ Note: each contrail container should have separate contrailctl configuration fil
     analyticsdb - /etc/contrailctl/analyticsdb.conf
     vrouter agent - /etc/contrailctl/agent.conf
 
-##3.1 Alternatives considered
+## 3.1 Alternatives considered
 None
 
-##3.2 API schema changes
+## 3.2 API schema changes
 None
 
-##3.3 User workflow impact
+## 3.3 User workflow impact
 contrailctl is used within the container startup to configure and start the services within the container. Also users
 can use this tool to do any above mentioned operations.
 
@@ -163,5 +163,5 @@ $ contrailctl config validate -c analytics
 All configurations are valid
 ```
 
-#11. References
+# 11. References
 * [Contrailctl configuration examples](https://github.com/Juniper/contrail-docker/tree/master/tools/python-contrailctl/examples/configs)
