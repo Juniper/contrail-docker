@@ -1,3 +1,7 @@
 FROM contrail-base-u16.04:{{ contrail_version }}
+LABEL Name=contrail-analyticsdb-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=analyticsdb \
+      Description="Dockerimage for Contrail AnalyticsDB" Vendor="Juniper Networks"
 RUN contrailctl config sync -c analyticsdb -F -v -t package
 RUN contrailctl config sync -c analyticsdb -F -v -t install

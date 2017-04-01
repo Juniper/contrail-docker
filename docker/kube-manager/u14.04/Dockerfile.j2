@@ -1,4 +1,8 @@
 FROM contrail-base-u14.04:{{ contrail_version }}
+LABEL Name=contrail-kube-manager-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=kube-manager \
+      Description="Dockerimage for Contrail kube manager" Vendor="Juniper Networks"
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh

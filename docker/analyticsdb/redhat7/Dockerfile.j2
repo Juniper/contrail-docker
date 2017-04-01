@@ -3,6 +3,7 @@ ARG CONTRAIL_VERSION
 ARG OS
 LABEL Name=contrail-analyticsdb-$OS \
       Version="$CONTRAIL_VERSION" \
+      contrail.role=analyticsdb \
       Description="Dockerimage for Contrail AnalyticsDB" Vendor="Juniper Networks"
 
 RUN contrailctl config sync -c analyticsdb -F -v -t package

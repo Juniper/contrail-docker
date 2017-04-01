@@ -3,6 +3,7 @@ ARG CONTRAIL_VERSION
 ARG OS
 LABEL Name=contrail-controller-$OS \
       Version="$CONTRAIL_VERSION" \
+      contrail.role=controller \
       Description="Dockerimage for Contrail Controller" Vendor="Juniper Networks"
 
 RUN contrailctl config sync -c controller -F -v -t package

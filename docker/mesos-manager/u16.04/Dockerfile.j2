@@ -1,2 +1,6 @@
 FROM contrail-base-u16.04:{{ contrail_version }}
+LABEL Name=contrail-mesos-manager-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=mesos-manager \
+      Description="Dockerimage for Contrail Mesos Manager" Vendor="Juniper Networks"
 RUN contrailctl config sync -c mesosmanager -F -v -t install

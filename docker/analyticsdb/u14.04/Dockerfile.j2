@@ -1,4 +1,8 @@
 FROM contrail-base-u14.04:{{ contrail_version }}
+LABEL Name=contrail-analyticsdb-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=analyticsdb \
+      Description="Dockerimage for Contrail AnalyticsDB" Vendor="Juniper Networks"
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
