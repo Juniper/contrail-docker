@@ -3,6 +3,7 @@ ARG CONTRAIL_VERSION
 ARG OS
 LABEL Name=contrail-agent-$OS \
       Version="$CONTRAIL_VERSION" \
+      contrail.role=agent \
       Description="Dockerimage for Contrail Vrouter Agent" Vendor="Juniper Networks"
 
 RUN contrailctl config sync -c agent -F -v -t package

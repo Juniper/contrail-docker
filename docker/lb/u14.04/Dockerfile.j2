@@ -1,4 +1,8 @@
 FROM contrail-base-u14.04:{{ contrail_version }}
+LABEL Name=contrail-lb-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=lb \
+      Description="Dockerimage for Contrail LB" Vendor="Juniper Networks"
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh

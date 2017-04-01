@@ -1,5 +1,9 @@
 FROM contrail-base-u14.04:{{ contrail_version }}
 COPY entrypoint.sh /
+LABEL Name=contrail-controller-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=controller \
+      Description="Dockerimage for Contrail Controller" Vendor="Juniper Networks"
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
 RUN contrailctl config sync -c controller -F -v -t package

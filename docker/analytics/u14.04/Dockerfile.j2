@@ -1,5 +1,9 @@
 FROM contrail-base-u14.04:{{ contrail_version }}
 COPY entrypoint.sh /
+LABEL Name=contrail-analytics-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=analytics \
+      Description="Dockerimage for Contrail Analytics" Vendor="Juniper Networks"
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
 RUN contrailctl config sync -c analytics -F -v -t package
