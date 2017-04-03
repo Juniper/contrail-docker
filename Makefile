@@ -139,12 +139,12 @@ $(CONTRAIL_BASE_TAR): ansible-internal contrail-repo
 	@touch $@
 
 $(CONTRAIL_ANSIBLE_TAR):
-ifdef $(CONTRAIL_ANSIBLE_ARTIFACT)
-	if [[ -f $(CONTRAIL_ANSIBLE_ARTIFACT) ]]; then  \
+ifdef CONTRAIL_ANSIBLE_ARTIFACT
+	if [ -f $(CONTRAIL_ANSIBLE_ARTIFACT) ]; then  \
 		cp -f $(CONTRAIL_ANSIBLE_ARTIFACT) $(CONTRAIL_ANSIBLE_TAR) ;\
 	else \
-		@echo "No artifact found, getting the code from git repo" ; \
-		$(eval BUILD_CONTRAIL_ANSIBLE_TAR := yes) ; \
+		@echo "ERROR: ansible artifact not found: $(CONTRAIL_ANSIBLE_ARTIFACT)" ; \
+		@exit 1; \
 	fi
 else
 	$(eval BUILD_CONTRAIL_ANSIBLE_TAR := yes)
