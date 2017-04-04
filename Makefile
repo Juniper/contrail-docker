@@ -28,10 +28,10 @@ ifdef CONTRAIL_REPO_MIRROR_SNAPSHOT
 endif
 
 # OS - operaing system release code
-# ubuntu 14.04 - u14.04, ubuntu 16.04 - u16.04, centos 7.1 - c7.1
+# ubuntu 14.04 - ubuntu14.04, ubuntu 16.04 - ubuntu16.04, centos 7.x - centos7
 ifndef OS
 $(warning OS is undefined, default to u14.04)
-	export OS := u14.04
+	export OS := ubuntu14.04
 endif
 
 
@@ -39,8 +39,6 @@ endif
 ifndef CONTRAIL_VERSION
 $(error CONTRAIL_VERSION is undefined)
 endif
-
-CONTAINER_TARS = $(CONTAINERS:%=contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz)
 
 CONTRAIL_INSTALL_PACKAGE_TAR = contrail-install-packages_$(CONTRAIL_VERSION)-$(CONTRAIL_SKU).tgz
 CONTRAIL_BASE_TAR = contrail-base-$(OS)-$(CONTRAIL_VERSION).tar.gz
@@ -50,7 +48,7 @@ ifndef CONTRAIL_REPO_PORT
 	export CONTRAIL_REPO_PORT := 1567
 endif
 
-ifneq (,$(filter u14.04 u16.04,$(OS)))
+ifneq (,$(filter ubuntu14.04 ubuntu16.04,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 	export CONTRAIL_REPO_INTERNAL_PORT=1567
@@ -59,7 +57,7 @@ ifndef CONTAINERS
 endif
 endif
 
-ifneq (,$(filter c7.1 c7.2,$(OS)))
+ifneq (,$(filter centos7,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 ifndef CONTAINERS
@@ -67,13 +65,15 @@ ifndef CONTAINERS
 endif
 endif
 
-ifneq (,$(filter centos7 redhat7,$(OS)))
+ifneq (,$(filter redhat7,$(OS)))
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 ifndef CONTAINERS
 	export CONTAINERS = controller analytics agent analyticsdb lb
 endif
 endif
+
+CONTAINER_TARS = $(CONTAINERS:%=contrail-%-$(OS)-$(CONTRAIL_VERSION).tar.gz)
 
 CONTRAIL_ANSIBLE_TAR = contrail-ansible-internal-$(CONTRAIL_VERSION).tar.gz
 CONTRAIL_ANSIBLE_REPO = "git@github.com:Juniper/contrail-ansible-internal.git"
