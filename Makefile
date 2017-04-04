@@ -123,8 +123,6 @@ contrail-repo:  $(CONTRAIL_REPO_CONTAINER_TAR)
 $(CONTRAIL_BASE_TAR): ansible-internal contrail-repo
 	$(eval CONTRAIL_BUILD_ARGS := )
 	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_ANSIBLE_TAR=$(CONTRAIL_ANSIBLE_TAR) )
-	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg CONTRAIL_VERSION=$(CONTRAIL_VERSION) )
-	$(eval CONTRAIL_BUILD_ARGS +=  --build-arg OS=$(OS) )
 	$(eval CONTRAIL_BUILD_ARGS += $(http_proxy_build_arg))
 	$(eval CONTRAIL_BUILD_ARGS += $(repo_snapshot_build_arg))
 	$(eval TEMP := $(shell mktemp -d))
