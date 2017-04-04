@@ -1,6 +1,0 @@
-FROM contrail-base-u16.04:{{ contrail_version }}
-LABEL Name=contrail-kube-manager-$OS \
-      Version="$CONTRAIL_VERSION" \
-      contrail.role=kube-manager \
-      Description="Dockerimage for Contrail Kube manager" Vendor="Juniper Networks"
-RUN contrailctl config sync -c kubemanager -F -v -t install

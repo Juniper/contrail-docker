@@ -1,9 +1,0 @@
-FROM contrail-base-u14.04:{{ contrail_version }}
-LABEL Name=contrail-mesos-manager-$OS \
-      Version="$CONTRAIL_VERSION" \
-      contrail.role=mesos-manager \
-      Description="Dockerimage for Contrail Mesos Manager" Vendor="Juniper Networks"
-COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT /entrypoint.sh
-RUN contrailctl config sync -c mesosmanager -F -v -t install
