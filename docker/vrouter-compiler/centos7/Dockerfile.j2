@@ -1,0 +1,9 @@
+FROM contrail-base-centos7:{{ contrail_version }}
+COPY entrypoint.sh /
+LABEL Name=contrail-vrouter-compiler-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=vrouter-compiler \
+      Description="Contrail vrouter compiler" Vendor="Juniper Networks"
+EXPOSE 8081 8086
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT /entrypoint.sh
