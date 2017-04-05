@@ -5,9 +5,10 @@ LABEL Name=contrail-analyticsdb-$OS \
       Version="$CONTRAIL_VERSION" \
       contrail.role=analyticsdb \
       Description="Dockerimage for Contrail AnalyticsDB" Vendor="Juniper Networks"
-
-RUN contrailctl config sync -c analyticsdb -F -v -t package
-RUN contrailctl config sync -c analyticsdb -F -v -t install
+ENV CONTRAIL_ROLE analyticsdb
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t package
+RUN contrailctl config sync -F -v -t install
 EXPOSE 9141 9161
 
 # Repo cleanup

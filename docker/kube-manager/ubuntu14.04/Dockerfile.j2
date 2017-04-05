@@ -6,5 +6,7 @@ LABEL Name=contrail-kube-manager-$OS \
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
-RUN contrailctl config sync -c kubemanager -F -v -t package
-RUN contrailctl config sync -c kubemanager -F -v -t install
+ENV CONTRAIL_ROLE kubemanager
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t package
+RUN contrailctl config sync -F -v -t install

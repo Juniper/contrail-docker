@@ -3,7 +3,9 @@ LABEL Name=contrail-agent-{{ OS }}\
       Version={{ CONTRAIL_VERSION }} \
       contrail.role=agent \
       Description="Contrail Vrouter Agent" Vendor="Juniper Networks"
-RUN contrailctl config sync -c agent -F -v -t package
-RUN contrailctl config sync -c agent -F -v -t install
+ENV CONTRAIL_ROLE agent
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t package
+RUN contrailctl config sync -F -v -t install
 EXPOSE 8085 9090
 RUN cp -rf /usr/src/ /usr/src.orig/
