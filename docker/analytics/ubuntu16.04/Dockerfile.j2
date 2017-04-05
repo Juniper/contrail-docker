@@ -3,5 +3,7 @@ LABEL Name=contrail-analytics-$OS \
       Version="$CONTRAIL_VERSION" \
       contrail.role=analytics \
       Description="Contrail Analytics" Vendor="Juniper Networks"
-RUN contrailctl config sync -c analytics -F -v -t package
-RUN contrailctl config sync -c analytics -F -v -t install
+ENV CONTRAIL_ROLE analytics
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t package
+RUN contrailctl config sync -F -v -t install

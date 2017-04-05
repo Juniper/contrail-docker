@@ -216,9 +216,8 @@ def main(args=sys.argv[1:]):
                                 help='Comma separated list of seed nodes to be used')
     ap_common = argparse.ArgumentParser(add_help=False)
     ap_common.add_argument("-f", "--config-file", type=str,
-                           help="Master config file path")
-    ap_common.add_argument("-c", "--component", type=str, required=True,
-                           choices=components,
+                           help="contrailctl config file path for the component")
+    ap_common.add_argument("-c", "--component", type=str, choices=components,
                            help="contrail role to be configured")
 
     ap = argparse.ArgumentParser(description="Contrailctl")
@@ -236,9 +235,8 @@ def main(args=sys.argv[1:]):
     p_config_sync.add_argument("-v", "--verbose", action='store_true',
                                help="Verbose")
 
-    p_config_validate = sp_config.add_parser("validate", help="Validate the config",
+    sp_config.add_parser("validate", help="Validate the config",
                                              parents=[ap_common])
-
 
     p_config_node = sp_config.add_parser(
         "node", help="add/remove/swap nodes in the cluster configuration")
@@ -255,19 +253,19 @@ def main(args=sys.argv[1:]):
         parents=[ap_node_common, ap_common])
 
     args = ap.parse_args()
-    if not args.config_file:
-        if hasattr(args, 'component'):
-            args.config_file = "/etc/contrailctl/%s.conf" % args.component
-        elif os.path.isfile('/etc/contrail-role'):
+    if not args.component:
+        if os.path.isfile('/etc/contrail-role'):
             component = open('/etc/contrail-role', 'r').read().strip()
             if component in components:
-                args.config_file = "/etc/contrailctl/%s.conf" % component
+                args.component = component
             else:
                 print("Wrong role in /etc/contrail-role, valid roles are: %s" % components)
                 return 1
         else:
             print ("Unable to detect component name from either --component or /etc/contrail-role")
             return 1
+    if not args.config_file:
+        args.config_file = "/etc/contrailctl/%s.conf" % args.component
 
     timeout = 1800
     poll = 10
