@@ -6,4 +6,6 @@ LABEL Name=contrail-mesos-manager-$OS \
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
-RUN contrailctl config sync -c mesosmanager -F -v -t install
+ENV CONTRAIL_ROLE mesosmanager
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t install
