@@ -3,4 +3,7 @@ LABEL Name=contrail-kube-manager-$OS \
       Version="$CONTRAIL_VERSION" \
       contrail.role=kube-manager \
       Description="Contrail Kube manager" Vendor="Juniper Networks"
-RUN contrailctl config sync -c kubemanager -F -v -t install
+ENV CONTRAIL_ROLE kubemanager
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t package
+RUN contrailctl config sync -F -v -t install

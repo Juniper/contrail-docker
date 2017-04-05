@@ -6,5 +6,7 @@ LABEL Name=contrail-lb-$OS \
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
-RUN contrailctl config sync -c lb -F -v -t install
+ENV CONTRAIL_ROLE lb
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t install
 EXPOSE 8082 5998 9696 8081

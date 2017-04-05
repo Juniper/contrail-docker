@@ -3,4 +3,6 @@ LABEL Name=contrail-mesos-manager-$OS \
       Version="$CONTRAIL_VERSION" \
       contrail.role=mesos-manager \
       Description="Contrail Mesos Manager" Vendor="Juniper Networks"
-RUN contrailctl config sync -c mesosmanager -F -v -t install
+ENV CONTRAIL_ROLE mesosmanager
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN contrailctl config sync -F -v -t install
