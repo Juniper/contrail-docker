@@ -11,6 +11,18 @@
     "KEYSTONE": {
       "$ref": "definitions.json#/definitions/keystone_config"
     },
+    "CONTROLLER": {
+      "id": "controller",
+      "type": "object",
+      "description": "Global values for controller container",
+      "additionalProperties": false,
+      "properties": {
+        "encap_priority": {
+          "description": "encapsulation priority",
+          "type": "string"
+        }
+      }
+    },
     "WEBUI": {
       "id": "webui",
       "type": "object",
