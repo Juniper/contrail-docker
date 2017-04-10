@@ -23,6 +23,22 @@
         }
       }
     },
+    "RABBITMQ": {
+      "id": "rabbitmq",
+      "type": "object",
+      "description": "rabbitmq specific configurations",
+      "additionalProperties": false,
+      "properties": {
+        "user": {
+          "description": "rabbitmq user",
+          "type": "string"
+        },
+        "group": {
+          "description": "rabbitmq group",
+          "type": "string"
+        }
+      }
+    },
     "WEBUI": {
       "id": "webui",
       "type": "object",
