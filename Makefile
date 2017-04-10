@@ -1,6 +1,7 @@
 ## Variables accepted
 #
 # KEEP_IMAGES - to avoid cleaning up container images locally
+# OS_VERSION - to select docker base os version
 #
 ##
 
@@ -32,6 +33,12 @@ endif
 ifndef OS
 $(warning OS is undefined, default to u14.04)
 	export OS := u14.04
+endif
+
+# OS_VERSION - Docker Base OS Version
+ifndef OS_VERSION
+$(warning OS_VERSION is undefined, default to latest)
+	export OS_VERSION := latest
 endif
 
 
@@ -134,6 +141,9 @@ $(CONTRAIL_BASE_TAR): ansible-internal contrail-repo
 		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
 	fi
 	cd $(TEMP); \
+	if [ -f Dockerfile.j2 ]; then \
+	    python pyj2.py -t Dockerfile.j2 -o Dockerfile -v CONTAINER_REGISTRY=$(CONTAINER_REGISTRY) OS_VERSION=$(OS_VERSION); \
+	fi; \
 	docker build $(CONTRAIL_BUILD_ARGS) --build-arg CONTRAIL_REPO_URL=http://$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT)  -t contrail-base-$(OS):$(CONTRAIL_VERSION) .
 	rm -fr $(TEMP)
 	@touch $@
