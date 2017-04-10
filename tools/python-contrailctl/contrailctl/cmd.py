@@ -13,7 +13,8 @@ import json
 LOCK_PATH = "/var/lock/contrailctl"
 PLAYBOOK_DIR = "/contrail-ansible-internal"
 
-class SingleInstance:
+
+class SingleInstance(object):
     def __init__(self):
         self.fh = None
         self.is_running = False
@@ -70,6 +71,18 @@ class ConfigManager(object):
         configurator = Configurator(self.config_file, self.param_map, self.component)
         self.config_dict = configurator.get_config_dict()
         self.mapped_dict = configurator.map({})
+        if os.environ.get('PLAYBOOK_DIRECTORY', None):
+            playbook_dir = os.environ['PLAYBOOK_DIRECTORY']
+        else:
+            playbook_dir = PLAYBOOK_DIR
+
+        if os.path.isdir(playbook_dir):
+            if os.path.isdir(os.path.join(playbook_dir,"playbooks")):
+                self.playbook_dir = os.path.join(playbook_dir, "playbooks")
+            else:
+                self.playbook_dir = playbook_dir
+        else:
+            raise OSError(2, 'No such file or directory', playbook_dir)
 
     def _update_yml(self, yml, new_vars):
         """ Update vars yaml file
@@ -121,16 +134,16 @@ class ConfigManager(object):
         valid = self.validate()
         if not valid:
             return None
-        var_file = "{}/playbooks/vars/{}".format(
-            PLAYBOOK_DIR, self.PLAYBOOKS[self.component])
-        playbook = "{}/playbooks/{}".format(
-            PLAYBOOK_DIR, self.PLAYBOOKS[self.component])
+        var_file = "{}/vars/{}".format(
+            self.playbook_dir, self.PLAYBOOKS[self.component])
+        playbook = "{}/{}".format(
+            self.playbook_dir, self.PLAYBOOKS[self.component])
         need_ansible_run = self._update_yml(var_file, self.mapped_dict)
         if need_ansible_run or force:
             # NOTE: it may make sense to have some of these params to be get
             # from user in later point.  But currently they are constants
             runner_params = dict(
-                inventory="{}/playbooks/inventory/all-in-one".format(PLAYBOOK_DIR),
+                inventory="{}/inventory/all-in-one".format(self.playbook_dir),
                 playbook=playbook,
                 tags=tags,
                 verbosity=0
@@ -177,9 +190,9 @@ class ConfigManager(object):
             server_list = list(set(servers))
             config_dict['GLOBAL'].update({'analyticsdb_list': server_list})
             config_dict['GLOBAL'].update({'analyticsdb_seed_list': seed_list})
-        playbook = "{}/playbooks/contrailctl_config.yml".format(PLAYBOOK_DIR)
+        playbook = "{}/contrailctl_config.yml".format(self.playbook_dir)
         runner_params = dict(
-            inventory='{}/playbooks/inventory/all-in-one'.format(PLAYBOOK_DIR),
+            inventory='{}/inventory/all-in-one'.format(self.playbook_dir),
             playbook=playbook,
             run_data={'contrailctl_config_file': self.config_file, 'contrailctl_config_data': config_dict},
             verbosity=0
@@ -187,18 +200,6 @@ class ConfigManager(object):
         ansible_runner = Runner(**runner_params)
         stats = ansible_runner.run()
         return stats
-
-
-def config_sync(config_file, component, force=False, tags=None, verbose=False):
-    cm = ConfigManager(config_file, component)
-    stats = cm.sync(force, tags, verbose)
-    if stats:
-        if stats.failures:
-            return 1
-        else:
-            return 0
-    else:
-        return 1
 
 
 def main(args=sys.argv[1:]):
@@ -256,6 +257,7 @@ def main(args=sys.argv[1:]):
         "remove", help="remove nodes from the cluster configuration",
         parents=[ap_node_common, ap_common])
 
+
     args = ap.parse_args()
     if not args.config_file:
         if hasattr(args, 'component'):
@@ -290,7 +292,15 @@ def main(args=sys.argv[1:]):
             return_value = 0
             if args.resource == 'config':
                 if args.action == 'sync':
-                    return_value = config_sync(args.config_file, args.component, args.force, args.tags, args.verbose)
+                    cm = ConfigManager(args.config_file, args.component)
+                    stats = cm.sync(args.force, args.tags, args.verbose)
+                    if stats:
+                        if stats.failures:
+                            return_value = 1
+                        else:
+                            return_value = 0
+                    else:
+                        return_value = 1
                 elif args.action == 'validate':
                     cm = ConfigManager(args.config_file, args.component)
                     valid = cm.validate()
