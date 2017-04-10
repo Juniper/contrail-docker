@@ -87,6 +87,10 @@
           "description": "An optional dictionary of hostname and ip to write /etc/hosts entries",
           "type" : "object"
         },
+        "ansible_test_mode": {
+          "description": "parameter to tell ansible to test configuration code",
+          "type": "boolean"
+        },
         "external_lb": {
           "description": "Flag to identify the whether the loadbalancer is internaly or externally hosted",
           "type": "boolean"
