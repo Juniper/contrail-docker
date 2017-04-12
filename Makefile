@@ -2,7 +2,6 @@
 #
 # KEEP_IMAGES - to avoid cleaning up container images locally
 #
-##
 
 # If SKU is not defined, default to mitaka
 ifndef CONTRAIL_SKU
