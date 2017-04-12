@@ -13,9 +13,7 @@ ifndef CONTRAIL_REPO_IP
 	export CONTRAIL_REPO_IP := $(shell ip a l docker0 | awk '/inet / {print $$2}' | cut -f1 -d'/')
 endif
 
-ifndef SSHUSER
-	export SSHUSER := root
-endif
+export SSHUSER ?= root
 
 ifdef docker_http_proxy
 	export http_proxy_build_arg :=  --build-arg http_proxy=$(docker_http_proxy) --build-arg https_proxy=$(docker_http_proxy) --build-arg no_proxy=$(CONTRAIL_REPO_IP)
