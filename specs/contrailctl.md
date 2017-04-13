@@ -43,14 +43,14 @@ can use this tool to do any above mentioned operations.
 ```
 $ contrailctl config sync -h
 usage: contrailctl config sync [-h] [-f CONFIG_FILE] -c
-                               {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager}
+                               {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager,cephcontroller}
                                [-F] [-t TAGS]
 
 optional arguments:
   -h, --help            show this help message and exit
   -f CONFIG_FILE, --config-file CONFIG_FILE
                         Master config file path
-  -c {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager}, --component {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager}
+  -c {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager,cephcontroller}, --component {controller,analyticsdb,analytics,agent,lb,kubemanager,mesosmanager,cephcontroller}
                         Component[s] to be configured
   -F, --force           Whether to apply config forcibly
   -t TAGS, --tags TAGS  comma separated list of tags to runspecific set of

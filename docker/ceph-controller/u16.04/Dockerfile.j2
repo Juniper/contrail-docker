@@ -1,0 +1,7 @@
+FROM contrail-base-u16.04:{{ contrail_version }}
+LABEL Name=contrail-ceph-controller-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=ceph-controller \
+      Description="Dockerimage for Contrail Ceph Controller" Vendor="Juniper Networks"
+RUN contrailctl config sync -c cephcontroller -F -v -t install
+EXPOSE 6789 6005 6006
