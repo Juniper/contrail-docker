@@ -175,6 +175,14 @@
         "uve_partition_count": {
           "description": "UVE data is partitioned to improve analytics performance, this configuration set number of partitions",
           "type": "string"
+        },
+        "sandesh_ssl_enable": {
+          "description": "Whether to enable SSL for sandesh connection",
+          "type": "boolean"
+        },
+        "introspect_ssl_enable": {
+          "description": "Whether to enable SSL for introspect connection",
+          "type": "boolean"
         }
       }
     },
