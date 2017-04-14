@@ -36,6 +36,10 @@
         "compile_vrouter_module": {
           "description": "Whether to compile vrouter module or not",
           "type": "boolean"
+        },
+        "vrouter_agent_ip": {
+          "description": "vrouter agent ip",
+          "type": "string"
         }
       }
     }
