@@ -83,6 +83,10 @@
             "openshift"
           ]
         },
+        "nested_mode": {
+          "description": "Nested mode kubernetes or not",
+          "type": "boolean"
+        },
         "hosts_entries": {
           "description": "An optional dictionary of hostname and ip to write /etc/hosts entries",
           "type" : "object"
@@ -99,13 +103,11 @@
         },
         "controller_ip": {
           "description": "An IP address using which one can connect to all public services within controller container. This can be a virtual IP handled by load balancer in case of multi-node controllers.",
-          "type": "string",
-          "format": "ipv4"
+          "type": "string"
         },
         "config_ip": {
           "description": "IP Address to connect config api. Usually this is same as controller_ip and that is the default, but in case if you have set of controllers without configs then this ip can be different.",
-          "type": "string",
-          "format": "ipv4"
+          "type": "string"
         },
         "analytics_list": {
           "description": "List of analytics server addresses",
@@ -113,8 +115,7 @@
         },
         "analytics_ip": {
           "description": "An IP address using which one can connect to analytics-api service within analytics container. This can be a virtual IP handled by load balancer in case of multi-node analytics. This will be configured in various contrail services configurations for connectting to contrail-analytics-api.",
-          "type": "string",
-          "format": "ipv4"
+          "type": "string"
         },
         "external_rabbitmq_servers": {
           "description": "List of externally managed rabbitmq servers to be used for controller services.",
@@ -194,8 +195,7 @@
         },
         "ip": {
           "description": "Ip address of the host running keystone",
-          "type": "string",
-          "format": "ipv4"
+          "type": "string"
         },
         "admin_port": {
           "description": "Keystone admin port in which the keystone is listening, default 35357",
