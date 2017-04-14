@@ -53,7 +53,7 @@ ifneq (,$(filter u14.04 u16.04,$(OS)))
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 	export CONTRAIL_REPO_INTERNAL_PORT=1567
 ifndef CONTAINERS
-	export CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager ceph-controller
+	export CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager
 endif
 endif
 
