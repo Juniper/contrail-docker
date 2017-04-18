@@ -1,7 +1,0 @@
-FROM contrail-base-u16.04:{{ contrail_version }}
-LABEL Name=contrail-lb-$OS \
-      Version="$CONTRAIL_VERSION" \
-      contrail.role=lb \
-      Description="Dockerimage for Contrail LB" Vendor="Juniper Networks"
-RUN contrailctl config sync -c lb -F -v -t install
-EXPOSE 8082 5998 9696 8081
