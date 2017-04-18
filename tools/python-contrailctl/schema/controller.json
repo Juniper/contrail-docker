@@ -40,68 +40,107 @@
       }
     },
     "CONTROL": {
-      "allOf":[
-        {
-          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+      "id": "control",
+      "type": "object",
+      "description": "CONTROL section",
+      "additionalProperties": false,
+      "properties": {
+        "log": {
+          "description": "log file",
+          "type": "string"
         },
-        {
-          "properties": {
-            "asn": {
-              "description": "asn for control node",
-              "type": "string"
-            },
-            "external_routers": {
-              "description": "external router list",
-              "type": "array"
-            },
-            "bgp_port": {
-              "description": "bgp port",
-              "type": "string"
-            },
-            "xmpp_server_port": {
-              "description": "xmpp server port",
-              "type": "string"
-            }
-          }
+        "log_level": {
+          "description": "",
+          "type": "string"
+        },
+        "introspect_port": {
+          "description": "service introspect port",
+          "type": "string"
+        },
+        "listen_port": {
+          "description": "service listen port",
+          "type": "string"
+        },
+        "asn": {
+          "description": "asn for control node",
+          "type": "string"
+        },
+        "external_routers": {
+          "description": "external router list",
+          "type": "array"
+        },
+        "bgp_port": {
+          "description": "bgp port",
+          "type": "string"
+        },
+        "xmpp_server_port": {
+          "description": "xmpp server port",
+          "type": "string"
         }
-      ]
+      }
     },
     "DNS": {
-      "allOf": [
-        {
-          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+      "id": "dns",
+      "type": "object",
+      "description": "dns section",
+      "additionalProperties": false,
+      "properties": {
+        "log": {
+          "description": "log file",
+          "type": "string"
         },
-        {
-          "properties": {
-            "named_log_file": {
-              "description": "named log file",
-              "type": "string"
-            },
-            "dns_server_port": {
-              "description": "dns server port",
-              "type": "string"
-            }
-          }
+        "log_level": {
+          "description": "",
+          "type": "string"
+        },
+        "introspect_port": {
+          "description": "service introspect port",
+          "type": "string"
+        },
+        "listen_port": {
+          "description": "service listen port",
+          "type": "string"
+        },
+        "named_log_file": {
+          "description": "named log file",
+          "type": "string"
+        },
+        "dns_server_port": {
+          "description": "dns server port",
+          "type": "string"
         }
-      ]
+      }
     },
     "CASSANDRA": {
       "$ref": "definitions.json#/definitions/cassandra_config"
     },
     "API": {
-      "allOf": [
-        {
-          "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+      "id": "api",
+      "type": "object",
+      "description": "",
+      "additionalProperties": false,
+      "properties": {
+        "log": {
+          "description": "log file",
+          "type": "string"
         },
-        {
-          "properties": {
-            "list_optimization_enabled": {
-              "description": "Enable optimizations to list resources",
-              "type": "boolean"
-            }
-          }
+        "log_level": {
+          "description": "",
+          "type": "string"
+        },
+        "introspect_port": {
+          "description": "service introspect port",
+          "type": "string"
+        },
+        "listen_port": {
+          "description": "service listen port",
+          "type": "string"
+        },
+        "list_optimization_enabled": {
+          "description": "Enable optimizations to list resources",
+          "type": "boolean"
         }
-      ]
+      }
     },
     "SCHEMA": {
       "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
