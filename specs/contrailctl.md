@@ -30,6 +30,8 @@ Note: each contrail container should have separate contrailctl configuration fil
     analyticsdb - /etc/contrailctl/analyticsdb.conf
     vrouter agent - /etc/contrailctl/agent.conf
 
+![Container startup/contrailctl flow](images/contrailctl.jpg "container startup/contrailctl flow")
+
 ## 3.1 Alternatives considered
 None
 
