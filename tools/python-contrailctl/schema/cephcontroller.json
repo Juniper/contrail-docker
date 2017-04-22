@@ -7,6 +7,38 @@
   "properties": {
     "GLOBAL": {
       "$ref": "definitions.json#/definitions/global_config"
+    },
+    "CEPH_CONTROLLER": {
+      "id": "ceph_controller",
+      "type": "object",
+      "description": "Global values for ceph controller container",
+      "additionalProperties": false,
+      "properties": {
+        "ceph_monname_list": {
+          "description": "list of ceph monitor hostnames",
+          "type": "array"
+        },
+        "ceph_monip_list": {
+          "description": "list of ceph monitor ips",
+          "type": "array"
+        },
+        "cluster_fsid": {
+          "description": "Ceph cluster fsid",
+          "type": "string"
+        },
+        "mon_key": {
+          "description": "monitor authentication key",
+          "type": "string"
+        },
+        "adm_key": {
+          "description": "admin authentication key",
+          "type": "string"
+        },
+        "osd_key": {
+          "description": "bootstrap osd authentication key",
+          "type": "string"
+        }
+      }
     }
   }
 }
