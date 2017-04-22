@@ -45,4 +45,13 @@ ANALYTICSDB_PARAM_MAP = {}
 AGENT_PARAM_MAP = {}
 KUBEMANAGER_PARAM_MAP = {}
 MESOSMANAGER_PARAM_MAP = {}
-CEPHCONTROLLER_PARAM_MAP = {}
+CEPHCONTROLLER_PARAM_MAP = dict(
+    CEPH_CONTROLLER=dict(
+        cluster_fsid="cluster_fsid",
+        ceph_monip_list="ceph_monip_list",
+        ceph_monname_list="ceph_monname_list",
+        mon_key="mon_key",
+        osd_key="osd_key",
+        adm_key="adm_key",
+    )
+)

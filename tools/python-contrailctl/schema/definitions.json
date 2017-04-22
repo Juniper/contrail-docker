@@ -188,6 +188,10 @@
         "introspect_ssl_enable": {
           "description": "Whether to enable SSL for introspect connection",
           "type": "boolean"
+        },
+        "ceph_controller_list": {
+          "description": "Storage ceph controller list",
+          "type": "array"
         }
       }
     },
