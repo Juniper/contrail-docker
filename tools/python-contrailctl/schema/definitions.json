@@ -99,11 +99,9 @@
           "description": "Flag to identify the whether the loadbalancer is internaly or externally hosted",
           "type": "boolean"
         },
-        "controller_list": {
-          "description": "controller server IP addresses - this will be used to configure rabbitmq, zookeeper, cassandra servers in various contrail service configurations and configure load balancer for variuos contrail services that needed to be loadbalanced",
-          "type": "array",
-          "variable_name": "contrail_control_list",
-          "default_value": "hite"
+        "controller_nodes": {
+          "description": "Comma seperated list of controller server IP addresses - this will be used to configure rabbitmq, zookeeper, cassandra servers in various contrail service configurations and configure load balancer for variuos contrail services that needed to be loadbalanced",
+          "type": "string"
         },
         "controller_ip": {
           "description": "An IP address using which one can connect to all public services within controller container. This can be a virtual IP handled by load balancer in case of multi-node controllers.",
@@ -113,25 +111,25 @@
           "description": "IP Address to connect config api. Usually this is same as controller_ip and that is the default, but in case if you have set of controllers without configs then this ip can be different.",
           "type": "string"
         },
-        "analytics_list": {
-          "description": "List of analytics server addresses",
-          "type": "array"
+        "analytics_nodes": {
+          "description": "Comma separated list of analytics server addresses",
+          "type": "string"
         },
         "analytics_ip": {
           "description": "An IP address using which one can connect to analytics-api service within analytics container. This can be a virtual IP handled by load balancer in case of multi-node analytics. This will be configured in various contrail services configurations for connectting to contrail-analytics-api.",
           "type": "string"
         },
         "external_rabbitmq_servers": {
-          "description": "List of externally managed rabbitmq servers to be used for controller services.",
-          "type": "array"
+          "description": "Comma separated list of externally managed rabbitmq servers to be used for controller services.",
+          "type": "string"
         },
         "external_zookeeper_servers": {
-          "description": "List of externally managed zookeeper servers to be used for controller services.",
-          "type": "array"
+          "description": "Comma separated list of externally managed zookeeper servers to be used for controller services.",
+          "type": "string"
         },
         "external_configdb_servers": {
-          "description": "List of externally managed cassandra(configdb) servers to be used for controller services.",
-          "type": "array"
+          "description": "Comma separated list of externally managed cassandra(configdb) servers to be used for controller services.",
+          "type": "string"
         },
         "multi_tenancy": {
           "description": "Enable or disable multi_tenancy The effects of this configuration are: 1. multi_tenancy for config_api is enabled/disabled, 2. static_auth is used in webui in case of multi_tenancy disabled",
@@ -149,25 +147,25 @@
           "description": "Whether to enable config_service or not, by default it is enabled",
           "type": "boolean"
         },
-        "config_server_list": {
+        "config_nodes": {
           "description": "While making config component optional within controller container, it fails the assumption that all nodes in controller_list has config running and thus need to set another optional entry to be configured in case config is not running on all controller nodes",
-          "type": "array"
+          "type": "string"
         },
-        "config_seed_list": {
-          "description": "config_seed_list is to support adding new nodes to existing cluster, in which case config_seed_list is the list of existing servers in the cluster and this list will be used for various clusters like rabbitmq, cassandra to join new nodes to them",
-          "type": "array"
+        "config_seeds": {
+          "description": "config_seeds is to support adding new nodes to existing cluster, in which case config_seed_list is the list of existing servers in the cluster and this list will be used for various clusters like rabbitmq, cassandra to join new nodes to them",
+          "type": "string"
         },
-        "analyticsdb_seed_list": {
+        "analyticsdb_seeds": {
           "description": "this is to support adding new nodes to existing cluster, in which case analyticsdb_seed_list is the list of existing servers in the cluster and this list will be used for various clusters like kafka, cassandra to join new nodes to them",
-          "type": "array"
+          "type": "string"
         },
-        "analyticsdb_list": {
-          "description": "analyticsdb list",
-          "type": "array"
+        "analyticsdb_nodes": {
+          "description": "Comma separated list of analyticsdb servers",
+          "type": "string"
         },
-        "compute_list": {
-          "description": "compute node list",
-          "type": "array"
+        "compute_nodes": {
+          "description": "Comma separated list of compute node list",
+          "type": "string"
         },
         "xmpp_auth_enable": {
           "description": "Whether to enable contrail control and contrail vrouter agent to communicate over SSL",
