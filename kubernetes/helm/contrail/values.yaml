@@ -26,14 +26,14 @@ global:
   # entries are required, unless there is an external dns infrastructure to support it
   # hosts_entries: '{"node1": "192.168.0.11", "node2": "192.168.0.12", "node3": "192.168.0.13"}'
 
-  # controller_list - list of controller nodes
-  # controller_list: '["192.168.0.11", "192.168.0.12", "192.168.0.13"]'
+  # controllers - comma separated list of controller ip addresses
+  # controllers: 192.168.0.11,192.168.0.12,192.168.0.13
 
-  # analyticsdb_list - list of analyticsdb nodes
-  # analyticsdb_list: '["192.168.0.11", "192.168.0.12", "192.168.0.13"]'
+  # analyticsdb_servers - comma separated list of analyticsdb servers
+  # analyticsdb_servers: 192.168.0.11,192.168.0.12,192.168.0.13
 
-  # analytics_list - list of analytics nodes
-  # analytics_list: '["192.168.0.109"]'
+  # analytics_servers - comma separated list of analytics nodes
+  # analytics_list: 192.168.0.11,192.168.0.12,192.168.0.13
 
   # cloud_orchestrator: values - kubernetes, mesos, openshift, openstack
   cloud_orchestrator: kubernetes
