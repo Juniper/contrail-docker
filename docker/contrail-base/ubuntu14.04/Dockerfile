@@ -1,4 +1,4 @@
-FROM hkumar/ubuntu:14.04.5
+FROM 10.84.34.155:5000/ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
 ARG CONTRAIL_ANSIBLE_TAR
