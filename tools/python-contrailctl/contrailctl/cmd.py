@@ -122,13 +122,16 @@ class ConfigManager(object):
             print(error.message)
             return False
 
-    def sync(self, force=False, tags=None, verbose=False):
+    def sync(self, force=False, tags=None, verbose=False, extra_vars=None):
         """Sync configuration from container master config to internal service
         configs
         :param force: Forcefully run the sync even if there is no difference in
                       configurations
         :param tags: specific ansible tags to run
+        :param verbose: Verbose output
+        :param extra_vars: extra vars to be passed to ansible
         """
+        extra_vars_dict = dict(x.split('=') for x in extra_vars)
         if not tags:
             tags = ['configure', 'service', 'provision']
         valid = self.validate()
@@ -146,7 +149,8 @@ class ConfigManager(object):
                 inventory="{}/inventory/all-in-one".format(self.playbook_dir),
                 playbook=playbook,
                 tags=tags,
-                verbosity=0
+                verbosity=0,
+                run_data=extra_vars_dict
             )
             ansible_runner = Runner(**runner_params)
             stats = ansible_runner.run(verbose)
@@ -237,7 +241,8 @@ def main(args=sys.argv[1:]):
                                     "specific set of ansible code")
     p_config_sync.add_argument("-v", "--verbose", action='store_true',
                                help="Verbose")
-
+    p_config_sync.add_argument('-e', '--extra-vars', nargs='*',
+                    help="Extra variables to be passed to ansible")
     sp_config.add_parser("validate", help="Validate the config",
                                              parents=[ap_common])
 
@@ -291,7 +296,7 @@ def main(args=sys.argv[1:]):
             if args.resource == 'config':
                 if args.action == 'sync':
                     cm = ConfigManager(args.config_file, args.component)
-                    stats = cm.sync(args.force, args.tags, args.verbose)
+                    stats = cm.sync(args.force, args.tags, args.verbose, args.extra_vars)
                     if stats:
                         if stats.failures:
                             return_value = 1
