@@ -1,4 +1,4 @@
-FROM 10.84.34.155:5000/ubuntu:16.04
+FROM 10.84.34.155:5000/contrail-base-os-images-ubuntu:16.04.2
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
 ARG CONTRAIL_ANSIBLE_TAR
@@ -13,7 +13,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG apt_install="apt-get install -yq --force-yes --no-install-recommends --no-install-suggests "
 ENV ANSIBLE_INVENTORY="all-in-one"
 ARG PACKAGES_ANSIBLE="ansible iproute2 python-configparser vim ssh-client"
-ARG CONTRAIL_REPO_MIRROR_SNAPSHOT=10072016
+ARG CONTRAIL_REPO_MIRROR_SNAPSHOT=04042017
 COPY contrail-ubuntu-mirror.key /
 RUN apt-key add /contrail-ubuntu-mirror.key;\
     echo > /etc/apt/sources.list ;\
