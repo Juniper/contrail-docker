@@ -10,6 +10,9 @@ from .runner import Runner
 from jsonschema import validate,FormatChecker, exceptions, RefResolver
 import json
 
+from ansible.executor.stats import AggregateStats
+
+
 LOCK_PATH = "/var/lock/contrailctl"
 PLAYBOOK_DIR = "/contrail-ansible-internal"
 
@@ -157,7 +160,7 @@ class ConfigManager(object):
             return stats
         else:
             print("All configs are in sync")
-            return None
+            return AggregateStats()
 
     def node_config(self, action, type, servers, config_servers=None, seed_list=None):
         """add/remove node from cluster configuration
