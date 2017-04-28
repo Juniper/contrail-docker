@@ -13,39 +13,18 @@ spec:
       labels:
         app: {{ template "agent.fullname" . }}
         contrail_function: "contrail-vrouter"
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
-        scheduler.alpha.kubernetes.io/affinity: >
-          {
-            "nodeAffinity": {
-              "requiredDuringSchedulingIgnoredDuringExecution": {
-                "nodeSelectorTerms": [
-                  {
-                    "matchExpressions": [
-                      {
-                        "key": "kubeadm.alpha.kubernetes.io/role",
-                        "operator": "NotIn",
-                        "values": ["master"]
-                      },
-                      {
-                        "key": "contrail.role",
-                        "operator": "NotIn",
-                        "values": ["controller"]
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        scheduler.alpha.kubernetes.io/tolerations: >
-          [
-           {
-              "key":"CriticalAddonsOnly",
-              "operator":"Exists"
-           }
-          ]
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: DoesNotExist
+              - key: "contrail.role"
+                operator: "NotIn"
+                values: 
+                - controller
       hostNetwork: true
       containers:
       - name: contrail-agent

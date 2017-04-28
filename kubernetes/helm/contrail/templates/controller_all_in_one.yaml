@@ -14,39 +14,18 @@ spec:
       labels:
         app: {{ template "controller.fullname" . }}
         contrail_function: "contrail-controller"
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
-        scheduler.alpha.kubernetes.io/affinity: >
-          {
-            "nodeAffinity": {
-              "requiredDuringSchedulingIgnoredDuringExecution": {
-                "nodeSelectorTerms": [
-                  {
-                    "matchExpressions": [
-                      {
-                        "key": "kubeadm.alpha.kubernetes.io/role",
-                        "operator": "In",
-                        "values": ["master"]
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        scheduler.alpha.kubernetes.io/tolerations: >
-          [
-            {
-              "key":"dedicated",
-              "value":"master",
-              "effect":"NoSchedule"
-            },
-           {
-              "key":"CriticalAddonsOnly",
-              "operator":"Exists"
-           }
-          ]
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/master
+                operator: Exists
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
       hostNetwork: true
       containers:
       - name: contrail-controller
