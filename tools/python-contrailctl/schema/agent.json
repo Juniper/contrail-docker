@@ -40,6 +40,10 @@
         "vrouter_agent_ip": {
           "description": "vrouter agent ip",
           "type": "string"
+        },
+        "hypervisor": {
+          "description": "Type of hypervisor: kvm, xen, vmware. (optional)",
+          "type": string
         }
       }
     }
