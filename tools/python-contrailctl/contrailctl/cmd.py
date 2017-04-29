@@ -134,6 +134,7 @@ class ConfigManager(object):
         :param verbose: Verbose output
         :param extra_vars: extra vars to be passed to ansible
         """
+        extra_vars = extra_vars or {}
         extra_vars_dict = dict(x.split('=') for x in extra_vars)
         if not tags:
             tags = ['configure', 'service', 'provision']
