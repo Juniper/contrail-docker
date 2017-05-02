@@ -37,6 +37,9 @@ CONTROLLER_PARAM_MAP = dict(
     API=dict(
         list_optimization_enabled="list_optimization_enabled",
         multi_tenancy="multi_tenancy",
+    ),
+    WEBUI=dict(
+        webui_storage_enable="webui_storage_enable"
     )
 )
 
