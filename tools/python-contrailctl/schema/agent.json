@@ -42,6 +42,18 @@
           "type": "string"
         }
       }
+    },
+    "HYPERVISOR": {
+      "id": "hypervisor",
+      "type": "object",
+      "description": "HYPERVISOR configuration section",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "Type of hypervisor: kvm, xen, vmware. (optional)",
+          "type": "string"
+        }
+      }
     }
   }
 }
