@@ -186,6 +186,30 @@
         "introspect_ssl_enable": {
           "description": "Whether to enable SSL for introspect connection",
           "type": "boolean"
+        },
+        "apiserver_auth_protocol": {
+          "description": "api-server auth protocol",
+          "type": "string",
+          "enum": [
+            "http",
+            "https"
+          ]
+        },
+        "apiserver_certfile": {
+          "description": "api-server SSL certificate to install and use for API ports",
+          "type": "string"
+        },
+        "apiserver_keyfile": {
+          "description": "api-server SSL key to use with certificate.",
+          "type": "string"
+        },
+        "apiserver_cafile": {
+          "description": "api-server SSL CA to use with the certificate and key provided - Required only if using privately signed certfile and keyfile",
+          "type": "string"
+        },
+        "apiserver_insecure": {
+          "description": "Whether to validate api-server SSL certificate.",
+          "type": "boolean"
         }
       }
     },
@@ -234,6 +258,22 @@
         "admin_tenant": {
           "description": "Keystone admin tenant",
           "type": "string"
+        },
+        "certfile": {
+          "description": "Keystone SSL certificate to install and use for API ports",
+          "type": "string"
+        },
+        "keyfile": {
+          "description": "Keystone SSL key to use with certificate.",
+          "type": "string"
+        },
+        "cafile": {
+          "description": "Keystone SSL CA to use with the certificate and key provided - Required only if using privately signed certfile and keyfile",
+          "type": "string"
+        },
+        "insecure": {
+          "description": "Whether to validate Keystone SSL certificate.",
+          "type": "boolean"
         }
       }
     }
