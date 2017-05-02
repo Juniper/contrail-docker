@@ -9,4 +9,4 @@ ENTRYPOINT /entrypoint.sh
 ENV CONTRAIL_ROLE cephcontroller
 RUN echo $CONTRAIL_ROLE > /etc/contrail-role
 RUN contrailctl config sync -F -v -t install
-EXPOSE 6789 6005 6006
+EXPOSE 6789 5005 5006
