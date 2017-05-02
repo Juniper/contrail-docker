@@ -37,6 +37,10 @@
         "osd_key": {
           "description": "bootstrap osd authentication key",
           "type": "string"
+        },
+        "ceph_rest_api_port": {
+          "description": "Ceph rest api port",
+          "type": "string"
         }
       }
     }
