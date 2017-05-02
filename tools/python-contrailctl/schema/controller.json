@@ -56,6 +56,10 @@
         "https_listen_port": {
           "description": "https listen port",
           "type": "string"
+        },
+	"webui_storage_enable": {
+	  "description": "contrail storage enable",
+	  "type": "boolean"
         }
       }
     },
