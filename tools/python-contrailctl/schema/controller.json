@@ -38,7 +38,19 @@
       "additionalProperties": false,
       "properties": {
         "user": {
-          "description": "rabbitmq user",
+          "description": "Rabbit username to access rabbitmq",
+          "type": "string"
+        },
+        "password": {
+          "description": "Rabbit password to access rabbitmq",
+          "type": "string"
+        },
+        "vhost": {
+          "description": "vhost for rabbitmq",
+          "type": "string"
+        },
+        "owner": {
+          "description": "rabbitmq owner",
           "type": "string"
         },
         "group": {
@@ -154,6 +166,10 @@
         },
         "listen_port": {
           "description": "service listen port",
+          "type": "string"
+        },
+        "listen_address": {
+          "description": "Listen IP address of the api-server",
           "type": "string"
         },
         "list_optimization_enabled": {
