@@ -155,6 +155,18 @@
         "list_optimization_enabled": {
           "description": "Enable optimizations to list resources",
           "type": "boolean"
+        },
+        "rabbit_vhost": {
+          "description": "vhost for abbit",
+          "type": "string"
+        },
+        "rabbit_user": {
+          "description": "Rabbit user",
+          "type": "string"
+        },
+        "rabbit_password": {
+          "description": "Rabbit password",
+          "type": "string"
         }
       }
     },
