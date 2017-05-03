@@ -24,11 +24,11 @@
         "external_routers_list": {
           "description": "dictionary of external, physical routers in form of {name1: ip1, name2: ip2}",
           "type": "object"
-        }
+        },
         "bgp_asn": {
           "description": "asn of control node",
           "type": "string"
-        },
+        }
       }
     },
     "RABBITMQ": {
