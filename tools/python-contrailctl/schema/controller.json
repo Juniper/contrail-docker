@@ -36,20 +36,7 @@
       }
     },
     "RABBITMQ": {
-      "id": "rabbitmq",
-      "type": "object",
-      "description": "rabbitmq specific configurations",
-      "additionalProperties": false,
-      "properties": {
-        "user": {
-          "description": "rabbitmq user",
-          "type": "string"
-        },
-        "group": {
-          "description": "rabbitmq group",
-          "type": "string"
-        }
-      }
+      "$ref": "definitions.json#/definitions/rabbitmq_config"
     },
     "WEBUI": {
       "id": "webui",
@@ -158,6 +145,10 @@
         },
         "listen_port": {
           "description": "service listen port",
+          "type": "string"
+        },
+        "listen_address": {
+          "description": "Listen IP address of the api-server",
           "type": "string"
         },
         "list_optimization_enabled": {
