@@ -210,6 +210,10 @@
         "apiserver_insecure": {
           "description": "Whether to validate api-server SSL certificate.",
           "type": "boolean"
+        },
+        "redis_password": {
+          "description": "Redis password.",
+          "type": "string"
         }
       }
     },
