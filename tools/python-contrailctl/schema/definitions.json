@@ -131,10 +131,6 @@
           "description": "Comma separated list of externally managed cassandra(configdb) servers to be used for controller services.",
           "type": "string"
         },
-        "multi_tenancy": {
-          "description": "Enable or disable multi_tenancy The effects of this configuration are: 1. multi_tenancy for config_api is enabled/disabled, 2. static_auth is used in webui in case of multi_tenancy disabled",
-          "type": "boolean"
-        },
         "enable_config_service": {
           "description": "Whether to enable config service or not, by default it is enabled",
           "type": "boolean"
