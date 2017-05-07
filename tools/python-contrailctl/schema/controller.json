@@ -159,6 +159,10 @@
         "list_optimization_enabled": {
           "description": "Enable optimizations to list resources",
           "type": "boolean"
+        },
+        "aaa_mode": {
+          "description": "Set AAA mode. One of no-auth, cloud-admin or rbac. Default is cloud-admin",
+          "type": "string"
         }
       }
     },
