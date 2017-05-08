@@ -87,6 +87,9 @@
     },
     "TOPOLOGY": {
       "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+    },
+    "CASSANDRA": {
+      "$ref": "definitions.json#/definitions/cassandra_config"
     }
   }
 }
