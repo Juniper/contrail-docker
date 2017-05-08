@@ -35,21 +35,17 @@
           "description": "Directory to store commitlogs",
           "type": "string"
         },
-        "saved_caches_dir": {
-          "description": "The directory location where table key and row caches are stored",
-          "type": "string"
-        },
         "data_dirs": {
           "description": "A list of directory locations where table data is stored",
           "type": "array"
         },
-        "java_max_heap_size": {
-          "description": "Java maximum heap size",
+        "user": {
+          "description": "cassandra user",
           "type": "string"
         },
-        "java_max_heap_newsize": {
-          "description": "Java maximum newgen heap size",
-          "type": "array"
+        "password": {
+          "description": "cassandra password",
+          "type": "string"
         }
       }
     },
@@ -213,6 +209,22 @@
         },
         "redis_password": {
           "description": "Redis password.",
+          "type": "string"
+        },
+        "configdb_cassandra_user": {
+          "description": "cassandra user to access configdb",
+          "type": "string"
+        },
+        "configdb_cassandra_password": {
+          "description": "cassandra password to access configdb",
+          "type": "string"
+        },
+        "analyticsdb_cassandra_user": {
+          "description": "cassandra user to access analyticsdb",
+          "type": "string"
+        },
+        "analyticsdb_cassandra_password": {
+          "description": "cassandra password to access analyticsdb",
           "type": "string"
         }
       }
