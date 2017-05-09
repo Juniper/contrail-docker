@@ -8,14 +8,25 @@
     "GLOBAL": {
       "$ref": "definitions.json#/definitions/global_config"
     },
-    "OPENSHIFT": {
-      "id": "openshift",
+    "AUTH": {
+      "$ref": "definitions.json#/definitions/keystone_config"
+    },
+    "KUBERNETES": {
+      "id": "kubernetes",
       "type": "object",
-      "description": "OPENSHIFT section",
+      "description": "kubernetes section",
       "additionalProperties": false,
       "properties": {
+        "cluster_name": {
+          "description": "Name of kubernetes cluster",
+          "type": "string"
+        },
+        "cluster_network": {
+          "description": "Virtual Network FQName used by kubernetes cluster.",
+          "type": "object"
+        },
         "token": {
-          "description": "openshift master token",
+          "description": "kubernetes api server access token",
           "type": "string"
         }
       }
