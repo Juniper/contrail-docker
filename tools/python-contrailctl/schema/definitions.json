@@ -119,6 +119,14 @@
           "description": "Comma separated list of externally managed cassandra(configdb) servers to be used for controller services.",
           "type": "string"
         },
+        "configdb_cassandra_user": {
+          "description": "Cassandra username to access configdb",
+          "type": "string"
+        },
+        "configdb_cassandra_password": {
+          "description": "Cassandra password to access configb",
+          "type": "string"
+        },
         "enable_config_service": {
           "description": "Whether to enable config service or not, by default it is enabled",
           "type": "boolean"
