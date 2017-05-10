@@ -38,7 +38,7 @@
         "data_dirs": {
           "description": "A list of directory locations where table data is stored",
           "type": "array"
-        },
+        }
       }
     },
     "global_config": {
