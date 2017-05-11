@@ -89,7 +89,8 @@
         },
         "controller_nodes": {
           "description": "Comma seperated list of controller server IP addresses - this will be used to configure rabbitmq, zookeeper, cassandra servers in various contrail service configurations and configure load balancer for variuos contrail services that needed to be loadbalanced",
-          "type": "string"
+          "type": "string",
+          "is_csip":" True"
         },
         "controller_ip": {
           "description": "An IP address using which one can connect to all public services within controller container. This can be a virtual IP handled by load balancer in case of multi-node controllers.",
@@ -101,7 +102,8 @@
         },
         "analytics_nodes": {
           "description": "Comma separated list of analytics server addresses",
-          "type": "string"
+          "type": "string",
+          "is_csip":" True"
         },
         "analytics_ip": {
           "description": "An IP address using which one can connect to analytics-api service within analytics container. This can be a virtual IP handled by load balancer in case of multi-node analytics. This will be configured in various contrail services configurations for connectting to contrail-analytics-api.",
@@ -133,7 +135,9 @@
         },
         "config_nodes": {
           "description": "While making config component optional within controller container, it fails the assumption that all nodes in controller_list has config running and thus need to set another optional entry to be configured in case config is not running on all controller nodes",
-          "type": "string"
+          "type": "string",
+          "format": "odd_count",
+          "is_csip": "True"
         },
         "config_seeds": {
           "description": "config_seeds is to support adding new nodes to existing cluster, in which case config_seed_list is the list of existing servers in the cluster and this list will be used for various clusters like rabbitmq, cassandra to join new nodes to them",
@@ -145,11 +149,13 @@
         },
         "analyticsdb_nodes": {
           "description": "Comma separated list of analyticsdb servers",
-          "type": "string"
+          "type": "string",
+          "is_csip":" True"
         },
         "compute_nodes": {
           "description": "Comma separated list of compute node list",
-          "type": "string"
+          "type": "string",
+          "is_csip":" True"
         },
         "xmpp_auth_enable": {
           "description": "Whether to enable contrail control and contrail vrouter agent to communicate over SSL",
