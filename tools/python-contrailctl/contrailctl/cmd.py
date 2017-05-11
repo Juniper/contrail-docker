@@ -4,13 +4,16 @@ import sys
 import os
 import fcntl
 import time
-from .config import Configurator
-from .map import *
-from .runner import Runner
-from jsonschema import validate,FormatChecker, exceptions, RefResolver
 import json
 
 from ansible.executor.stats import AggregateStats
+from jsonschema import validate, exceptions, RefResolver
+
+from .config import Configurator
+from .map import *
+from .runner import Runner
+from .validator import ContrailValidator, contrail_formatchecker
+
 
 
 LOCK_PATH = "/var/lock/contrailctl"
@@ -121,7 +124,11 @@ class ConfigManager(object):
             print("Schema file is missing - {}".format(schema_path))
             return True
         try:
-            validate(data, json.loads(schema), format_checker=FormatChecker(), resolver=resolver)
+            validate(data,
+                    json.loads(schema),
+                    cls=ContrailValidator,
+                    format_checker=contrail_formatchecker,
+                    resolver=resolver)
             return True
         except exceptions.ValidationError as error:
             print(error.message)
