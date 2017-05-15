@@ -48,7 +48,48 @@
       }
     },
     "ANALYTICS_COLLECTOR": {
-      "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
+      "id": "analytics_collector",
+      "type": "object",
+      "description": "analytics collector section",
+      "additionalProperties": false,
+      "properties": {
+        "log": {
+          "description": "log file",
+          "type": "string"
+        },
+        "log_level": {
+          "description": "log level",
+          "type": "string"
+        },
+        "introspect_port": {
+          "description": "service introspect port",
+          "type": "string"
+        },
+        "listen_port": {
+          "description": "service listen port",
+          "type": "string"
+        },
+        "syslog_port": {
+          "description": "remote syslog port",
+          "type": "string"
+        },
+        "analytics_flow_ttl": {
+          "description": "analytics flow ttl",
+          "type": "string"
+        },
+        "analytics_statistics_ttl": {
+          "description": "analytics statistics ttl",
+          "type": "string"
+        },
+        "analytics_config_audit_ttl": {
+          "description": "analytics config audit ttl",
+          "type": "string"
+        },
+        "analytics_data_ttl": {
+          "description": "analytics data ttl",
+          "type": "string"
+        }
+      }
     },
     "QUERY_ENGINE": {
       "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
