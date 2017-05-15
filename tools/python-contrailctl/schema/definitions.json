@@ -22,6 +22,26 @@
         "listen_port": {
           "description": "service listen port",
           "type": "string"
+        },
+        "analytics_flow_ttl": {
+          "description": "analytics flow ttl",
+          "type": "string"
+        },
+        "analytics_statistics_ttl": {
+          "description": "analytics statistics ttl",
+          "type": "string"
+        },
+        "analytics_config_audit_ttl": {
+          "description": "analytics config audit ttl",
+          "type": "string"
+        },
+        "analytics_data_ttl": {
+          "description": "analytics data ttl",
+          "type": "string"
+        },
+        "syslog_port": {
+          "description": "remote syslog port",
+          "type": "string"
         }
       }
     },
