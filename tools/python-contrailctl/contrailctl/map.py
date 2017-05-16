@@ -56,6 +56,7 @@ CEPHCONTROLLER_PARAM_MAP = dict(
         osd_key="osd_key",
         adm_key="adm_key",
         ceph_rest_api_port="ceph_rest_api_port",
+        enable_stats_daemon="enable_stats_daemon",
     )
 )
 CONTRAIL_ISSU_MAP = {}
