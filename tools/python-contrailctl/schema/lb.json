@@ -22,6 +22,17 @@
           "type": "string"
         }
       }
+    },
+    "HAPROXY_TORAGENT": {
+      "type": "object",
+      "description": "HAPROXY Tor Agent specific config section",
+      "additionalProperties": false,
+      "properties": {
+        "haproxy_toragent_config": {
+          "description": "Tor Agent configuration across all computes",
+          "type": "object"
+        }
+      }
     }
   }
 }
