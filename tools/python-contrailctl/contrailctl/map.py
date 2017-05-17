@@ -17,6 +17,9 @@ LB_PARAM_MAP = dict(
     HAPROXY=dict(
         user="haproxy_auth_user",
         password="haproxy_auth_password",
+    ),
+    HAPROXY_TORAGENT=dict(
+        haproxy_toragent_config="haproxy_toragent_config"
     )
 )
 
