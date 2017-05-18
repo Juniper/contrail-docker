@@ -162,10 +162,32 @@
         },
         "aaa_mode": {
           "description": "Set AAA mode. One of no-auth, cloud-admin or rbac. Default is cloud-admin",
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "no-auth",
+            "cloud-admin",
+            "rbac"
+          ]
         }
       }
     },
+    "ANALYTICS_API": {
+      "id": "analytics_api",
+      "type": "object",
+      "description": "",
+      "additionalProperties": false,
+      "properties": {
+        "aaa_mode": {
+          "description": "aaa_mode: no-auth - no authentication, cloud-admin - authentication is performed and only cloud-admin role has, rbac RBAC - authentication is performed and access granted based on role",
+          "type": "string",
+          "enum": [
+            "no-auth",
+            "cloud-admin",
+            "rbac"
+          ]
+        }
+      }
+    }
     "SCHEMA": {
       "$ref": "definitions.json#/definitions/contrail_log_n_port_config"
     },
