@@ -25,9 +25,33 @@
           "description": "Virtual Network FQName used by kubernetes cluster.",
           "type": "object"
         },
+        "cluster_project": {
+          "description": "Project FQName used by kubernetes cluster.",
+          "type": "object"
+        },
+        "service_subnets": {
+          "description": "Service CIDR for this kubernetes cluster.",
+          "type": "string"
+        },
+        "pod_subnets": {
+          "description": "Pod CIDR for this kubernetes cluster.",
+          "type": "string"
+        },
         "token": {
           "description": "kubernetes api server access token",
           "type": "string"
+        }
+      }
+    },
+    "KUBERNETES_VNC": {
+      "id": "kubernetes_vnc",
+      "type": "object",
+      "description": "kubernetes vnc_section",
+      "additionalProperties": false,
+      "properties": {
+        "public_fip_pool": {
+          "description": "Public FloatingIpPool FQName used by kubernetes cluster.",
+          "type": "object"
         }
       }
     }
