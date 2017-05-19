@@ -163,6 +163,14 @@
           "description": "Enable optimizations to list resources",
           "type": "boolean"
         },
+        "cloud_admin_role": {
+          "description": "Set role name of cloud administrator for configuration. Default is admin",
+          "type": "string"
+        },
+        "global_read_only_role": {
+          "description": "Set role name that allows full read-only access to configuration. Default is not set",
+          "type": "string"
+        },
         "aaa_mode": {
           "description": "Set AAA mode. One of no-auth, cloud-admin or rbac. Default is cloud-admin",
           "type": "string",
