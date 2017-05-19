@@ -65,9 +65,17 @@
           "description": "https listen port",
           "type": "string"
         },
-	"webui_storage_enable": {
-	  "description": "contrail storage enable",
-	  "type": "boolean"
+        "webui_storage_enable": {
+          "description": "contrail storage enable",
+          "type": "boolean"
+        },
+        "nova_api_ip": {
+          "description": "IP(or vip) of nova api",
+          "type": "string"
+        },
+        "glance_api_ip": {
+          "description": "IP(or vip) of glance api",
+          "type": "string"
         }
       }
     },
