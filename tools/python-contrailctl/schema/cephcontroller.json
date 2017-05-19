@@ -41,6 +41,10 @@
         "ceph_rest_api_port": {
           "description": "Ceph rest api port",
           "type": "string"
+        },
+        "enable_stats_daemon": {
+          "description": "Enable stats daemon",
+          "type": "boolean"
         }
       }
     }
