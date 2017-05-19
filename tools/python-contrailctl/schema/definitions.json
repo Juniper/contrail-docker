@@ -115,6 +115,10 @@
           "description": "Comma separated list of externally managed zookeeper servers to be used for controller services.",
           "type": "string"
         },
+        "external_analyticsdb_zookeeper_servers": {
+          "description": "List of externally managed zookeeper servers to be used for analyticsdb services.",
+          "type": "array"
+        },
         "external_configdb_servers": {
           "description": "Comma separated list of externally managed cassandra(configdb) servers to be used for controller services.",
           "type": "string"
