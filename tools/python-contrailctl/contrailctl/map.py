@@ -38,7 +38,9 @@ CONTROLLER_PARAM_MAP = dict(
         list_optimization_enabled="list_optimization_enabled",
     ),
     WEBUI=dict(
-        webui_storage_enable="webui_storage_enable"
+        webui_storage_enable="webui_storage_enable",
+        nova_api_ip="nova_api_ip",
+        glance_api_ip="glance_api_ip",
     )
 )
 
