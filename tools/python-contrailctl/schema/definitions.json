@@ -99,6 +99,10 @@
           "description": "IP Address to connect config api. Usually this is same as controller_ip and that is the default, but in case if you have set of controllers without configs then this ip can be different.",
           "type": "string"
         },
+        "ceph_controller_nodes": {
+          "description": "Comma seperated list of ceph controller server IP addresses - this will be used to serve ceph rest api request.",
+          "type": "string"
+        },
         "analytics_nodes": {
           "description": "Comma separated list of analytics server addresses",
           "type": "string"
