@@ -21,10 +21,6 @@
           "description": "encapsulation priority",
           "type": "string"
         },
-        "flow_export_rate": {
-          "description": "flow export rate to the collector",
-          "type": "integer"
-        },
         "external_routers_list": {
           "description": "dictionary of external, physical routers in form of {name1: ip1, name2: ip2}",
           "type": "object"
