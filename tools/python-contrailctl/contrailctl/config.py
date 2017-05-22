@@ -1,5 +1,5 @@
 import ConfigParser
-import yaml
+import ast
 import re
 import os
 
@@ -24,11 +24,12 @@ class Configurator(object):
     @staticmethod
     def eval(data):
         if isinstance(data, str):
-            try:
-                data = yaml.load(data)
-            except:
-                pass
-            return data
+            if re.match(r"^\[.*\]$", data) or re.match(r"^\{.*\}$", data):
+                return ast.literal_eval(data)
+            elif data.lower() in ("yes", "true", "no", "false"):
+                return data.lower() in ("yes", "true")
+            else:
+                return data
         else:
             return data
 
