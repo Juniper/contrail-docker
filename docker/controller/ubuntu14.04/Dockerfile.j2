@@ -15,3 +15,7 @@ COPY supervisor_configs/config/ /etc/contrail/supervisord_config_files/
 RUN mkdir -p /etc/contrail/supervisord_files
 COPY supervisor_configs/main/supervisord.conf /etc/contrail/
 COPY supervisor_configs/main/*.ini /etc/contrail/supervisord_files/
+RUN rm -rf /etc/apt/sources.list.d/trusty.list
+RUN rm -rf /etc/apt/sources.list.d/trusty-updates.list
+RUN rm -rf /etc/apt/sources.list.d/trusty-security.list
+RUN rm -rf /etc/apt/sources.list.d/contrail-ansible-packages-trusty.list
