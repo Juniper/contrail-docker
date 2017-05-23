@@ -9,3 +9,9 @@ ENTRYPOINT /entrypoint.sh
 ENV CONTRAIL_ROLE mesosmanager
 RUN echo $CONTRAIL_ROLE > /etc/contrail-role
 RUN contrailctl config sync -F -v -t install
+RUN rm -rf /etc/apt/sources.list.d/trusty.list
+RUN rm -rf /etc/apt/sources.list.d/trusty-updates.list
+RUN rm -rf /etc/apt/sources.list.d/trusty-security.list
+RUN rm -rf /etc/apt/sources.list.d/contrail-ansible-packages-trusty.list
+RUN rm -rf /etc/apt/sources.list.d/contrail-local.list
+RUN apt-get clean; apt-get update; echo 0

@@ -14,3 +14,9 @@ EXPOSE 8082 8084 8087 8088 8096 8100 5672 5997 5998 4369 8443 8444 68 123 8103 9
 RUN mkdir -p /etc/contrail/supervisord_files
 COPY supervisor_configs/main/supervisord.conf /etc/contrail/
 COPY supervisor_configs/main/*.ini /etc/contrail/supervisord_files/
+RUN rm -rf /etc/apt/sources.list.d/trusty.list
+RUN rm -rf /etc/apt/sources.list.d/trusty-updates.list
+RUN rm -rf /etc/apt/sources.list.d/trusty-security.list
+RUN rm -rf /etc/apt/sources.list.d/contrail-ansible-packages-trusty.list
+RUN rm -rf /etc/apt/sources.list.d/contrail-local.list
+RUN apt-get clean; apt-get update; echo 0
