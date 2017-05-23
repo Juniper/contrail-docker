@@ -16,7 +16,6 @@ EXPOSE 53 68 123 179 2181 2182 4369 \
        9092 9160
 
 # Copy Supervisor configs
-COPY supervisor_configs/config/ /etc/contrail/supervisord_config_files/
 RUN mkdir -p /etc/contrail/supervisord_files
 COPY supervisor_configs/main/supervisord.conf /etc/contrail/
 COPY supervisor_configs/main/*.ini /etc/contrail/supervisord_files/
