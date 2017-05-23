@@ -28,6 +28,10 @@
         "bgp_asn": {
           "description": "asn of control node",
           "type": "string"
+        },
+        "flow_export_rate": {
+          "description": "flow export rate to the collector",
+          "type": "string"
         }
       }
     },
