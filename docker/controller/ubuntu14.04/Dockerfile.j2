@@ -1,5 +1,6 @@
 FROM contrail-base-ubuntu14.04:{{ contrail_version }}
 COPY entrypoint.sh /
+COPY entrypoint.sh /
 LABEL Name=contrail-controller-$OS \
       Version="$CONTRAIL_VERSION" \
       contrail.role=controller \
