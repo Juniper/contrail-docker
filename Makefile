@@ -206,6 +206,7 @@ clean:
 ifndef KEEP_IMAGES
 	$(foreach i,$(CONTAINERS) repo, \
 		docker rmi -f $(CONTAINER_REGISTRY)/contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;\
+		docker rmi -f $(CONTAINER_REGISTRY_IND)/contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;\
 		docker rmi -f contrail-$(i)-$(OS):$(CONTRAIL_VERSION) || true;)
 	docker rmi -f contrail-base-$(OS):$(CONTRAIL_VERSION) || true
 endif
@@ -235,4 +236,18 @@ ifdef CONTAINER_REGISTRY
 		done
 else
 		$(error CONTAINER_REGISTRY is undefined)
+endif
+
+ifdef CONTAINER_REGISTRY_IND
+                @for i in repo $(CONTAINERS); do\
+                        CONTAINER_NAME=contrail-$$i;\
+                        CONTAINER_TAG=$$(docker images | grep "^$$CONTAINER_NAME-$$OS " | awk '{print $$3}');\
+                        CONTAINER_REG_NAME=$$CONTAINER_REGISTRY_IND/$$CONTAINER_NAME-$$OS:$$CONTRAIL_VERSION;\
+                        echo "Tagging container: docker tag $$CONTAINER_TAG $$CONTAINER_REG_NAME";\
+                        docker tag $$CONTAINER_TAG $$CONTAINER_REG_NAME;\
+                        echo "Pushing container: docker push $$CONTAINER_REG_NAME";\
+                        docker push $$CONTAINER_REG_NAME;\
+                done
+else
+                $(error CONTAINER_REGISTRY_IND is undefined)
 endif
