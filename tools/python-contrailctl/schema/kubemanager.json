@@ -37,6 +37,10 @@
           "description": "Pod CIDR for this kubernetes cluster.",
           "type": "string"
         },
+        "api_server": {
+          "description": "kubernetes api server ip.",
+          "type": "string"
+        },
         "token": {
           "description": "kubernetes api server access token",
           "type": "string"
