@@ -1,34 +1,31 @@
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ template "agent.fullname" . }}
+  name: contrail-vrouter-agent
   namespace: kube-system
   labels:
-    app: {{ template "agent.fullname" . }}
+    app: contrail-cni
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "agent.fullname" . }}
-        contrail_function: "contrail-vrouter"
+        app: contrail-cni
+        contrail_function: "contrail-vrouter-agent"
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "node-role.kubernetes.io/master"
-                operator: DoesNotExist
-              - key: "contrail.role"
-                operator: "NotIn"
-                values: 
-                - controller
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
       hostNetwork: true
       containers:
       - name: contrail-agent
+        {{- if .Values.imageRepo }}
         image: "{{ .Values.imageRepo }}/{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        {{- else }}
+        image: {{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        {{- end  }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
@@ -51,7 +48,7 @@ spec:
       volumes:
       - name: etc-contrailctl
         configMap:
-          name: {{ template "fullname" . }}
+          name: contrailctl-config
           items:
           - key: agent-config
             path: agent.conf
