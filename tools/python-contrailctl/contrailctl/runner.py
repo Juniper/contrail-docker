@@ -65,8 +65,8 @@ class Options(object):
         self.vault_password_files = vault_password_files
         self.new_vault_password_file = new_vault_password_file
         self.output_file = output_file
-        self.tags = tags
-        self.skip_tags = skip_tags
+        self.tags = tags or []
+        self.skip_tags = skip_tags or []
         self.one_line = one_line
         self.tree = tree
         self.ask_sudo_pass = ask_sudo_pass
@@ -109,8 +109,8 @@ class Runner(object):
         self.options.become = True
         self.options.become_method = 'sudo'
         self.options.become_user = 'root'
-        self.options.tags = tags
-        self.options.skip_tags = skip_tags
+        self.options.tags = tags or []
+        self.options.skip_tags = skip_tags or []
         # Set global verbosity
         self.display = Display()
         self.display.verbosity = self.options.verbosity
