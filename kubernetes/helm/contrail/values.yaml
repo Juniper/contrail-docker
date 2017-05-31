@@ -1,7 +1,7 @@
 # Default values for contrail.
 # contrailVersion - example 4.0.0.0-3042
 # This variable cannot be blank.
-# contrailVersion:
+contrailVersion: 4.0.0.0-6
 
 # osRelease - operating system release
 # ubuntu 14.04 - ubuntu14.04
@@ -11,11 +11,7 @@
 osRelease: ubuntu16.04
 
 # image repository, pull policy etc
-imageRepo: 10.84.34.155:5000
-
-# contrailHA - true/false: whether to setup multi-controller setup
-#
-contrailHA: false
+imageRepo: 10.84.18.5:5000
 
 # Global configurations
 #
@@ -26,21 +22,22 @@ global:
   # entries are required, unless there is an external dns infrastructure to support it
   # hosts_entries: '{"node1": "192.168.0.11", "node2": "192.168.0.12", "node3": "192.168.0.13"}'
 
-  # controller_nodes - comma separated list of controller ip addresses
-  # controller_nodes: 192.168.0.11,192.168.0.12,192.168.0.13
+  # controller_nodes 
+  controller_nodes: 
+    - 10.87.65.152
+  
+  # If analyticsdb nodes are different from controller_nodes
+  # Example:
+  # analyticsdb_nodes: 
+  #  - 10.87.65.30
 
-  # analyticsdb_nodes - comma separated list of analyticsdb servers
-  # analyticsdb_nodes: 192.168.0.11,192.168.0.12,192.168.0.13
-
-  # analytics_nodes - comma separated list of analytics nodes
-  # analytics_nodes: 192.168.0.11,192.168.0.12,192.168.0.13
-
+  # If analytics nodes are different from controller_nodes
+  # Example:
+  # analytics_nodes: 
+  #  - 10.87.65.30
+  
   # cloud_orchestrator: values - kubernetes, mesos, openshift, openstack
   cloud_orchestrator: kubernetes
-
-#
-# Controller configurations
-#
 
 #
 # webui configurations
@@ -57,7 +54,7 @@ webui:
 #
 agent:
   # vrouter_physical_interface - physical interface to use for vrouter
-  vrouter_physical_interface: eth0
+  vrouter_physical_interface: em1
 
 #
 # Other optional parameters which rarely changed
@@ -74,3 +71,35 @@ agent:
 # analyticsdbImageName: contrail-analyticsdb
 # kubeManagerImageName: contrail-kube-manager
 # agentImageName: contrail-agent
+
+#
+# kubernetes configurations
+#
+kubernetes:
+  # Name of the kubernetes cluster being provisioned
+  # Default value: "k8s-default"
+  # Example:
+  # cluster_name: k8s-default
+  
+  # Access token to connect to kubernetes API server
+  # Default value: ""
+  kubernetes_access_token: 
+
+  # Pod subnet 
+  # Default value: "10.32.0.0/12"
+  # Example:
+  # kubernetes_pod_subnets: "10.87.45.0/24"
+
+  # Service subnet
+  # Default value: "10.96.0.0/12"
+  # Example:
+  # kubernetes_service_subnets: "10.87.46.0/24"
+  
+  # Cluster project used in contrail
+  # Default value: {'domain': 'default-domain', 'project': 'default'}
+  # Example:
+  # kubernetes_cluster_project: "{'domain': 'default-domain', 'project': 'default'}"
+
+  # Kubernetes FloatingIpPool to be used for service/ingress.
+  # Example:
+  # kubernetes_public_fip_pool: {'domain': 'domain-name', 'project': 'project-name', 'network': 'network-name', 'name': 'fip-pool-name' }

@@ -1,29 +1,28 @@
-{{ if .Values.contrailHA }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ template "controller.fullname" . }}
+  name: contrail-controller
   namespace: kube-system
   labels:
-    app: {{ template "controller.fullname" . }}
+    app: contrail-cni
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "controller.fullname" . }}
-        contrail_function: "contrail-controller"
+        app: contrail-cni
+        contrail_function: contrail-controller
     spec:
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: "contrail.role"
+              - key: "opencontrail.org/control-plane"
                 operator: In
                 values:
-                - controller
+                - true
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -31,7 +30,11 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-controller
+      {{- if .Values.imageRepo }}
         image: "{{ .Values.imageRepo }}/{{ default "contrail-controller" .Values.controllerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+      {{- else }}
+        image: "{{ default "contrail-controller" .Values.controllerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+      {{- end }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
@@ -45,7 +48,7 @@ spec:
       volumes:
       - name: contrailctl-controller
         configMap:
-          name: {{ template "fullname" . }}
+          name: contrailctl-config
           items:
           - key: controller-config
             path: controller.conf
@@ -53,4 +56,3 @@ spec:
         emptyDir: {}
       - name: zookeeper-data
         emptyDir: {}
-{{ end }}
