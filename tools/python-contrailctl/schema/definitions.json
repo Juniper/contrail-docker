@@ -222,6 +222,14 @@
         "analyticsdb_cassandra_password": {
           "description": "cassandra password to access analyticsdb",
           "type": "string"
+        },
+        "neutron_metadata_ip": {
+          "description": "IP of metadata server",
+          "type": "string"
+        },
+        "neutron_metadata_port": {
+          "description": "Port of metadata server",
+          "type": "string"
         }
       }
     },
