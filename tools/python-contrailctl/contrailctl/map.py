@@ -44,6 +44,7 @@ CONTROLLER_PARAM_MAP = dict(
         webui_storage_enable="webui_storage_enable",
         nova_api_ip="nova_api_ip",
         glance_api_ip="glance_api_ip",
+        network_manager_ip='network_manager_ip',
     )
 )
 
