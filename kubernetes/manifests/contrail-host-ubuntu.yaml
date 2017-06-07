@@ -1,0 +1,331 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrailctl-config
+  labels:
+    app: contrail-cni
+  namespace: kube-system
+data:
+  controller-config: |-
+    [GLOBAL]
+    controller_nodes = 10.87.65.155
+    cloud_orchestrator = kubernetes
+  analytics-config: |-
+    [GLOBAL]
+    controller_nodes = 10.87.65.155
+    cloud_orchestrator = kubernetes
+  analyticsdb-config: |-
+    [GLOBAL]
+    controller_nodes = 10.87.65.155
+    cloud_orchestrator = kubernetes
+  agent-config: |-
+    [GLOBAL]
+    controller_nodes = 10.87.65.155
+    cloud_orchestrator = kubernetes
+    [AGENT]
+    vrouter_physical_interface = em1
+  kubemanager-config: |-
+    [GLOBAL]
+    controller_nodes = 10.87.65.155
+    cloud_orchestrator = kubernetes
+    [KUBERNETES]
+    cluster_project = {'domain': 'default-domain', 'project': 'default'}
+    api_server = 10.87.65.155
+    token = 
+    #service_subnets = "10.96.0.0/12"
+    #pod_subnets = "10.32.0.0/12"
+    #cluster_network = {}
+    #[KUBERNETES_VNC]
+    #public_fip_pool = {}
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-controller
+  namespace: kube-system
+  labels:
+    app: contrail-cni
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-cni
+        contrail_function: "contrail-controller"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
+              - key: "opencontrail.org/control-plane"
+                operator: In
+                values:
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-controller
+        image: "10.84.18.5:5000/contrail-controller-ubuntu16.04:4.0.0.0-6"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-controller
+        - mountPath: /var/lib/cassandra
+          name: configdb-data
+        - mountPath: /var/lib/zookeeper
+          name: zookeeper-data
+      volumes:
+      - name: contrailctl-controller
+        configMap:
+          name: contrailctl-config
+          items:
+          - key: controller-config
+            path: controller.conf
+      - name: configdb-data
+        emptyDir: {}
+      - name: zookeeper-data
+        emptyDir: {}
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-analytics
+  namespace: kube-system
+  labels:
+    app: contrail-cni
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-cni
+        contrail_function: "contrail-analytics"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
+              - key: "opencontrail.org/control-plane"
+                operator: In
+                values:
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-analytics
+        image: "10.84.18.5:5000/contrail-analytics-ubuntu16.04:4.0.0.0-6"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-analytics
+      volumes:
+      - name: contrailctl-analytics
+        configMap:
+          name: contrailctl-config
+          items:
+          - key: analytics-config 
+            path: analytics.conf
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-analyticsdb
+  namespace: kube-system
+  labels:
+    app: contrail-cni
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-cni
+        contrail_function: "contrail-analyticsdb"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
+              - key: "opencontrail.org/control-plane"
+                operator: In
+                values:
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-analyticsdb
+        image: "10.84.18.5:5000/contrail-analyticsdb-ubuntu16.04:4.0.0.0-6"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-analyticsdb
+        - mountPath: /var/lib/cassandra
+          name: analyticsdb-data
+      volumes:
+      - name: contrailctl-analyticsdb
+        configMap:
+          name: contrailctl-config
+          items:
+          - key: analyticsdb-config
+            path: analyticsdb.conf
+      - name: analyticsdb-data
+        emptyDir: {}
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-kube-manager
+  namespace: kube-system
+  labels:
+    app: contrail-cni
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-cni
+        contrail_function: "contrail-kube-manager"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
+              - key: "opencontrail.org/control-plane"
+                operator: In
+                values:
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-kube-manager
+        image: "10.84.18.5:5000/contrail-kube-manager-ubuntu16.04:4.0.0.0-6"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: contrailctl-kube-manager
+      volumes:
+      - name: contrailctl-kube-manager
+        configMap:
+          name: contrailctl-config
+          items:
+          - key: kubemanager-config
+            path: kubemanager.conf
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-agent
+  namespace: kube-system
+  labels:
+    app: contrail-cni
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-cni
+        contrail_function: "contrail-vrouter"
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: contrail-agent
+        image: "10.84.18.5:5000/contrail-agent-ubuntu16.04:4.0.0.0-6"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /etc/contrailctl
+          name: etc-contrailctl
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /usr/src
+          name: usr-src
+        - mountPath: /host/opt_cni_bin
+          name: opt-cni-bin
+        - mountPath: /host/etc_cni
+          name: etc-cni
+        - mountPath: /var/lib/contrail/
+          name: contrail-varlib
+        # This is a workaround just to make sure the directory is created on host
+        - mountPath: /var/log/contrail/cni
+          name: log-cni
+      volumes:
+      - name: etc-contrailctl
+        configMap:
+          name: contrailctl-config
+          items:
+          - key: agent-config
+            path: agent.conf
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: usr-src
+        hostPath:
+          path: /usr/src
+      - name: opt-cni-bin
+        hostPath:
+          path: /opt/cni/bin
+      - name: etc-cni
+        hostPath:
+          path: /etc/cni
+      - name: contrail-varlib
+        hostPath:
+          path: /var/lib/contrail/
+      - name: log-cni
+        hostPath:
+          path: /var/log/contrail/cni/

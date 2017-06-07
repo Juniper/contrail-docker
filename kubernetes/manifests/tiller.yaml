@@ -1,5 +1,5 @@
 apiVersion: extensions/v1beta1
-kind: Deployment
+kind: DaemonSet
 metadata:
   creationTimestamp: null
   labels:
@@ -8,8 +8,6 @@ metadata:
   name: tiller-deploy
   namespace: kube-system
 spec:
-  replicas: 1
-  strategy: {}
   template:
     metadata:
       creationTimestamp: null
@@ -17,12 +15,17 @@ spec:
         app: helm
         name: tiller
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
       hostNetwork: true
       containers:
       - env:
         - name: TILLER_NAMESPACE
           value: kube-system
-        image: gcr.io/kubernetes-helm/tiller:v2.2.2
+        image: gcr.io/kubernetes-helm/tiller:v2.4.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -43,7 +46,6 @@ spec:
         resources: {}
       serviceAccountName: ""
       volumes: null
-status: {}
 
 ---
 apiVersion: v1

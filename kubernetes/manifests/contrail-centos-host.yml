@@ -31,6 +31,7 @@ data:
     cloud_orchestrator = kubernetes
     [KUBERNETES]
     cluster_project = {'domain': 'default-domain', 'project': 'default'}
+    api_server = 10.87.65.155
     token = 
     #service_subnets = "10.96.0.0/12"
     #pod_subnets = "10.32.0.0/12"
@@ -57,10 +58,18 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
               - key: "opencontrail.org/control-plane"
                 operator: In
                 values:
-                - true
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -110,10 +119,18 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
               - key: "opencontrail.org/control-plane"
                 operator: In
                 values:
-                - true
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -155,10 +172,18 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
               - key: "opencontrail.org/control-plane"
                 operator: In
                 values:
-                - true
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -204,10 +229,18 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "analyticsdb"
+            - matchExpressions:
               - key: "opencontrail.org/control-plane"
                 operator: In
                 values:
-                - true
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -249,6 +282,17 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+      - name: contrail-vrouter-compiler
+        image: "10.84.18.5:5000/contrail-vrouter-compiler-centos7:4.0.0.0-6"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /usr/src/kernels
+          name: usr-src-kernels
       containers:
       - name: contrail-agent
         image: "10.84.18.5:5000/contrail-agent-ubuntu16.04:4.0.0.0-6"
@@ -278,6 +322,9 @@ spec:
           items:
           - key: agent-config
             path: agent.conf
+      - name: usr-src-kernels
+        hostPath: 
+          path: /usr/src/kernels
       - name: lib-modules
         hostPath:
           path: /lib/modules
