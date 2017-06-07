@@ -4,6 +4,8 @@
 {{- define "kubernetesConfig" -}}
 [KUBERNETES]
 {{- if not .kubernetes -}}{{- $_ := set . "kubernetes" dict -}}{{- end }}
+{{- $kubernetes_api_server_default := first .global.controller_nodes }}
+api_server = {{ .kubernetes.kubernetes_api_server | default $kubernetes_api_server_default }}
 cluster_name = {{ .kubernetes.cluster_name | default "default-cluster" }}
 cluster_network = {}
 pod_subnets = {{ .kubernetes.kubernetes_pod_subnets | default "10.32.0.0/12" }}
