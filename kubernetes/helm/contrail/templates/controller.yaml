@@ -19,10 +19,18 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
+              - key: "opencontrail.org/component"
+                operator: In
+                values:
+                - "controller"
+            - matchExpressions:
               - key: "opencontrail.org/control-plane"
                 operator: In
                 values:
-                - true
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists

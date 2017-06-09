@@ -19,12 +19,29 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+{{- if eq .Values.hostOs "centos7" }}
+      initContainers:
+      - name: contrail-vrouter-compiler
+        {{- if .Values.imageRepo }}
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-vrouter-compiler-centos7" .Values.compilerImageName }}:{{ .Values.contrailVersion }}"
+        {{- else }}
+        image: {{ default "contrail-vrouter-compiler-centos7" .Values.compilerImageName }}:{{ .Values.contrailVersion }}"
+        {{- end  }}
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /usr/src/kernels
+          name: usr-src-kernels
+{{- end }}
       containers:
       - name: contrail-agent
         {{- if .Values.imageRepo }}
         image: "{{ .Values.imageRepo }}/{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
         {{- else }}
-        image: {{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        image: "{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
         {{- end  }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
@@ -58,6 +75,11 @@ spec:
       - name: usr-src
         hostPath:
           path: /usr/src
+{{- if eq .Values.hostOs "centos7" }}
+      - name: usr-src-kernels
+        hostPath:
+          path: /usr/src/kernels
+{{- end }}
       - name: opt-cni-bin
         hostPath:
           path: /opt/cni/bin

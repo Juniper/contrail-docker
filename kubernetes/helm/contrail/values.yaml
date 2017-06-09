@@ -1,17 +1,27 @@
 # Default values for contrail.
+#(MANDATORY)
 # contrailVersion - example 4.0.0.0-3042
 # This variable cannot be blank.
-contrailVersion: 4.0.0.0-6
+contrailVersion: 4.0.0.0-20
 
+# hostOs - host operating system release
+# ubuntu 16.04 - ubuntu16.04
+# centos 7.1 - centos7
+# centos 7.2 - centos7
+# centos 7.3 - centos7
+# default hostOs: ubuntu16.04
+
+# (MANDATORY)
 # osRelease - operating system release
 # ubuntu 14.04 - ubuntu14.04
 # ubuntu 16.04 - ubuntu16.04
 # centos 7.1 - centos7
 # centos 7.2 - centos7
+# centos 7.3 - centos7
 osRelease: ubuntu16.04
 
 # image repository, pull policy etc
-imageRepo: 10.84.18.5:5000
+imageRepo: 10.84.5.71:5000
 
 # Global configurations
 #
@@ -22,6 +32,7 @@ global:
   # entries are required, unless there is an external dns infrastructure to support it
   # hosts_entries: '{"node1": "192.168.0.11", "node2": "192.168.0.12", "node3": "192.168.0.13"}'
 
+  # (MANDATORY)
   # controller_nodes 
   controller_nodes: 
     - 10.87.65.152
@@ -35,16 +46,18 @@ global:
   # Example:
   # analytics_nodes: 
   #  - 10.87.65.30
-  
+ 
+  #(MANDATORY) 
   # cloud_orchestrator: values - kubernetes, mesos, openshift, openstack
   cloud_orchestrator: kubernetes
 
 #
 # webui configurations
 #
-webui:
+#webui:
   # http listen port: default 8080
-  http_listen_port: 8085
+  # Example: 
+  # http_listen_port: 8085
 
   # https_listen_port: default 8143
   # https_listen_port:
@@ -53,6 +66,7 @@ webui:
 # agent configurations
 #
 agent:
+  # (MANDATORY)
   # vrouter_physical_interface - physical interface to use for vrouter
   vrouter_physical_interface: em1
 
@@ -71,11 +85,15 @@ agent:
 # analyticsdbImageName: contrail-analyticsdb
 # kubeManagerImageName: contrail-kube-manager
 # agentImageName: contrail-agent
+# compilerImageName: contrail-vrouter-compiler-centos7
 
 #
 # kubernetes configurations
 #
 kubernetes:
+  # IP address of the kubernetes_api_server
+  # Example:
+  # kubernetes_api_server: 10.84.18.8
   # Name of the kubernetes cluster being provisioned
   # Default value: "k8s-default"
   # Example:
@@ -83,7 +101,7 @@ kubernetes:
   
   # Access token to connect to kubernetes API server
   # Default value: ""
-  kubernetes_access_token: 
+  kubernetes_access_token: ""
 
   # Pod subnet 
   # Default value: "10.32.0.0/12"
