@@ -46,26 +46,24 @@ ifndef CONTRAIL_REPO_PORT
 	export CONTRAIL_REPO_PORT := 1567
 endif
 
-ifneq (,$(filter ubuntu14.04 ubuntu16.04,$(OS)))
+ifndef CONTRAIL_REPO_CONTAINER
 	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
 	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
-	export CONTRAIL_REPO_INTERNAL_PORT=1567
+endif
+
+ifneq (,$(filter ubuntu14.04 ubuntu16.04,$(OS)))
 ifndef CONTAINERS
 	export CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager ceph-controller
 endif
 endif
 
 ifneq (,$(filter centos7,$(OS)))
-	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
-	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 ifndef CONTAINERS
-	export CONTAINERS = vrouter-compiler
+	export CONTAINERS = controller analytics agent analyticsdb lb vrouter-compiler
 endif
 endif
 
 ifneq (,$(filter redhat7,$(OS)))
-	export CONTRAIL_REPO_CONTAINER = contrail-repo-$(OS)
-	export CONTRAIL_REPO_CONTAINER_TAR = $(CONTRAIL_REPO_CONTAINER)-$(CONTRAIL_VERSION).tar.gz
 ifndef CONTAINERS
 	export CONTAINERS = controller analytics agent analyticsdb lb
 endif
@@ -181,10 +179,24 @@ ifdef SSHUSER
 endif
 	$(eval TEMP := $(shell mktemp -d))
 	@echo "Building the container $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION)"
+	@echo "Temp Dir == $(TEMP)"
 	cp -rf docker/*.sh docker/*.key docker/contrail-repo/* $(TEMP)
 	if [ -d $(TEMP)/$(OS) ]; then \
 		cp -rf $(TEMP)/$(OS)/* $(TEMP)/; \
 	fi
+	# Create a repo in build machine and copy it to repo docker container
+	@echo "OS == $(OS)"
+	mkdir -p $(TEMP)/contrail_install_repo
+	$(eval REPO_TEMP_DIR := $(TEMP)/contrail_install_repo)
+	if [[ $(OS) == "centos7" ]]; then \
+	    echo "Inside centos7 loop"; \
+	    source ./create_repo.sh ; \
+	    create_pkg_repo package_urls=$(CONTRAIL_INSTALL_PACKAGE_TAR_URL) \
+	                    repo_dir=$(REPO_TEMP_DIR) \
+	                    sshuser=$(SSHUSER) \
+	                    sshpass=$(SSHPASS); \
+	fi
+	$(eval CONTRAIL_REPO_BUILD_ARGS += --build-arg CONTRAIL_REPO_DIR=contrail_install_repo)
 	cd $(TEMP); \
 	docker build $(CONTRAIL_REPO_BUILD_ARGS) \
 		-t $(CONTRAIL_REPO_CONTAINER):$(CONTRAIL_VERSION) .
