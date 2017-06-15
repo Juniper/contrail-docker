@@ -42,6 +42,16 @@ CONTROLLER_PARAM_MAP = dict(
     ),
     WEBUI=dict(
         webui_storage_enable="webui_storage_enable",
+        webui_enable_underlay="webui_enable_underlay",
+        webui_enable_mx="webui_enable_mx",
+        webui_enable_udd="webui_enable_udd",
+        webui_service_endpoint_from_config="webui_service_endpoint_from_Config",
+        webui_regions_from_config="webui_regions_from_config",
+        network_manager_auth_protocol="network_manager_auth_protocol",
+        image_manager_auth_protocol="image_manager_auth_protocol",
+        compute_manager_auth_protocol="compute_manager_auth_protocol",
+        webui_server_options_key_file="webui_server_options_key_file",
+        webui_server_options_cert_file="webui_server_options_cert_file",
         nova_api_ip="nova_api_ip",
         glance_api_ip="glance_api_ip",
     )

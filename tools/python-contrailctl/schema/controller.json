@@ -67,6 +67,46 @@
         "network_manager_ip": {
           "description": "IP(or vip) of network manager (neutron for OpenStack)",
           "type": "string"
+        },
+        "webui_enable_underlay": {
+          "description": "Enable/disable Underlay feature",
+          "type": "boolean"
+        },
+        "webui_enable_mx": {
+          "description": "Enable/disable MX feature",
+          "type": "boolean"
+        },
+        "webui_enable_udd": {
+          "description": "Enable/disable UDD feature",
+          "type": "boolean"
+        },
+        "webui_service_endpoint_from_config": {
+          "description": "Read endpoints from config or keystone",
+          "type": "boolean"
+        },
+        "webui_regions_from_config": {
+          "description": "Read regions from config or keystone",
+          "type": "boolean"
+        },
+        "network_manager_auth_protocol": {
+          "description": "Netowork manager auth protocol",
+          "type": "string"
+        },
+        "image_manager_auth_protocol": {
+          "description": "Image manager auth protocol",
+          "type": "string"
+        },
+        "compute_manager_auth_protocol": {
+          "description": "Compute manager auth protocol",
+          "type": "string"
+        },
+        "webui_server_options_key_file": {
+          "description": "Server options key file",
+          "type": "string"
+        },
+        "webui_server_options_cert_file": {
+          "description": "Service options cert file",
+          "type": "string"
         }
       }
     },
