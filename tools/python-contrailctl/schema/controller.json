@@ -67,6 +67,14 @@
         "network_manager_ip": {
           "description": "IP(or vip) of network manager (neutron for OpenStack)",
           "type": "string"
+        },
+        "orch_endpoint_from_config": {
+          "description": "Boolean flag. If set true, orchestration module (keystone) endpoints will be retrieved from the config file, else from auth catalog list",
+          "type": "boolean"
+        },
+        "contrail_endpoint_from_config": {
+          "description": "Boolean flag. If set true, contrail services (ApiServer and OpServer) endpoint will be retrieved from the config file, else from auth catalog list",
+          "type": "boolean"
         }
       }
     },
