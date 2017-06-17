@@ -19,8 +19,8 @@ data:
     analyticsdb_nodes = 10.84.13.7
   agent-config: |-
     [AGENT]
-    compile_vrouter_module = True
-    vrouter_physical_interface = p4p1
+    compile_vrouter_module = False
+    vrouter_physical_interface = enp2s0
   kubemanager-config: |-
     [KUBERNETES]
     cluster_name = k8s-default
@@ -60,7 +60,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analyticsdb
-        image: "10.84.5.71:5000/contrail-analyticsdb-ubuntu16.04:4.0.0.0-20"
+        image: "10.84.5.71:5000/contrail-analyticsdb-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -108,7 +108,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analytics
-        image: "10.84.5.71:5000/contrail-analytics-ubuntu16.04:4.0.0.0-20"
+        image: "10.84.5.71:5000/contrail-analytics-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -152,7 +152,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-controller
-        image: "10.84.5.71:5000/contrail-controller-ubuntu16.04:4.0.0.0-20"
+        image: "10.84.5.71:5000/contrail-controller-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -204,7 +204,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
-        image: "10.84.5.71:5000/contrail-kube-manager-ubuntu16.04:4.0.0.0-20"
+        image: "10.84.5.71:5000/contrail-kube-manager-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
         command: ["/bin/bash", "-c"]
         args: ["
@@ -222,7 +222,7 @@ spec:
 		cat /tmp/contrailctl/global.conf >> /etc/contrailctl/kubemanager.conf;
 		echo '' >> /etc/contrailctl/kubemanager.conf;
 		cat /tmp/contrailctl/kubemanager.conf >> /etc/contrailctl/kubemanager.conf;
-		exec /sbin/init"
+		/entrypoint.sh"
 	]
         securityContext:
           privileged: true
@@ -268,9 +268,23 @@ spec:
       #  operator: Exists
       #  effect: NoSchedule
       hostNetwork: true
+      initContainers:
+      - name: contrail-vrouter-compiler
+        image: "10.84.5.71:5000/contrail-vrouter-compiler-centos7:4.0.0.0-20"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /usr/src/kernels
+          name: usr-src-kernels
+        - mountPath: /lib/modules
+          name: lib-modules
+        env:
+        - name: INSTALL_VROUTER_MODULE
+          value: 'true'
       containers:
       - name: contrail-agent
-        image: "10.84.5.71:5000/contrail-agent-ubuntu16.04:4.0.0.0-20"
+        image: "10.84.5.71:5000/contrail-agent-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
         command: ["/bin/bash", "-c"]
         args: ["
@@ -288,7 +302,7 @@ spec:
 		cat /tmp/contrailctl/global.conf >> /etc/contrailctl/agent.conf;
 		echo '' >> /etc/contrailctl/agent.conf;
 		cat /tmp/contrailctl/agent.conf >> /etc/contrailctl/agent.conf;
-		exec /sbin/init"
+		/entrypoint.sh"
 	]
         securityContext:
           privileged: true
@@ -320,6 +334,9 @@ spec:
       - name: usr-src
         hostPath:
           path: /usr/src
+      - name: usr-src-kernels
+        hostPath:
+          path: /usr/src/kernels
       - name: lib-modules
         hostPath:
           path: /lib/modules
