@@ -151,6 +151,10 @@
           "description": "While making config component optional within controller container, it fails the assumption that all nodes in controller_list has config running and thus need to set another optional entry to be configured in case config is not running on all controller nodes",
           "type": "string"
         },
+        "webui_nodes": {
+            "description": "List of Contrail WebUI IP Addresses, seperated by comma(,)",
+            "type": "string"
+        },
         "config_seeds": {
           "description": "config_seeds is to support adding new nodes to existing cluster, in which case config_seed_list is the list of existing servers in the cluster and this list will be used for various clusters like rabbitmq, cassandra to join new nodes to them",
           "type": "string"
