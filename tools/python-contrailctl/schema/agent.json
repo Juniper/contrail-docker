@@ -40,6 +40,10 @@
         "vrouter_agent_ip": {
           "description": "vrouter agent ip",
           "type": "string"
+        },
+        "gateway_mode": {
+          "description": "agent gateway mode",
+          "type": "string"
         }
       }
     },
