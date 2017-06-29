@@ -61,6 +61,8 @@ spec:
           - key: analyticsdb-config
             path: analyticsdb.conf
       - name: analyticsdb-data
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/analyticsdb 
       - name: zookeeper-analyticsdb-data
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/analyticsdb_zookeeper_data
