@@ -41,6 +41,14 @@
           "description": "vrouter agent ip",
           "type": "string"
         },
+        "non_mgmt_ip": {
+          "description": "vrouter non mgmt interface ip",
+          "type": "string"
+        },
+        "non_mgmt_gw": {
+          "description": "vrouter non mgmt interface gw",
+          "type": "string"
+        },
         "gateway_mode": {
           "description": "agent gateway mode",
           "type": "string"
