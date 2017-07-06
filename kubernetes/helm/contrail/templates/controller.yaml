@@ -61,6 +61,8 @@ spec:
           - key: controller-config
             path: controller.conf
       - name: configdb-data
-        emptyDir: {}
+        hostPath: 
+          path: /var/lib/configdb
       - name: zookeeper-data
-        emptyDir: {}
+        hostPath: 
+          path: /var/lib/config_zookeeper_data
