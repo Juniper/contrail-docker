@@ -52,6 +52,50 @@
         "gateway_mode": {
           "description": "agent gateway mode",
           "type": "string"
+        },
+        "qos_queue_id_list": {
+          "description": "qos queue id list",
+          "type": "array"
+        },
+        "qos_logical_queue_list": {
+          "description": "qos logical queue list",
+          "type": "array"
+        },
+        "qos_default_nic_queue": {
+          "description": "qos default hw queue",
+          "type": "boolean"
+        },
+        "qos_priority_tagging": {
+          "description": "qos_priority_tagging_config",
+          "type": "boolean"
+        },
+        "priority_id_list": {
+          "description": "priority id list",
+          "type": "array"
+        },
+        "priority_scheduling_list": {
+          "description": "priority scheduling list",
+          "type": "array"
+        },
+        "priority_bandwidth_list": {
+          "description": "priority bandwidth list",
+          "type": "array"
+        },
+        "vgw_intf_list": {
+          "description": "vgw intf list",
+          "type": "array"
+        },
+        "vgw_public_subnet_list": {
+          "description": "vgw public subnet list",
+          "type": "array"
+        },
+        "vgw_public_vn_name_list": {
+          "description": "vgw public vn name list",
+          "type": "array"
+        },
+        "vgw_gateway_route_list": {
+          "description": "vgw_gateway_route_list",
+          "type": "array"
         }
       }
     },
