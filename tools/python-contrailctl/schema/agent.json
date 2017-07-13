@@ -11,6 +11,22 @@
     "KEYSTONE": {
       "$ref": "definitions.json#/definitions/keystone_config"
     },
+    "KUBERNETES": {
+      "id": "kubernetes",
+      "type": "object",
+      "description": "KUBERNETES configuration section",
+      "additionalProperties": false,
+      "properties": {
+        "api_server": {
+          "description": "kubernetes api server ip",
+          "type": "string"
+        },
+        "token": {
+          "description": "aaa token to communicate to kubernetes api server ip",
+          "type": "string"
+        }
+      }
+    },
     "AGENT": {
       "id": "agent",
       "type": "object",
@@ -39,18 +55,6 @@
         },
         "vrouter_agent_ip": {
           "description": "vrouter agent ip",
-          "type": "string"
-        },
-        "non_mgmt_ip": {
-          "description": "vrouter non mgmt interface ip",
-          "type": "string"
-        },
-        "non_mgmt_gw": {
-          "description": "vrouter non mgmt interface gw",
-          "type": "string"
-        },
-        "gateway_mode": {
-          "description": "agent gateway mode",
           "type": "string"
         }
       }
