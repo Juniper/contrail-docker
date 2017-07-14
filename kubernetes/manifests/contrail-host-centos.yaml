@@ -30,6 +30,9 @@ data:
     pod_subnets = 10.32.0.0/12
     token =
     api_server = 10.84.13.7
+  kubernetes-agent-config: |-
+    [GLOBAL]
+    cloud_orchestrator = kubernetes
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -282,6 +285,39 @@ spec:
         env:
         - name: INSTALL_VROUTER_MODULE
           value: 'true'
+      - name: contrail-kubernetes-agent
+        image: "10.84.5.71:5000/contrail-kubernetes-agent-ubuntu14.04:4.0.0.0-20"
+        imagePullPolicy: ""
+        command: ["/bin/bash", "-c"]
+        args: ["
+		while true;
+		do
+			[ -f /tmp/contrailctl/kubernetesagent.conf ] && break;
+			sleep 2;
+		done;
+		while true;
+		do
+			[ -d /etc/contrailctl ] && break;
+			mkdir /etc/contrailctl;
+			sleep 2;
+		done;
+		echo '' >> /etc/contrailctl/kubernetesagent.conf;
+		cat /tmp/contrailctl/kubernetesagent.conf >> /etc/contrailctl/kubernetesagent.conf;
+		/entrypoint.sh"
+	]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /tmp/contrailctl
+          name: contrail-config
+        - mountPath: /var/lib/contrail/
+          name: var-lib-contrail
+        - mountPath: /host/etc_cni
+          name: etc-cni
+        - mountPath: /host/opt_cni_bin
+          name: opt-cni-bin
+        - mountPath: /var/log/contrail/cni
+          name: var-log-contrail-cni
       containers:
       - name: contrail-agent
         image: "10.84.5.71:5000/contrail-agent-ubuntu14.04:4.0.0.0-20"
@@ -331,6 +367,8 @@ spec:
             path: global.conf
           - key: agent-config
             path: agent.conf
+          - key: kubernetes-agent-config
+            path: kubernetesagent.conf
       - name: usr-src
         hostPath:
           path: /usr/src
