@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail Vcenter Plugin Configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    }
+  }
+}
