@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail vcenter plugin configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    },
+    "VCPLUGIN": {
+      "properties": {
+        "vc_url": {
+          "description": "vcenter sdk url",
+          "type": "string"
+        },
+        "datacenter": {
+          "description": "Datacenter name in vcenter",
+          "type": "string"
+        },
+        "dvs": {
+          "description": "DVS name used for contrail networking",
+          "type": "string"
+        },
+        "username": {
+          "description": "username for connecting to vcenter",
+          "type": "string"
+        },
+        "password": {
+          "description": "password for connecting to vcenter",
+          "type": "string"
+        },
+        "ipfabricpg": {
+          "description": "fabric portgroup for contrailVM",
+          "type": "string"
+        },
+        "mode": {
+          "description": "mode plugin runs, vcenter-only or vc-compute",
+          "type": "string"
+        },
+        "api_server_ip": {
+          "description": "api server ip address",
+          "type": "string"
+        },
+        "api_server_port": {
+          "description": "api server port",
+          "type": "string"
+        },
+        "zookeeper_server_list": {
+          "description": "zookeeper servers for plugin ip:port",
+          "type": "string"
+        },
+        "introspect_port": {
+          "description": "plugin introspection port",
+          "type": "string"
+        },
+        "esxtocomputemap": {
+          "description": "list of esxihost to computevm mapping ip:ip",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
