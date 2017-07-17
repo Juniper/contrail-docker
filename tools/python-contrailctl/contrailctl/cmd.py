@@ -56,6 +56,7 @@ class ConfigManager(object):
         "mesosmanager": MESOSMANAGER_PARAM_MAP,
         "cephcontroller": CEPHCONTROLLER_PARAM_MAP,
         "contrailissu": CONTRAIL_ISSU_MAP,
+        "vcenterplugin": VCENTER_PLUGIN_MAP,
     }
 
     PLAYBOOKS = dict(
@@ -68,6 +69,7 @@ class ConfigManager(object):
         mesosmanager="contrail_mesos_manager.yml",
         cephcontroller="storage_ceph_controller.yml",
         contrailissu="contrail_issu.yml",
+        vcenterplugin="contrail_vc_plugin.yml"
         kubernetesagent="contrail_kubernetes_agent.yml"
     )
 
@@ -217,7 +219,8 @@ class ConfigManager(object):
 def main(args=sys.argv[1:]):
 
     components = ["controller", "analyticsdb", "analytics", "agent",
-                      "lb","kubemanager", "mesosmanager", "cephcontroller", "contrailissu", "kubernetesagent"]
+                      "lb","kubemanager", "mesosmanager", "cephcontroller", "contrailissu",
+                      "kubernetesagent", "vcenter-plugin"]
     types = ["controller", "analyticsdb", "analytics", "cephcontroller"]
     ap_node_common = argparse.ArgumentParser(add_help=False)
     ap_node_common.add_argument('-t', '--type', type=str, required=True,
