@@ -217,7 +217,8 @@ class ConfigManager(object):
 def main(args=sys.argv[1:]):
 
     components = ["controller", "analyticsdb", "analytics", "agent",
-                      "lb","kubemanager", "mesosmanager", "cephcontroller", "contrailissu", "kubernetesagent"]
+                      "lb","kubemanager", "mesosmanager", "cephcontroller", "contrailissu",
+                      "kubernetesagent", "vcenter-plugin"]
     types = ["controller", "analyticsdb", "analytics", "cephcontroller"]
     ap_node_common = argparse.ArgumentParser(add_help=False)
     ap_node_common.add_argument('-t', '--type', type=str, required=True,
