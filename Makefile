@@ -54,6 +54,7 @@ endif
 ifneq (,$(filter ubuntu14.04 ubuntu16.04,$(OS)))
 ifndef CONTAINERS
 	export CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager ceph-controller kubernetes-agent
+	#export CONTAINERS = controller analytics agent analyticsdb lb kube-manager mesos-manager ceph-controller kubernetes-agent vcenter-plugin
 endif
 endif
 
