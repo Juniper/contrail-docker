@@ -39,9 +39,9 @@ spec:
       containers:
       - name: contrail-kube-manager
         {{- if .Values.imageRepo }}
-        image: "{{ .Values.imageRepo }}/{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}-{{ .Values.containerOsRelease }}:{{ .Values.contrailVersion }}"
         {{- else }}
-        image: "{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        image: "{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}"
         {{- end }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
