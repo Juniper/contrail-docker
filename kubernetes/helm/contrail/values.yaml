@@ -1,47 +1,48 @@
 # Default values for contrail.
-#(MANDATORY)
+# (MANDATORY)
 # contrailVersion - example 4.0.0.0-3042
 # This variable cannot be blank.
 contrailVersion: 4.0.0.0-20
 
+# (OPTIONAL)
 # hostOs - host operating system release
-# ubuntu 16.04 - ubuntu16.04
+# ubuntu 16.04 - ubuntu
+# ubuntu 14.04 - ubuntu
 # centos 7.1 - centos7
 # centos 7.2 - centos7
 # centos 7.3 - centos7
 # default hostOs: ubuntu16.04
+hostOs: centos7
 
 # (MANDATORY)
-# osRelease - operating system release
+# containerOsRelease - operating system release
 # ubuntu 14.04 - ubuntu14.04
 # ubuntu 16.04 - ubuntu16.04
 # centos 7.1 - centos7
 # centos 7.2 - centos7
 # centos 7.3 - centos7
-osRelease: ubuntu16.04
+containerOsRelease: ubuntu14.04
 
-# image repository, pull policy etc
+# (OPTIONAL)
+# Docker repository
 imageRepo: 10.84.5.71:5000
 
 # Global configurations
 #
 global:
-  # hosts_entries - (OPTIONAL) a dict in form of {name1: 1.1.1.1, name2: 1.1.1.2}
-  # In multi-controller systems, all hosts in the cluster should be reachable
-  # using its own hostname which is requirement for rabbitmq, so for that /etc/hosts
-  # entries are required, unless there is an external dns infrastructure to support it
-  # hosts_entries: '{"node1": "192.168.0.11", "node2": "192.168.0.12", "node3": "192.168.0.13"}'
 
   # (MANDATORY)
   # controller_nodes 
   controller_nodes: 
-    - 10.87.65.152
+    - 10.87.65.30
   
+  # (OPTIONAL)
   # If analyticsdb nodes are different from controller_nodes
   # Example:
   # analyticsdb_nodes: 
   #  - 10.87.65.30
 
+  # (OPTIONAL)
   # If analytics nodes are different from controller_nodes
   # Example:
   # analytics_nodes: 
@@ -55,10 +56,12 @@ global:
 # webui configurations
 #
 #webui:
+  # (OPTIONAL)
   # http listen port: default 8080
   # Example: 
   # http_listen_port: 8085
 
+  # (OPTIONAL)
   # https_listen_port: default 8143
   # https_listen_port:
 
@@ -79,21 +82,27 @@ agent:
 ##
 # imagePullPolicy:
 
-# container image names
-# controllerImageName: contrail-controller
-# analyticsImageName: contrail-analytics
-# analyticsdbImageName: contrail-analyticsdb
-# kubeManagerImageName: contrail-kube-manager
-# agentImageName: contrail-agent
-# compilerImageName: contrail-vrouter-compiler-centos7
+# (OPTIONAL)
+# If manually loaded docker images, then give the contrail container image names
+# controllerImageName: contrail-controller-ubuntu-16.04:4.0.0.0-20
+# analyticsImageName: contrail-analytics-ubuntu-16.04:4.0.0.0-20
+# analyticsdbImageName: contrail-analyticsdb-ubuntu-16.04:4.0.0.0-20
+# kubeManagerImageName: contrail-kube-manager-ubuntu-16.04:4.0.0.0-20
+# agentImageName: contrail-agent-ubuntu-16.04:4.0.0.0-20
+# compilerImageName: contrail-vrouter-compiler-centos7:4.0.0.0-20
 
 #
 # kubernetes configurations
 #
 kubernetes:
-  # IP address of the kubernetes_api_server
+
+  # (OPTIONAL)
+  # If contrail controller node is differnet then the k8s master node
+  # Then give the IP address of the kubernetes_api_server
   # Example:
   # kubernetes_api_server: 10.84.18.8
+
+  # (OPTIONAL)
   # Name of the kubernetes cluster being provisioned
   # Default value: "k8s-default"
   # Example:
@@ -103,21 +112,25 @@ kubernetes:
   # Default value: ""
   kubernetes_access_token: ""
 
+  # (OPTIONAL)
   # Pod subnet 
   # Default value: "10.32.0.0/12"
   # Example:
   # kubernetes_pod_subnets: "10.87.45.0/24"
 
+  # (OPTIONAL)
   # Service subnet
   # Default value: "10.96.0.0/12"
   # Example:
   # kubernetes_service_subnets: "10.87.46.0/24"
   
+  # (OPTIONAL)
   # Cluster project used in contrail
   # Default value: {'domain': 'default-domain', 'project': 'default'}
   # Example:
   # kubernetes_cluster_project: "{'domain': 'default-domain', 'project': 'default'}"
 
+  # (OPTIONAL)
   # Kubernetes FloatingIpPool to be used for service/ingress.
   # Example:
   # kubernetes_public_fip_pool: {'domain': 'domain-name', 'project': 'project-name', 'network': 'network-name', 'name': 'fip-pool-name' }

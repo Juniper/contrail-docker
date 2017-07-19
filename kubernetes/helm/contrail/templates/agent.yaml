@@ -1,3 +1,4 @@
+{{- if not .Values.hostOs -}}{{- $_ := set .Values "hostOs" "ubuntu" -}}{{- end }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
@@ -35,13 +36,16 @@ spec:
           name: lib-modules
         - mountPath: /usr/src/kernels
           name: usr-src-kernels
+        env:
+        - name: INSTALL_VROUTER_MODULE
+          value: 'true'
 {{- end }}
       containers:
       - name: contrail-agent
         {{- if .Values.imageRepo }}
-        image: "{{ .Values.imageRepo }}/{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.containerOsRelease }}:{{ .Values.contrailVersion }}"
         {{- else }}
-        image: "{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        image: "{{ default "contrail-agent" .Values.agentImageName }}"
         {{- end  }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:

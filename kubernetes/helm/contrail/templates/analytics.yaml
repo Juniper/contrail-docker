@@ -39,9 +39,9 @@ spec:
       containers:
       - name: contrail-analytics
         {{- if .Values.imageRepo }}
-        image: "{{ .Values.imageRepo }}/{{ default "contrail-analytics" .Values.analyticsImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-analytics" .Values.analyticsImageName }}-{{ .Values.containerOsRelease }}:{{ .Values.contrailVersion }}"
         {{- else }}
-        image: "{{ default "contrail-analytics" .Values.analyticsImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        image: "{{ default "contrail-analytics" .Values.analyticsImageName }}"
         {{- end }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:

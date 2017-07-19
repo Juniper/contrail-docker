@@ -1,4 +1,11 @@
-apiVersion: v1
+name: Contrail
 description: A Helm chart for contrail
-name: contrail
 version: 0.1.0
+appVersion: Contrail 4.0.1.0
+home: https://github.com/Juniper/contrail-docker/
+sources:
+  - https://github.com/Juniper/contrail-controller/
+tillerVersion: 2.4.2
+keywords:
+  - Contrail
+  - SDN
