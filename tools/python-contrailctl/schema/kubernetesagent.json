@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Contrail Kubernetes Agent configuration",
+  "type": "object",
+  "id": "root",
+  "additionalProperties": false,
+  "properties": {
+    "GLOBAL": {
+      "$ref": "definitions.json#/definitions/global_config"
+    },
+    "AGENT": {
+      "id": "agent",
+      "type": "object",
+      "description": "AGENT configuration section",
+      "additionalProperties": false,
+      "properties": {
+        "ip": {
+          "description": "vrouter agent ip",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
