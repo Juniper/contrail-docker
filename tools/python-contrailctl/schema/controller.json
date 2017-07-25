@@ -103,6 +103,18 @@
         "server_options_cert_file": {
           "description": "Service options cert file",
           "type": "string"
+        },
+        "vcenter_server_ip": {
+          "description": "vcenter server ip",
+          "type": "string"
+        },
+        "vcenter_wsdl_path": {
+          "description": "vcenter wsdl path",
+          "type": "string"
+        },
+        "vcenter_auth_protocol": {
+          "description": "vcenter auth protocol",
+          "type": "string"
         }
       }
     },
