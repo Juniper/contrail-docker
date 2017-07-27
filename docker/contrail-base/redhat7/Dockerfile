@@ -32,7 +32,8 @@ RUN echo $CONTRAIL_REPO_URL && \
     yum repolist
 RUN yum -y install --disablerepo=* --enablerepo=contrail-install-repo \
       yum-plugin-priorities python-setuptools $ANSIBLE_PACKAGES \
-      iproute net-tools openssh-clients wget tar telnet vim which initscripts
+      iproute net-tools openssh-clients wget tar telnet vim which initscripts \
+      sudo kexec-tools less
 
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
