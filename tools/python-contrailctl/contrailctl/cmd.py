@@ -295,12 +295,15 @@ def main(args=sys.argv[1:]):
         if args.component in ["kubemanager", "agent", "kubernetesagent"]:
             if os.path.exists(TMP_K8S_CONTRAILCTL):
                 k8s_modify = K8sModifyConfig(args.component,TMP_K8S_CONTRAILCTL,args.config_file)
+                merged = False
                 if args.component == "agent":
-                    k8s_modify.merge_update_sections_agent()
+                    merged = k8s_modify.merge_update_sections_agent()
                 elif args.component == "kubemanager":
-                    k8s_modify.merge_update_sections_kubemanager()
+                    merged = k8s_modify.merge_update_sections_kubemanager()
                 elif args.component == "kubernetesagent":
-                    k8s_modify.merge_update_sections_kubernetesagent()
+                    merged = k8s_modify.merge_update_sections_kubernetesagent()
+                if not merged:
+                    return 1
 
     while True:
         si = SingleInstance()
