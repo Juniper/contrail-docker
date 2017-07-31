@@ -20,7 +20,8 @@ data:
   agent-config: |-
     [AGENT]
     compile_vrouter_module = False
-    vrouter_physical_interface = enp2s0
+    # Optional ctrl_data_network, if different from management
+    # ctrl_data_network = "192.168.10.0/24"
   kubemanager-config: |-
     [KUBERNETES]
     cluster_name = k8s-default
@@ -28,11 +29,9 @@ data:
     cluster_network = {}
     service_subnets = 10.96.0.0/12
     pod_subnets = 10.32.0.0/12
-    token =
     api_server = 10.84.13.7
   kubernetes-agent-config: |-
-    [GLOBAL]
-    cloud_orchestrator = kubernetes
+    [AGENT]
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -56,6 +55,9 @@ spec:
                 operator: In
                 values:
                 - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -72,6 +74,8 @@ spec:
           name: contrail-config
         - mountPath: /var/lib/cassandra
           name: analyticsdb-data
+        - mountPath: /var/lib/zookeeper
+          name: zookeeper-analyticsdb-data
       volumes:
       - name: contrail-config
         configMap:
@@ -80,7 +84,11 @@ spec:
           - key: global-config
             path: analyticsdb.conf
       - name: analyticsdb-data
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/analyticsdb 
+      - name: zookeeper-analyticsdb-data
+        hostPath:
+          path: /var/lib/analyticsdb_zookeeper_data
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -104,6 +112,9 @@ spec:
                 operator: In
                 values:
                 - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -148,6 +159,9 @@ spec:
                 operator: In
                 values:
                 - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -174,9 +188,11 @@ spec:
           - key: global-config
             path: controller.conf
       - name: configdb-data
-        emptyDir: {}
+        hostPath: 
+          path: /var/lib/configdb
       - name: zookeeper-data
-        emptyDir: {}
+        hostPath: 
+          path: /var/lib/config_zookeeper_data
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -200,40 +216,28 @@ spec:
                 operator: In
                 values:
                 - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
         effect: NoSchedule
+      automountServiceAccountToken: false
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
         image: "10.84.5.71:5000/contrail-kube-manager-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
-        command: ["/bin/bash", "-c"]
-        args: ["
-		while true;
-		do
-			[ -f /tmp/contrailctl/global.conf ] && [ -f /tmp/contrailctl/kubemanager.conf ] && break;
-			sleep 2;
-		done;
-		while true;
-		do
-			[ -d /etc/contrailctl ] && break;
-			mkdir /etc/contrailctl;
-			sleep 2;
-		done;
-		cat /tmp/contrailctl/global.conf >> /etc/contrailctl/kubemanager.conf;
-		echo '' >> /etc/contrailctl/kubemanager.conf;
-		cat /tmp/contrailctl/kubemanager.conf >> /etc/contrailctl/kubemanager.conf;
-		/entrypoint.sh"
-	]
         securityContext:
           privileged: true
         volumeMounts:
         - mountPath: /tmp/contrailctl
-          name: contrail-config
+          name: tmp-contrail-config
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
       volumes:
-      - name: contrail-config
+      - name: tmp-contrail-config
         configMap:
           name: contrail-config
           items:
@@ -241,6 +245,9 @@ spec:
             path: global.conf
           - key: kubemanager-config
             path: kubemanager.conf
+      - name: pod-secret
+        secret:
+          secretName: contrail-kube-manager-token
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -265,11 +272,15 @@ spec:
                 operator: NotIn
                 values:
                 - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       #Enable tolerations for single node setup
       #tolerations:
       #- key: node-role.kubernetes.io/master
       #  operator: Exists
       #  effect: NoSchedule
+      automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
       - name: contrail-vrouter-compiler
@@ -288,28 +299,11 @@ spec:
       - name: contrail-kubernetes-agent
         image: "10.84.5.71:5000/contrail-kubernetes-agent-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
-        command: ["/bin/bash", "-c"]
-        args: ["
-		while true;
-		do
-			[ -f /tmp/contrailctl/kubernetesagent.conf ] && break;
-			sleep 2;
-		done;
-		while true;
-		do
-			[ -d /etc/contrailctl ] && break;
-			mkdir /etc/contrailctl;
-			sleep 2;
-		done;
-		echo '' >> /etc/contrailctl/kubernetesagent.conf;
-		cat /tmp/contrailctl/kubernetesagent.conf >> /etc/contrailctl/kubernetesagent.conf;
-		/entrypoint.sh"
-	]
         securityContext:
           privileged: true
         volumeMounts:
         - mountPath: /tmp/contrailctl
-          name: contrail-config
+          name: tmp-contrail-config
         - mountPath: /var/lib/contrail/
           name: var-lib-contrail
         - mountPath: /host/etc_cni
@@ -322,24 +316,6 @@ spec:
       - name: contrail-agent
         image: "10.84.5.71:5000/contrail-agent-ubuntu14.04:4.0.0.0-20"
         imagePullPolicy: ""
-        command: ["/bin/bash", "-c"]
-        args: ["
-		while true;
-		do
-			[ -f /tmp/contrailctl/global.conf ] && [ -f /tmp/contrailctl/agent.conf ] && break;
-			sleep 2;
-		done;
-		while true;
-		do
-			[ -d /etc/contrailctl ] && break;
-			mkdir /etc/contrailctl;
-			sleep 2;
-		done;
-		cat /tmp/contrailctl/global.conf >> /etc/contrailctl/agent.conf;
-		echo '' >> /etc/contrailctl/agent.conf;
-		cat /tmp/contrailctl/agent.conf >> /etc/contrailctl/agent.conf;
-		/entrypoint.sh"
-	]
         securityContext:
           privileged: true
         volumeMounts:
@@ -348,7 +324,7 @@ spec:
         - mountPath: /lib/modules
           name: lib-modules
         - mountPath: /tmp/contrailctl
-          name: contrail-config
+          name: tmp-contrail-config
         - mountPath: /var/lib/contrail/
           name: var-lib-contrail
         - mountPath: /host/etc_cni
@@ -358,8 +334,10 @@ spec:
         # This is a workaround just to make sure the directory is created on host
         - mountPath: /var/log/contrail/cni
           name: var-log-contrail-cni
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
       volumes:
-      - name: contrail-config
+      - name: tmp-contrail-config
         configMap:
           name: contrail-config
           items:
@@ -367,8 +345,13 @@ spec:
             path: global.conf
           - key: agent-config
             path: agent.conf
+          - key: kubemanager-config
+            path: kubemanager.conf
           - key: kubernetes-agent-config
             path: kubernetesagent.conf
+      - name: pod-secret
+        secret:
+          secretName: contrail-kube-manager-token
       - name: usr-src
         hostPath:
           path: /usr/src
@@ -390,3 +373,41 @@ spec:
       - name: var-log-contrail-cni
         hostPath:
           path: /var/log/contrail/cni/
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: contrail-kube-manager
+  namespace: kube-system
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: contrail-kube-manager
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: contrail-kube-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: contrail-kube-manager
+subjects:
+- kind: ServiceAccount
+  name: contrail-kube-manager
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contrail-kube-manager-token
+  namespace: kube-system
+  annotations: 
+    kubernetes.io/service-account.name: contrail-kube-manager
+type: kubernetes.io/service-account-token

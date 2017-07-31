@@ -7,6 +7,7 @@ import time
 from .config import Configurator
 from .map import *
 from .runner import Runner
+from .k8s_modify_config import K8sModifyConfig
 from jsonschema import validate,FormatChecker, exceptions, RefResolver
 import json
 
@@ -15,6 +16,7 @@ from ansible.executor.stats import AggregateStats
 
 LOCK_PATH = "/var/lock/contrailctl"
 PLAYBOOK_DIR = "/contrail-ansible-internal"
+TMP_K8S_CONTRAILCTL = "/tmp/contrailctl"
 
 
 class SingleInstance(object):
@@ -142,6 +144,7 @@ class ConfigManager(object):
         extra_vars_dict = dict(x.split('=') for x in extra_vars)
         if not tags:
             tags = ['configure', 'service', 'provision']
+
         valid = self.validate()
         if not valid:
             return None
@@ -287,6 +290,20 @@ def main(args=sys.argv[1:]):
     timeout = 1800
     poll = 10
     total_wait_time = 0
+
+    if 'configure' in args.tags:
+        if args.component in ["kubemanager", "agent", "kubernetesagent"]:
+            if os.path.exists(TMP_K8S_CONTRAILCTL):
+                k8s_modify = K8sModifyConfig(args.component,TMP_K8S_CONTRAILCTL,args.config_file)
+                merged = False
+                if args.component == "agent":
+                    merged = k8s_modify.merge_update_sections_agent()
+                elif args.component == "kubemanager":
+                    merged = k8s_modify.merge_update_sections_kubemanager()
+                elif args.component == "kubernetesagent":
+                    merged = k8s_modify.merge_update_sections_kubernetesagent()
+                if not merged:
+                    return 1
 
     while True:
         si = SingleInstance()
