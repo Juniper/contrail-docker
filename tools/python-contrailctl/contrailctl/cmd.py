@@ -291,7 +291,7 @@ def main(args=sys.argv[1:]):
     poll = 10
     total_wait_time = 0
 
-    if 'configure' in args.tags:
+    if args.tags and 'configure' in args.tags:
         if args.component in ["kubemanager", "agent", "kubernetesagent"]:
             if os.path.exists(TMP_K8S_CONTRAILCTL):
                 k8s_modify = K8sModifyConfig(args.component,TMP_K8S_CONTRAILCTL,args.config_file)
