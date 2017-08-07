@@ -116,6 +116,10 @@
         "vrouter_module_params": {
           "description": "vrouter module params",
           "type": "string"
+        },
+        "compute_controller_list": {
+          "description": "list of controller nodes",
+          "type": "string"
         }
       }
     },
