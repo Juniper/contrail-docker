@@ -77,7 +77,7 @@ endif
 
 ifneq (,$(filter redhat7,$(OS)))
 ifndef CONTAINERS
-	export CONTAINERS = controller analytics agent analyticsdb lb
+	export CONTAINERS = controller analytics agent analyticsdb lb kube-manager
 endif
 endif
 
