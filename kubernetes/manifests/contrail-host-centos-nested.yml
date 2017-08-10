@@ -1,0 +1,202 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrail-config
+  namespace: kube-system
+data:
+  global-config: |-
+    [GLOBAL]
+    cloud_orchestrator = kubernetes
+    config_nodes = 10.10.10.1
+    controller_nodes = 10.10.10.1
+    analytics_nodes = 10.10.10.2
+    nested_mode = True
+  kubemanager-config: |-
+    [KUBERNETES]
+    cluster_name = k8s-default
+    cluster_project = {}
+    cluster_network = {'domain': 'default-domain', 'project': 'admin', 'name': '__public_network_nested_k8s__'}
+    service_subnets = 10.96.0.0/12
+    pod_subnets = 10.32.0.0/12
+    api_server = 10.84.53.3
+    [AUTH]
+    ip = 10.10.10.100
+    admin_password = c0ntrail123
+    admin_user = admin
+    admin_tenant = admin
+  kubernetes-agent-config: |-
+    [AGENT]
+    ip = 10.10.10.101
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-kube-manager
+  namespace: kube-system
+  labels:
+    app: contrail-kube-manager
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-kube-manager
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/controller"
+                operator: In
+                values:
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: contrail-kube-manager
+        image: "10.84.5.71:5000/contrail-kube-manager-ubuntu14.04:4.0.0.0-20"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /tmp/contrailctl
+          name: tmp-contrail-config
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
+      volumes:
+      - name: tmp-contrail-config
+        configMap:
+          name: contrail-config
+          items:
+          - key: global-config
+            path: global.conf
+          - key: kubemanager-config
+            path: kubemanager.conf
+      - name: pod-secret
+        secret:
+          secretName: contrail-kube-manager-token
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-kubernetes-agent
+  namespace: kube-system
+  labels:
+    app: contrail-kubernetes-agent
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-kubernetes-agent
+    spec:
+      #Disable affinity for single node setup
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/controller"
+                operator: NotIn
+                values:
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
+      #Enable tolerations for single node setup
+      #tolerations:
+      #- key: node-role.kubernetes.io/master
+      #  operator: Exists
+      #  effect: NoSchedule
+      automountServiceAccountToken: false
+      hostNetwork: true
+      containers:
+      - name: contrail-kubernetes-agent
+        image: "10.84.5.71:5000/contrail-kubernetes-agent-ubuntu14.04:4.0.0.0-20"
+        imagePullPolicy: ""
+        command: ["/bin/bash", "-c", "/entrypoint.sh -l"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /tmp/contrailctl
+          name: contrail-config
+        - mountPath: /var/lib/contrail/
+          name: var-lib-contrail
+        - mountPath: /host/etc_cni
+          name: etc-cni
+        - mountPath: /host/opt_cni_bin
+          name: opt-cni-bin
+        # This is a workaround just to make sure the directory is created on host
+        - mountPath: /var/log/contrail/cni
+          name: var-log-contrail-cni
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
+      volumes:
+      - name: contrail-config
+        configMap:
+          name: contrail-config
+          items:
+          - key: global-config
+            path: global.conf
+          - key: kubernetes-agent-config
+            path: kubernetesagent.conf
+      - name: var-lib-contrail
+        hostPath:
+          path: /var/lib/contrail/
+      - name: etc-cni
+        hostPath:
+          path: /etc/cni
+      - name: opt-cni-bin
+        hostPath:
+          path: /opt/cni/bin
+      - name: var-log-contrail-cni
+        hostPath:
+          path: /var/log/contrail/cni/
+      - name: pod-secret
+        secret:
+          secretName: contrail-kube-manager-token
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: contrail-kube-manager
+  namespace: kube-system
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: contrail-kube-manager
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: contrail-kube-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: contrail-kube-manager
+subjects:
+- kind: ServiceAccount
+  name: contrail-kube-manager
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contrail-kube-manager-token
+  namespace: kube-system
+  annotations:
+    kubernetes.io/service-account.name: contrail-kube-manager
+type: kubernetes.io/service-account-token
