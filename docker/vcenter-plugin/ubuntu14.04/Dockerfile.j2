@@ -2,11 +2,11 @@ FROM contrail-base-ubuntu14.04:{{ contrail_version }}
 COPY entrypoint.sh /
 LABEL Name=contrail-vcenter-plugin-$OS \
       Version="$CONTRAIL_VERSION" \
-      contrail.role=vcenter-plugin \
+      contrail.role=vcenterplugin \
       Description="Contrail Vcenter Plugin" Vendor="Juniper Networks"
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
-ENV CONTRAIL_ROLE vcenter-plugin
+ENV CONTRAIL_ROLE vcenterplugin
 RUN echo $CONTRAIL_ROLE > /etc/contrail-role
 RUN contrailctl config sync -F -v -t package
 RUN contrailctl config sync -F -v -t install
