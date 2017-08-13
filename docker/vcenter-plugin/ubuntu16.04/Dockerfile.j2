@@ -1,9 +1,9 @@
 FROM contrail-base-ubuntu16.04:{{ contrail_version }}
 LABEL Name=contrail-vcenter-plugin-$OS \
       Version="$CONTRAIL_VERSION" \
-      contrail.role=vcenter-plugin \
+      contrail.role=vcenterplugin \
       Description="Contrail Vcenter Plugin" Vendor="Juniper Networks"
-ENV CONTRAIL_ROLE vcenter-plugin
+ENV CONTRAIL_ROLE vcenterplugin
 RUN echo $CONTRAIL_ROLE > /etc/contrail-role
 RUN contrailctl config sync -F -v -t package
 RUN contrailctl config sync -F -v -t install
