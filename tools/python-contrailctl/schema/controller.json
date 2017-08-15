@@ -103,6 +103,10 @@
         "server_options_cert_file": {
           "description": "Service options cert file",
           "type": "string"
+        },
+        "config_editor_schema_path": {
+          "description": "Path of the json schema for use in Config Editor",
+          "type": "string"
         }
       }
     },
