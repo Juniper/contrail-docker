@@ -1,0 +1,16 @@
+{% extends parent_template %}
+
+# Contrail Neutron plugin packages
+{% set neutron_server_packages_append = ['neutron-plugin-contrail', 'python-contrail'] %}
+
+# Allow Unauthenticated contrail packages
+{% block openstack_base_header %}
+COPY 99contrail /etc/apt/apt.conf.d/99contrail
+{% endblock %}
+
+# Copy vrouter-port-control in Nova compute container
+{% block nova_compute_header %}
+COPY vrouter-port-control /usr/local/bin/vrouter-port-control
+RUN chmod +x /usr/local/bin/vrouter-port-control
+{% endblock %}
+
