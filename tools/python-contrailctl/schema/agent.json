@@ -120,6 +120,10 @@
         "compute_controller_list": {
           "description": "list of controller nodes",
           "type": "string"
+        },
+        "metadata_ssl_enable": {
+          "description": "Knob to enable ssl for metadata service",
+	  "type": "boolean"
         }
       }
     },
