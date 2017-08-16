@@ -1,34 +1,52 @@
+{{- if not .Values.hostOs -}}{{- $_ := set .Values "hostOs" "ubuntu" -}}{{- end }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ template "agent.fullname" . }}
+  name: contrail-vrouter-agent
   namespace: kube-system
   labels:
-    app: {{ template "agent.fullname" . }}
+    app: contrail-cni
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "agent.fullname" . }}
-        contrail_function: "contrail-vrouter"
+        app: contrail-cni
+        contrail_function: "contrail-vrouter-agent"
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "node-role.kubernetes.io/master"
-                operator: DoesNotExist
-              - key: "contrail.role"
-                operator: "NotIn"
-                values: 
-                - controller
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
       hostNetwork: true
+{{- if eq .Values.hostOs "centos7" }}
+      initContainers:
+      - name: contrail-vrouter-compiler
+        {{- if .Values.imageRepo }}
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-vrouter-compiler-centos7" .Values.compilerImageName }}:{{ .Values.contrailVersion }}"
+        {{- else }}
+        image: {{ default "contrail-vrouter-compiler-centos7" .Values.compilerImageName }}:{{ .Values.contrailVersion }}"
+        {{- end  }}
+        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /usr/src/kernels
+          name: usr-src-kernels
+        env:
+        - name: INSTALL_VROUTER_MODULE
+          value: 'true'
+{{- end }}
       containers:
       - name: contrail-agent
-        image: "{{ .Values.imageRepo }}/{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        {{- if .Values.imageRepo }}
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-agent" .Values.agentImageName }}-{{ .Values.containerOsRelease }}:{{ .Values.contrailVersion }}"
+        {{- else }}
+        image: "{{ default "contrail-agent" .Values.agentImageName }}"
+        {{- end  }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
@@ -51,7 +69,7 @@ spec:
       volumes:
       - name: etc-contrailctl
         configMap:
-          name: {{ template "fullname" . }}
+          name: contrailctl-config
           items:
           - key: agent-config
             path: agent.conf
@@ -61,6 +79,11 @@ spec:
       - name: usr-src
         hostPath:
           path: /usr/src
+{{- if eq .Values.hostOs "centos7" }}
+      - name: usr-src-kernels
+        hostPath:
+          path: /usr/src/kernels
+{{- end }}
       - name: opt-cni-bin
         hostPath:
           path: /opt/cni/bin

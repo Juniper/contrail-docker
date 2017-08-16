@@ -1,29 +1,36 @@
-{{ if .Values.contrailHA }}
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: {{ template "analyticsdb.fullname" . }}
+  name: contrail-analyticsdb
   namespace: kube-system
   labels:
-    app: {{ template "analyticsdb.fullname" . }}
+    app: contrail-cni
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
       labels:
-        app: {{ template "analyticsdb.fullname" . }}
-        contrail_function: "contrail-controller"
+        app: contrail-cni
+        contrail_function: contrail-analyticsdb
     spec:
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: "contrail.role"
+              - key: "opencontrail.org/component"
                 operator: In
                 values:
-                - controller
+                - "analyticsdb"
+            - matchExpressions:
+              - key: "opencontrail.org/control-plane"
+                operator: In
+                values:
+                - "true"
+            - matchExpressions:
+              - key: "node-role.kubernetes.io/master"
+                operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
         operator: Exists
@@ -31,7 +38,11 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analyticsdb
-        image: "{{ .Values.imageRepo }}/{{ default "contrail-analyticsdb" .Values.analyticsdbImageName }}-{{ .Values.osRelease }}:{{ .Values.contrailVersion }}"
+        {{- if .Values.imageRepo }}
+        image: "{{ .Values.imageRepo }}/{{ default "contrail-analyticsdb" .Values.analyticsdbImageName }}-{{ .Values.containerOsRelease }}:{{ .Values.contrailVersion }}"
+        {{- else }}
+        image: "{{ default "contrail-analyticsdb" .Values.analyticsdbImageName }}"
+        {{- end }}
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         securityContext:
           privileged: true
@@ -45,12 +56,13 @@ spec:
       volumes:
       - name: contrailctl-analyticsdb
         configMap:
-          name: {{ template "fullname" . }}
+          name: contrailctl-config
           items:
           - key: analyticsdb-config
             path: analyticsdb.conf
       - name: analyticsdb-data
-        emptyDir: {}
+        hostPath:
+          path: /var/lib/analyticsdb 
       - name: zookeeper-analyticsdb-data
-        emptyDir: {}
-{{ end }}
+        hostPath:
+          path: /var/lib/analyticsdb_zookeeper_data
