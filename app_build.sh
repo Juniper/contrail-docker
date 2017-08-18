@@ -37,6 +37,10 @@ case $BUILD_PLATFORM in
 	;;
 esac
 
+# If we are running as Continous or Official Build, use -j
+# flag (allowing for it to be pre-set).
+[[ -n $BUILD_SCRIPT_UTILS ]] && BUILD_J=${BUILD_J:-"-j12"}
+
 # TODO: this should use ssh key w/ no passphrase
 export SSHPASS=c0ntrail123
 
@@ -64,5 +68,5 @@ MAKE_ARGS="$MAKE_ARGS CONTAINER_SAVE_LOCATION=$container_save_location"
 
 cd $container_build_workspace
 set -o pipefail			# So that we exit with make's exit status, not tee's
-make OS=$OS $MAKE_ARGS $target 2>&1 | tee -a $log
+make $BUILD_J OS=$OS $MAKE_ARGS $target 2>&1 | tee -a $log
 exit $?
