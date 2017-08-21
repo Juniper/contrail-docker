@@ -8,6 +8,9 @@
     "GLOBAL": {
       "$ref": "definitions.json#/definitions/global_config"
     },
+    "KEYSTONE": {
+      "$ref": "definitions.json#/definitions/keystone_config"
+    },
     "VCPLUGIN": {
       "properties": {
         "vc_url": {
@@ -56,6 +59,14 @@
         },
         "esxtocomputemap": {
           "description": "list of esxihost to computevm mapping ip:ip",
+          "type": "string"
+        },
+        "vcenter_compute_ip": {
+          "description": "nova-compute ip paired to this vc-plugin",
+          "type": "string"
+        },
+        "vc_plugin_ip": {
+          "description": "ansible hostip of the plugin",
           "type": "string"
         }
       }
