@@ -327,6 +327,22 @@
         "group": {
           "description": "rabbitmq group",
           "type": "string"
+        },
+        "ssl": {
+          "description": "Enable rabbitmq ssl",
+          "type": "boolean"
+        },
+        "cacert": {
+          "description": "rabbitmq ssl cacert",
+          "type": "string"
+        },
+        "server_key": {
+          "description": "rabbitmq ssl server key",
+          "type": "string"
+        },
+        "server_cert": {
+          "description": "rabbitmq ssl server cert",
+          "type": "string"
         }
       }
     }
