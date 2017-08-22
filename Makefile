@@ -113,6 +113,7 @@ kolla-ubuntu-prep: kolla-prep
 	grep "deb \[arch=amd64\] http:\/\/$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) .\/" $(KOLLA_DIR)/docker/base/sources.list.ubuntu || \
 	  sed -i '1 i\deb [arch=amd64] $(CONTRAIL_REPO_URL) ./' $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 	cp -af $(KOLLA_DIR)/99contrail $(KOLLA_DIR)/docker/openstack-base/99contrail
+	cp -af $(KOLLA_DIR)/99contrail $(KOLLA_DIR)/docker/nova/nova-libvirt/99contrail
 
 kolla-centos-prep: kolla-prep
 	@echo "Applying Centos related Kolla patches"
