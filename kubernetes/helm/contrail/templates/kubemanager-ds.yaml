@@ -6,7 +6,6 @@ metadata:
   labels:
     app: contrail-cni
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Values.contrailVersion }}"
 spec:
   template:
     metadata:
@@ -19,12 +18,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: "opencontrail.org/component"
-                operator: In
-                values:
-                - "contrail-kube-manager"
-            - matchExpressions:
-              - key: "opencontrail.org/control-plane"
+              - key: "opencontrail.org/controller"
                 operator: In
                 values:
                 - "true"
@@ -36,23 +30,27 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      automountServiceAccountToken: false
       containers:
       - name: contrail-kube-manager
-        {{- if .Values.imageRepo }}
-        image: "{{ .Values.imageRepo }}/{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}-{{ .Values.containerOsRelease }}:{{ .Values.contrailVersion }}"
-        {{- else }}
-        image: "{{ default "contrail-kube-manager" .Values.kubeManagerImageName }}"
-        {{- end }}
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        image: {{ .Values.images.kubemanager | quote }}
+        imagePullPolicy: {{ default "" .Values.images.imagePullPolicy | quote }}
         securityContext:
           privileged: true
         volumeMounts:
-        - mountPath: /etc/contrailctl
+        - mountPath: /tmp/contrailctl
           name: contrailctl-kube-manager
+        - mountPath: /tmp/serviceaccount
+          name: pod-secret
       volumes:
       - name: contrailctl-kube-manager
         configMap:
           name: contrailctl-config
           items:
-          - key: kube-manager-config
+          - key: kubemanager-config
             path: kubemanager.conf
+          - key: global-config
+            path: global.conf  
+      - name: pod-secret
+        secret:
+          secretName: contrail-kube-manager-token

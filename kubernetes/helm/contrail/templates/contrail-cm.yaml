@@ -1,0 +1,29 @@
+{{- include "contrail.checkInputConfStruct" .Values | trunc 0 -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contrailctl-config
+  labels:
+    app: contrail-cni
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+  namespace: kube-system
+data:
+  global-config: |-
+{{ include "contrail.globalConfig" .Values.conf.global | indent 4 }}
+  agent-config: |-
+{{ include "contrail.agentConfig" .Values | indent 4 }}
+  controller-config: |-
+{{ include "contrail.globalConfig" .Values.conf.global | indent 4 }}
+{{ include "contrail.controllerConfig" .Values.conf | indent 4 }}
+  analyticsdb-config: |-
+{{ include "contrail.globalConfig" .Values.conf.global | indent 4 }}
+{{ include "contrail.analyticsdbConfig" .Values.conf | indent 4 }}
+  analytics-config: |-
+{{ include "contrail.globalConfig" .Values.conf.global | indent 4 }}
+{{ include "contrail.analyticsConfig" .Values.conf | indent 4 }}
+  kubemanager-config: |-
+{{ include "contrail.kubernetesConfig" .Values.conf | indent 4 }}
+  kubernetes-agent-config: |-
+    # TO-DO have to check with Dinesh on this
+    [AGENT]

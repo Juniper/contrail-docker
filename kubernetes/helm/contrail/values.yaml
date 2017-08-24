@@ -1,136 +1,337 @@
-# Default values for contrail.
-# (MANDATORY)
-# contrailVersion - example 4.0.0.0-3042
-# This variable cannot be blank.
-contrailVersion: 4.0.0.0-20
+# hostOs - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
+hostOs: centos
 
-# (OPTIONAL)
-# hostOs - host operating system release
-# ubuntu 16.04 - ubuntu
-# ubuntu 14.04 - ubuntu
-# centos 7.1 - centos7
-# centos 7.2 - centos7
-# centos 7.3 - centos7
-# default hostOs: ubuntu16.04
-hostOs: centos7
+images:
+  controller: "contrail-controller-ubuntu14.04:4.0.1.0-43"
+  analyticsdb: "contrail-analyticsdb-ubuntu14.04:4.0.1.0-43"
+  analytics: "contrail-analytics-ubuntu14.04:4.0.1.0-43"
+  kubemanager: "contrail-kube-manager-ubuntu14.04:4.0.1.0-43"
+  vrouterAgent: "contrail-agent-ubuntu14.04:4.0.1.0-43"
+  kubernetesAgent: "contrail-kubernetes-agent-ubuntu14.04:4.0.1.0-43"
+  vrouterCompiler: "contrail-vrouter-compiler-centos7:4.0.1.0-25"
+  imagePullPolicy: "IfNotPresent"
 
-# (MANDATORY)
-# containerOsRelease - operating system release
-# ubuntu 14.04 - ubuntu14.04
-# ubuntu 16.04 - ubuntu16.04
-# centos 7.1 - centos7
-# centos 7.2 - centos7
-# centos 7.3 - centos7
-containerOsRelease: ubuntu14.04
+conf:
+  # global section configuration needed by all containers
+  global:
+    controller: 
+      # nodes - (MANDATORY) list of controller node IP
+      nodes:
+      - 10.87.65.155
+      # virtualIp - (OPTIONAL) Virtual IP handled by load balancer in case of multi-node controllers
+      # virtualIp:
+      # enableControlService - (OPTIONAL) enable control service or not, by default it is enabled
+      enableControlService: "true"
 
-# (OPTIONAL)
-# Docker repository
-imageRepo: 10.84.5.71:5000
+    analyticsdb:
+      # nodes - (MANDATORY) list of analyticsdb node IP
+      nodes: 
+        - 10.87.65.155
+      # cassandraUser - (OPTIONAL) Cassandra username to access analyticsdb
+      cassandraUser: ''
+      # cassandraPassword - (OPTIONAL) Cassandra password to access analyticsdb
+      cassandraPassword: ''
 
-# Global configurations
-#
-global:
+    analytics:
+      # nodes -  (MANDATORY) list of analyticsdb node IP
+      nodes:
+        - 10.87.65.155
+      # virtualIp - (OPTIONAL) Virtual IP handled by load balancer in case of multi-node analytics
+      # virtualIp:
+
+    # (OPTIONAL)
+    config:
+      # nodes - list of config node IP
+      # nodes:
+      #   - 10.87.65.30
+      # virtualIp - Virtual IP handled by load balancer in case of multi-node analytics
+      # virtualIp:
+      # enable_service - enable config service or not, by default it is enabled
+      enableConfigService: "true"
+      # cassandraUser - Cassandra username to access configdb
+      cassandraUser: ''
+      # cassandraPassword - Cassandra password to access configdb
+      cassandraPassword: ''
+
+    # (OPTIONAL)
+    webui:
+      # nodes - list of webui node IP
+      # nodes:
+      # enableWebuiService - enable webui service or not, by default it is enabled
+      enableWebuiService: "true"
+    
+    # hostsEntries -  (OPTIONAL) 
+    # In multi-controller systems, all hosts in the cluster should be reachable
+    # using its own hostname which is requirement for rabbitmq, so for that /etc/hosts
+    #  entries are required, unless there is an external dns infrastructure to support it
+    # hostsEntries:
+    #   host_name_1 : host_ip_1
+    #   host_name_2 : host_ip_2
+     
+    # cloudOrchestrator (MANDATORY) valid values - kubernetes, mesos, openshift, openstack
+    cloudOrchestrator: kubernetes
+
+    # uvePartitionCount - (OPTIONAL) set number of partitions for UVE data to improve analytics performance
+    #
+    # End of global section
+
+    # (OPTIONAL)
+    external:
+      # rabbitmqServers - list of externally managed rabbitmq servers to be used for controller services
+      # rabbitmqServers:
+      #   - 1.1.1.1
+
+      # controllerZookeeperServers - list of externally managed zookeeper servers to be used for controller services
+      # controllerZookeeperServers:
+      #   - 1.1.1.1
+
+      # analyticsdbZookeeperServers - list of externally managed zookeeper servers to be used for analyticsdb services
+      # analyticsdbZookeeperServers:
+      #   - 1.1.1.1
+
+      # configdb_servers - list of externally managed cassandra(configdb) servers
+      # configdb_servers:
+      #   - 1.1.1.1
+
+    # (OPTIONAL)
+    ssl:
+      # xmppAuth - enables contrail control and contrail vrouter agent to communicate over SSL, default is false
+      xmppAuth: "false"
+      # xmppDNSAuth - enables contrail dns and contrail vrouter agent to communicate over SSL, default is false
+      xmppDNSAuth: "false"
+      # sandesh - enables SSL for sandesh connections, default is false
+      sandesh: "false"
+      # introspect - enables SSL for introspect connection, default is false
+      introspect: "false" 
+
+    # (OPTIONAL)
+    apiserver:
+      # authProtocol - api-server auth protocol (http, https) 
+      authProtocol: "http"
+      # certfile - api-server SSL certificate to install and use for API ports 
+      # certfile:
+      # keyfile - api-server SSL key to use with certificate
+      # Required only if using privately signed certfile and keyfile
+      # keyfile: 
+      # cafile - SSL CA to use with the certificate and key provided
+      # Required only if using privately signed certfile and keyfile
+      # cafile: 
+      # insecure - check to validate api-server SSL certificate
+      insecure: true
+
+    # (OPTIONAL)
+    neutron:
+      # metadataIP - IP or Service name of metadata server
+      # metadataIP: 
+      # metadataPort - port of metadata server
+      # metadataPort:
+
+  # (OPTIONAL)
+  # controller section configuration needed by controller container
+  controller:
+    # encapPriority - encapsulation priority
+    encapPriority: "MPLSoUDP,MPLSoGRE,VXLAN"
+    # externalRoutersList - dict of external, physical routers
+    # externalRoutersList:
+      # name1: ip1 
+      # name2: ip2
+    # bgpAsn - asn for control node by default is 64512
+    bgpAsn: 64512
+    # flowExportRate - flow export rate to the collector
+    # flowExportRate:
+
+  # (OPTIONAL)
+  # rabbitmq section configuration needed by controller container
+  rabbitmq:
+    user: guest
+    password: guest
+    vhost: '/'
+    # owner:
+    # group: 
+
+  # (OPTIONAL)
+  # webui section configuration needed by controller container
+  webui: 
+    httpListenPort: 8080
+    httpsListenPort: 8143
+    storageEnable: 'false'
+    enableUnderlay: 'false'
+    enableMX: 'false'
+    enableUdd: 'false'
+    serviceEPFromConfig: 'false'
+    # serverOptionsKeyFile:
+    # serverOptionsCertFile:
+
+  # (OPTIONAL)
+  # control section configuration needed by controller container
+  control:
+    logPortInfo:
+      logFile: "var/log/contrail/contrail-control.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 8083
+    bgpPort: 179
+    xmppServerPort: 5269
+
+  # (OPTIONAL)
+  # dns section configuration needed by controller container
+  dns:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-dns.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 8092
+    namedLogFile: "/var/log/contrail/contrail-named.log"
+    dnsPort: 53
+
+  # (OPTIONAL)
+  # schema section configuration needed by controller container
+  schema:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-schema.log"
+      logLevel: "SYS_NOTICE"
+
+  # (OPTIONAL)
+  # svcMonitor section configuration needed by controller container
+  svcMonitor:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-svc-monitor.log"
+      logLevel: "SYS_NOTICE"
+
+  # (OPTIONAL)
+  # deviceManager section configuration needed by controller container
+  deviceManager:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-device-manager.log"
+      logLevel: "SYS_NOTICE"
+
+  # (OPTIONAL)
+  # configdbCassandra cassandra config needed by controller  container
+  configdbCassandra:
+    commitLogDir: "/var/lib/cassandra/commitlog"
+    dataDirs: ["/var/lib/cassandra/data"]
+
+  # (OPTIONAL)
+  # analyticsdbCassandra cassandra config needed by analyticsdb container
+  analyticsdbCassandra:
+    commitLogDir: "/var/lib/cassandra/commitlog"
+    dataDirs: ["/var/lib/cassandra/data"]
+
+  # (OPTIONAL)
+  # contrailAPI section configuration needed by controller container
+  contrailAPI:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-api.log"
+      logLevel: "SYS_NOTICE"
+      listenPort: 8082
+    listenAddress: 0.0.0.0
+    listOptimizationEnabled: "true"
+    cloudAdminRole: ""
+    globalReadOnlyRole: ""
+    aaaMode: "no-auth"
+
+  # (OPTIONAL)
+  # analyticsAPI section configuration needed by controller and anslytics container
+  analyticsAPI:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-analytics-api.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 8090
+      listenPort: 8081
+    aaaMode: no-auth
+
+  # (OPTIONAL)
+  # alarmGen section configuration for analytics container
+  alarmGen:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-alarm-gen.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 5995
+
+  # (OPTIONAL)
+  # analyticsCollector section configuration for analytics container
+  analyticsCollector:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-collector.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 8089
+      listenPort: 8086
+    # syslogPort: -1 
+    analyticsFlowTTL: 48
+    analyticsStatisticsTTL: 2160
+    analyticsConfigAuditTTL: 24
+    analyticsDataTTL: 2
+
+  # (OPTIONAL)
+  # snmpCollector section configuration for analytics container
+  snmpCollector:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-snmp-collector.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 5920
+      listenPort: 600
+    scanFreq: 600
+    fastScanFreq: 60
+
+  # (OPTIONAL)
+  # topology section configuration for analytics container
+  topology:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-topology.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 5921
+
+  # (OPTIONAL)
+  # queryEngine section configuration for analytics container
+  queryEngine:
+    logPortInfo:
+      logFile: "/var/log/contrail/contrail-query-engine.log"
+      logLevel: "SYS_NOTICE"
+      introspectPort: 8091
 
   # (MANDATORY)
-  # controller_nodes 
-  controller_nodes: 
-    - 10.87.65.30
+  # kubernetes section configuration for kubernetes container
+  kubernetes:
   
-  # (OPTIONAL)
-  # If analyticsdb nodes are different from controller_nodes
-  # Example:
-  # analyticsdb_nodes: 
-  #  - 10.87.65.30
-
-  # (OPTIONAL)
-  # If analytics nodes are different from controller_nodes
-  # Example:
-  # analytics_nodes: 
-  #  - 10.87.65.30
- 
-  #(MANDATORY) 
-  # cloud_orchestrator: values - kubernetes, mesos, openshift, openstack
-  cloud_orchestrator: kubernetes
-
-#
-# webui configurations
-#
-#webui:
-  # (OPTIONAL)
-  # http listen port: default 8080
-  # Example: 
-  # http_listen_port: 8085
-
-  # (OPTIONAL)
-  # https_listen_port: default 8143
-  # https_listen_port:
-
-#
-# agent configurations
-#
-agent:
-  # (MANDATORY)
-  # vrouter_physical_interface - physical interface to use for vrouter
-  vrouter_physical_interface: em1
-
-#
-# Other optional parameters which rarely changed
-#
-
-## Specify a imagePullPolicy: 'Always' if imageTag is 'latest', else set to 'IfNotPresent'.
-## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-##
-# imagePullPolicy:
-
-# (OPTIONAL)
-# If manually loaded docker images, then give the contrail container image names
-# controllerImageName: contrail-controller-ubuntu-16.04:4.0.0.0-20
-# analyticsImageName: contrail-analytics-ubuntu-16.04:4.0.0.0-20
-# analyticsdbImageName: contrail-analyticsdb-ubuntu-16.04:4.0.0.0-20
-# kubeManagerImageName: contrail-kube-manager-ubuntu-16.04:4.0.0.0-20
-# agentImageName: contrail-agent-ubuntu-16.04:4.0.0.0-20
-# compilerImageName: contrail-vrouter-compiler-centos7:4.0.0.0-20
-
-#
-# kubernetes configurations
-#
-kubernetes:
-
-  # (OPTIONAL)
-  # If contrail controller node is differnet then the k8s master node
-  # Then give the IP address of the kubernetes_api_server
-  # Example:
-  # kubernetes_api_server: 10.84.18.8
-
-  # (OPTIONAL)
-  # Name of the kubernetes cluster being provisioned
-  # Default value: "k8s-default"
-  # Example:
-  # cluster_name: k8s-default
+    # (OPTIONAL)
+    # If contrail controller node is differnet then the k8s master node
+    # Then give the IP address of the apiServer
+    apiServer: 10.87.65.155
   
-  # Access token to connect to kubernetes API server
-  # Default value: ""
-  kubernetes_access_token: ""
-
-  # (OPTIONAL)
-  # Pod subnet 
-  # Default value: "10.32.0.0/12"
-  # Example:
-  # kubernetes_pod_subnets: "10.87.45.0/24"
-
-  # (OPTIONAL)
-  # Service subnet
-  # Default value: "10.96.0.0/12"
-  # Example:
-  # kubernetes_service_subnets: "10.87.46.0/24"
+    # (OPTIONAL)
+    # Name of the kubernetes cluster being provisioned
+    clusterName: k8s-default
+    
+    # (OPTIONAL)
+    # Pod subnet, default value: "10.32.0.0/12"
+    podSubnets: "10.32.0.0/12"
   
-  # (OPTIONAL)
-  # Cluster project used in contrail
-  # Default value: {'domain': 'default-domain', 'project': 'default'}
-  # Example:
-  # kubernetes_cluster_project: "{'domain': 'default-domain', 'project': 'default'}"
-
-  # (OPTIONAL)
-  # Kubernetes FloatingIpPool to be used for service/ingress.
-  # Example:
-  # kubernetes_public_fip_pool: {'domain': 'domain-name', 'project': 'project-name', 'network': 'network-name', 'name': 'fip-pool-name' }
+    # (OPTIONAL)
+    # Service subnet, default value: "10.96.0.0/12"
+    svcSubnets: "10.96.0.0/12"
+    
+    # (OPTIONAL)
+    # Cluster project used in contrail, default value: {'domain': 'default-domain', 'project': 'default'}
+    # Example:
+    clusterProject: "{'domain': 'default-domain', 'project': 'default'}"
+    
+  kubernetesVNC:
+    # (OPTIONAL)
+    # public fip pool to be used for service/ingress.
+    # publicFipPool: {'domain': 'domain-name', 'project': 'project-name', 'network': 'network-name', 'name': 'fip-pool-name' }
+    
+  # agent configurations
+  agent:
+    # (OPTIONAL) - Network CIDR on which you want to bring the vhost
+    # ctrlDataNetwork:
+    # (OPTIONAL) - Set to "False" if your hostOS is centos/redhat
+    # compileVrouterModule: "True"
+    
+    # qosQueueIdList: []
+    # qosLogicalQueueList: []
+    # qosDefaultNicQueue: None
+    # qosPriorityTagging: ''
+    # priorityIdList: []
+    # prioritySchedulingList: []
+    # priorityBandwidthList: []
+    # vrouterModuleParams: None
+    hypervisor:
+      type: "kvm"
