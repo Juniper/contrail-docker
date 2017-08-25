@@ -68,7 +68,8 @@
             "openstack",
             "kubernetes",
             "mesos",
-            "openshift"
+            "openshift",
+            "vcenter"
           ]
         },
         "nested_mode": {
