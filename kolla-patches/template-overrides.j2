@@ -9,17 +9,59 @@
 # Contrail Heat plugin packages
 {% set heat_engine_packages_append = ['contrail-heat', 'python-contrail'] %}
 
-# Allow Unauthenticated contrail packages
+# Add contrail repo and allow Unauthenticated contrail packages
+{% block neutron_server_header %}
+RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail ;\
+    echo "deb [arch=amd64] %CONTRAIL_REPO_URL% ./" > /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
+{% endblock %}
+
+{% block neutron_server_footer %}
+RUN [ -f /etc/apt/apt.conf.d/99contrail ] && rm -f /etc/apt/apt.conf.d/99contrail ;\
+    [ -f /etc/apt/sources.list.d/contrail.list ] && rm -f /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
+{% endblock %}
+
 {% block openstack_base_header %}
-RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail
+RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail ;\
+    echo "deb [arch=amd64] %CONTRAIL_REPO_URL% ./" > /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
+{% endblock %}
+
+{% block openstack_base_footer %}
+RUN [ -f /etc/apt/apt.conf.d/99contrail ] && rm -f /etc/apt/apt.conf.d/99contrail ;\
+    [ -f /etc/apt/sources.list.d/contrail.list ] && rm -f /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
 {% endblock %}
 
 {% block horizon_header %}
-RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail
+RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail ;\
+    echo "deb [arch=amd64] %CONTRAIL_REPO_URL% ./" > /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
 {% endblock %}
 
 {% block nova_libvirt_header %}
-RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail
+RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail ;\
+    echo "deb [arch=amd64] %CONTRAIL_REPO_URL% ./" > /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
+{% endblock %}
+
+{% block nova_libvirt_footer %}
+RUN [ -f /etc/apt/apt.conf.d/99contrail ] && rm -f /etc/apt/apt.conf.d/99contrail ;\
+    [ -f /etc/apt/sources.list.d/contrail.list ] && rm -f /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
+{% endblock %}
+
+{% block heat_engine_header %}
+RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail ;\
+    echo "deb [arch=amd64] %CONTRAIL_REPO_URL% ./" > /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
+{% endblock %}
+
+{% block heat_engine_footer %}
+RUN [ -f /etc/apt/apt.conf.d/99contrail ] && rm -f /etc/apt/apt.conf.d/99contrail ;\
+    [ -f /etc/apt/sources.list.d/contrail.list ] && rm -f /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
 {% endblock %}
 
 # Copy vrouter-port-control in Nova compute container
@@ -29,9 +71,13 @@ RUN chmod +x /usr/local/bin/vrouter-port-control
 {% endblock %}
 
 # Horizon patches
+# Remove contrail repo refs
+# Remove allow unauth contrail packages
 {% block horizon_footer %}
 RUN cp -af /usr/lib/python2.7/dist-packages/neutron_lbaas_dashboard/enabled/_1481_project_ng_loadbalancersv2_panel.py /usr/share/openstack-dashboard/openstack_dashboard/enabled/ && \
     echo yes | /usr/share/openstack-dashboard/manage.py collectstatic  && \
     /usr/share/openstack-dashboard/manage.py compress
+RUN [ -f /etc/apt/apt.conf.d/99contrail ] && rm -f /etc/apt/apt.conf.d/99contrail ; \
+    [ -f /etc/apt/sources.list.d/contrail.list ] && rm -f /etc/apt/sources.list.d/contrail.list ;\
+    apt-get update && echo pass
 {% endblock %}
-

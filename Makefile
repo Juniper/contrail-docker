@@ -105,13 +105,11 @@ kolla-prep:
 	@echo "Preparing Kolla build env"
 	cp -a kolla-patches/. $(KOLLA_DIR)
 
-kolla-ubuntu-patches: SHELL:=/bin/bash
+kolla-ubuntu-prep: SHELL:=/bin/bash
 kolla-ubuntu-prep: kolla-prep
 	@echo "Applying Ubuntu related Kolla patches"
-	echo "deb [arch=amd64] $(CONTRAIL_REPO_URL) ./" > $(KOLLA_DIR)/contrail.list
-	# Due to LP #1706549; Remove once fixed
-	grep "deb \[arch=amd64\] http:\/\/$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) .\/" $(KOLLA_DIR)/docker/base/sources.list.ubuntu || \
-	  sed -i '1 i\deb [arch=amd64] $(CONTRAIL_REPO_URL) ./' $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	# Due to LP #1706549
+	sed -i 's/\%CONTRAIL_REPO_URL\%/http:\/\/$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT)/g' $(KOLLA_DIR)/template-overrides.j2
 
 kolla-centos-prep: kolla-prep
 	@echo "Applying Centos related Kolla patches"
@@ -146,7 +144,7 @@ kolla-clean:
 	(cd $(KOLLA_DIR) && git reset --hard)
 	(cd $(KOLLA_DIR) && git clean -fd)
 	@echo "Remove all kolla docker containers..."
-	docker images |grep kolla | grep $(CONTRAIL_VERSION) | awk '{print $3}' | xargs docker rmi -f || \
+	docker images |grep -v 'IMAGE ID' | grep kolla | grep $(CONTRAIL_VERSION) | awk '{print $3}' | xargs docker rmi -f || \
 	    echo "NO DOCKER IMAGES TO CLEAN. Skipping..."
 
 $(CONTAINER_TARS): prep contrail-base
