@@ -124,8 +124,16 @@
         "metadata_ssl_enable": {
           "description": "Knob to enable ssl for openstack metadata service",
           "type": "boolean"
+        },
+	"agent_mode": {
+          "description": "supported values are: vrouter / tsn / tsn-no-forwarding / tor (default is vrouter)",
+          "type": "string"
+        },
+        "tsn_servers": {
+          "description": "list of tsn nodes when agent runs in tsn-no-forwarding mode",
+          "type": "array"
         }
-      }
+
     },
     "HYPERVISOR": {
       "id": "hypervisor",
