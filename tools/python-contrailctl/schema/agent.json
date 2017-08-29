@@ -124,6 +124,14 @@
         "metadata_ssl_enable": {
           "description": "Knob to enable ssl for openstack metadata service",
           "type": "boolean"
+        },
+        "tsn_evpn_mode": {
+          "description": "Knob to enable tor-service-node evpn peering",
+          "type": "boolean"
+        },
+        "tsn_servers": {
+          "description": "list of tsn nodes when agent runs in tsn-no-forwarding mode (tsn ha)",
+          "type": "array"
         }
       }
     },
