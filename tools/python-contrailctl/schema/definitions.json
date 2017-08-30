@@ -299,6 +299,14 @@
         "insecure": {
           "description": "Whether to validate Keystone SSL certificate.",
           "type": "boolean"
+        },
+        "user_domain_name": {
+          "description": "User domain name for keystone v3",
+          "type": "string"
+        },
+        "project_domain_name": {
+          "description": "Project domain name for keystone v3",
+          "type": "string"
         }
       }
     },
