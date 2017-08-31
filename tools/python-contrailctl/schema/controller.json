@@ -107,6 +107,18 @@
         "config_editor_schema_path": {
           "description": "Path of the json schema for use in Config Editor",
           "type": "string"
+        },
+        "vcenter_server_ip": {
+          "description": "vcenter server ip",
+          "type": "string"
+        },
+        "vcenter_wsdl_path": {
+          "description": "vcenter wsdl path",
+          "type": "string"
+        },
+        "vcenter_auth_protocol": {
+          "description": "vcenter auth protocol",
+          "type": "string"
         }
       }
     },
