@@ -235,7 +235,10 @@
             "cloud-admin",
             "rbac"
           ]
-        }
+        },
+       "strict_compliance": {
+           "description": "Run contrail-api to be strictly compliant with neutron."
+           "type": "boolean"
       }
     },
     "ANALYTICS_API": {
