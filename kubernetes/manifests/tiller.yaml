@@ -1,15 +1,13 @@
 apiVersion: extensions/v1beta1
-kind: Deployment
+kind: DaemonSet
 metadata:
   creationTimestamp: null
   labels:
     app: helm
     name: tiller
-  name: tiller-deploy
+  name: tiller-ds
   namespace: kube-system
 spec:
-  replicas: 1
-  strategy: {}
   template:
     metadata:
       creationTimestamp: null
@@ -17,12 +15,17 @@ spec:
         app: helm
         name: tiller
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
       hostNetwork: true
       containers:
       - env:
         - name: TILLER_NAMESPACE
           value: kube-system
-        image: gcr.io/kubernetes-helm/tiller:v2.2.2
+        image: gcr.io/kubernetes-helm/tiller:v2.4.2
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
@@ -41,9 +44,8 @@ spec:
           initialDelaySeconds: 1
           timeoutSeconds: 1
         resources: {}
-      serviceAccountName: ""
+      serviceAccountName: "tiller"
       volumes: null
-status: {}
 
 ---
 apiVersion: v1
@@ -53,7 +55,7 @@ metadata:
   labels:
     app: helm
     name: tiller
-  name: tiller-deploy
+  name: tiller-ds
   namespace: kube-system
 spec:
   ports:
@@ -66,5 +68,35 @@ spec:
     app: helm
     name: tiller
   type: ClusterIP
+  clusterIP: None
 status:
   loadBalancer: {}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: tiller
+  namespace: kube-system
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tiller
+subjects:
+- kind: ServiceAccount
+  name: tiller
+  namespace: kube-system
