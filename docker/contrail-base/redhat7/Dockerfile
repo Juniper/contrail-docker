@@ -1,4 +1,4 @@
-FROM 10.84.34.155:5000/contrail-base-os-images-rhel7:7.3
+FROM 10.84.34.155:5000/contrail-base-os-images-rhel7:7.4
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
 ARG CONTRAIL_ANSIBLE_TAR
@@ -30,10 +30,11 @@ RUN echo $CONTRAIL_REPO_URL && \
     sed -i "s#baseurl=baseurl#baseurl=$CONTRAIL_REPO_URL#" /etc/yum.repos.d/contrail-install.repo && \
     yum clean all && yum clean expire-cache && \
     yum repolist
-RUN yum -y install --disablerepo=* --enablerepo=contrail-install-repo \
+RUN yum -y install \
       yum-plugin-priorities python-setuptools $ANSIBLE_PACKAGES \
       iproute net-tools openssh-clients wget tar telnet vim which initscripts \
-      sudo kexec-tools less
+      sudo kexec-tools less file gcc make python-devel python-setuptools \
+      libyaml-devel openssl-devel libtool libffi-devel;
 
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
