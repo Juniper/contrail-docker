@@ -6,6 +6,9 @@
 # Horizon packages
 {% set horizon_packages_append = ['contrail-openstack-dashboard', 'python-django-horizon'] %}
 
+# Contrail Heat plugin packages
+{% set heat_engine_packages_append = ['contrail-heat', 'python-contrail'] %}
+
 # Allow Unauthenticated contrail packages
 {% block openstack_base_header %}
 RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail
