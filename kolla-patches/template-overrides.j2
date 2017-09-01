@@ -3,6 +3,9 @@
 # Contrail Neutron plugin packages
 {% set neutron_server_packages_append = ['neutron-plugin-contrail', 'python-contrail'] %}
 
+# Contrail Heat plugin packages
+{% set heat_engine_packages_append = ['contrail-heat', 'python-contrail'] %}
+
 # Allow Unauthenticated contrail packages
 {% block openstack_base_header %}
 COPY 99contrail /etc/apt/apt.conf.d/99contrail
