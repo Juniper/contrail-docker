@@ -228,7 +228,7 @@
           "description": "cassandra password to access analyticsdb",
           "type": "string"
         },
-        "analyticsdb_minimum_diskGB": {
+        "analyticsdb_minimum_diskgb": {
           "description": "Minimum disk in GB for analytics DB",
           "type": "string"
         },
