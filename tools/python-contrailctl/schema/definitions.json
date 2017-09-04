@@ -232,6 +232,10 @@
           "description": "Minimum disk in GB for analytics DB",
           "type": "string"
         },
+        "configdb_minimum_diskGB": {
+          "description": "Minimum disk in GB for config DB",
+          "type": "string"
+        },
         "neutron_metadata_ip": {
           "description": "IP of metadata server",
           "type": "string"
