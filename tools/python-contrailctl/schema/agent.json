@@ -129,7 +129,7 @@
           "description": "Knob to enable tor-service-node evpn peering",
           "type": "boolean"
         },
-        "tsn_servers": {
+        "tsn_server_list": {
           "description": "list of tsn nodes when agent runs in tsn-no-forwarding mode (tsn ha)",
           "type": "array"
         }
