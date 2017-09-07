@@ -232,8 +232,16 @@
           "description": "Minimum disk in GB for analytics DB",
           "type": "string"
         },
+        "analyticsdb_cql_port": {
+          "description": "Cassandra DB cql port for analytics DB",
+          "type": "string"
+        },
         "configdb_minimum_diskgb": {
           "description": "Minimum disk in GB for config DB",
+          "type": "string"
+        },
+        "configdb_cql_port": {
+          "description": "Cassandra DB cql port for config DB",
           "type": "string"
         },
         "neutron_metadata_ip": {
