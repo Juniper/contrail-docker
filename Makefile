@@ -15,9 +15,15 @@ endif
 
 export SSHUSER ?= root
 
+ARTIFACTS_DIR=$(realpath $(PWD)/../..)/build/artifacts
+
 # Kolla Repo Path
 ifndef KOLLA_DIR
-	export KOLLA_DIR := $(PWD)/../kolla/
+	export KOLLA_DIR := $(realpath $(PWD)/..)/kolla
+endif
+ifneq (,$(wildcard $(KOLLA_DIR)))
+    KOLLA_SAVE := kolla-archive
+    KOLLA_CLEAN := kolla-clean
 endif
 
 ifdef docker_http_proxy
@@ -102,11 +108,11 @@ kolla-prep:
 
 kolla-ubuntu-patches: SHELL:=/bin/bash
 kolla-ubuntu-prep: kolla-prep
-	@echo "Applying Ubuntu replated Kolla patches"
+	@echo "Applying Ubuntu related Kolla patches"
 	echo "deb [arch=amd64] $(CONTRAIL_REPO_URL) ./" > $(KOLLA_DIR)/contrail.list
 	# Due to LP #1706549; Remove once fixed
-	grep "deb \[arch=amd64\] http:\/\/$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) .\/" $(KOLLA_DIR)docker/base/sources.list.ubuntu || \
-	  sed -i '1 i\deb [arch=amd64] $(CONTRAIL_REPO_URL) ./' $(KOLLA_DIR)docker/base/sources.list.ubuntu
+	grep "deb \[arch=amd64\] http:\/\/$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) .\/" $(KOLLA_DIR)/docker/base/sources.list.ubuntu || \
+	  sed -i '1 i\deb [arch=amd64] $(CONTRAIL_REPO_URL) ./' $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 	cp -af $(KOLLA_DIR)/99contrail $(KOLLA_DIR)/docker/openstack-base/99contrail
 	cp -af $(KOLLA_DIR)/99contrail $(KOLLA_DIR)/docker/nova/nova-libvirt/99contrail
 
@@ -115,37 +121,36 @@ kolla-centos-prep: kolla-prep
 	echo -e "[contrail-repo]\nname = contrail-repo\nbaseurl = $(CONTRAIL_REPO_URL)\nenabled = 1\ngpgcheck = 0\n" > $(KOLLA_DIR)/docker/base/contrail.repo ;\
 
 kolla-patches: kolla-$(DISTRO)-prep
-	cp -af $(KOLLA_DIR)../../controller/src/vnsw/agent/port_ipc/vrouter-port-control \
+	cp -af $(KOLLA_DIR)/../../controller/src/vnsw/agent/port_ipc/vrouter-port-control \
 	       $(KOLLA_DIR)/docker/nova/nova-compute/vrouter-port-control
 
 kolla: SHELL:=/bin/bash
 kolla: prep kolla-prep kolla-$(DISTRO)-prep kolla-patches
 	@echo "Building Kolla Docker containers at $(KOLLA_DIR)"
 	cd $(KOLLA_DIR) && \
+	    virtualenv venv && source venv/bin/activate && \
+	    easy_install $(KOLLA_DIR) && \
 	    python setup.py install && \
 	    kolla-build --config-file kolla-build.conf \
 	                --tag $(CONTRAIL_VERSION) \
-	                -b $(DISTRO) \
+	                --base $(DISTRO) \
+			--threads 6 \
 	                --template-override template-overrides.j2
 
 kolla-archive: SHELL:=/bin/bash
 kolla-archive: kolla
 	@echo "Bundle generated openstack containers"
-	source $(PWD)/make_utils.sh && \
-	create_kolla_container_tar \
-	    "contrail_version=$(CONTRAIL_VERSION);tar_name=$(PWD)/openstack-docker-images_$(CONTRAIL_VERSION)_$(DISTRO).tgz"
+	$(MAKE) -C $(KOLLA_DIR) DISTRO=$(DISTRO) TARFILE=$(ARTIFACTS_DIR)/openstack-docker-images_$(CONTRAIL_VERSION)_$(DISTRO).tgz
 
 kolla-clean: SHELL:=/bin/bash
 kolla-clean:
 	@echo "Local changes at $(KOLLA_DIR) will removed"
 	@echo "Restore $(KOLLA_DIR)"
+	(cd $(KOLLA_DIR) && git reset --hard)
 	(cd $(KOLLA_DIR) && git clean -fd)
-	(cd $(KOLLA_DIR) && git stash)
 	@echo "Remove all kolla docker containers..."
 	docker images |grep kolla | grep $(CONTRAIL_VERSION) | awk '{print $3}' | xargs docker rmi -f || \
 	    echo "NO DOCKER IMAGES TO CLEAN. Skipping..."
-
-kolla-build: kolla-archive kolla-clean
 
 $(CONTAINER_TARS): prep contrail-base
 	$(eval TEMP := $(shell mktemp -d))
@@ -274,7 +279,7 @@ $(CONTRAIL_INSTALL_PACKAGE):
 
 .PHONY: clean
 
-clean:
+clean: $(KOLLA_CLEAN)
 	@echo "Cleaning the workspace"
 	docker rm -f $(CONTRAIL_REPO_CONTAINER)_$(CONTRAIL_REPO_PORT) || true
 ifndef KEEP_IMAGES
@@ -287,7 +292,7 @@ endif
 
 .PHONY: save
 
-save: $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTAINER_TARS)
+save: $(CONTRAIL_REPO_CONTAINER_TAR) $(CONTAINER_TARS) $(KOLLA_SAVE)
 ifndef CONTAINER_SAVE_LOCATION
 	$(error CONTAINER_SAVE_LOCATION is undefined)
 endif
