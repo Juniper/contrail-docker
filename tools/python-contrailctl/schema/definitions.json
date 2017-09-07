@@ -344,6 +344,10 @@
           "description": "rabbitmq group",
           "type": "string"
         },
+        "port": {
+          "description": "rabbitmq listen port.",
+          "type": "string"
+        },
         "ssl": {
           "description": "Enable rabbitmq ssl",
           "type": "boolean"
@@ -359,6 +363,14 @@
         "server_cert": {
           "description": "rabbitmq ssl server cert",
           "type": "string"
+        },
+        "ssl_port": {
+          "description": "rabbitmq ssl listen port.",
+          "type": "string"
+        },
+        "ha_queues": {
+          "description": "Highly Available (Mirrored) Queues.",
+          "type": "boolean"
         }
       }
     }
