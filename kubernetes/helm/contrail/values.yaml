@@ -1,14 +1,14 @@
 # hostOs - (OPTIONAL) host operating system release. Sample values "ubuntu" and "centos". Default is ubuntu
-hostOs: centos
+hostOs: ubuntu
 
 images:
-  controller: "contrail-controller-ubuntu14.04:4.0.1.0-43"
-  analyticsdb: "contrail-analyticsdb-ubuntu14.04:4.0.1.0-43"
-  analytics: "contrail-analytics-ubuntu14.04:4.0.1.0-43"
-  kubemanager: "contrail-kube-manager-ubuntu14.04:4.0.1.0-43"
-  vrouterAgent: "contrail-agent-ubuntu14.04:4.0.1.0-43"
-  kubernetesAgent: "contrail-kubernetes-agent-ubuntu14.04:4.0.1.0-43"
-  vrouterCompiler: "contrail-vrouter-compiler-centos7:4.0.1.0-25"
+  controller: "docker.io/opencontrail/contrail-controller-ubuntu16.04:4.0.1.0"
+  analyticsdb: "docker.io/opencontrail/contrail-analyticsdb-ubuntu16.04:4.0.1.0"
+  analytics: "docker.io/opencontrail/contrail-analytics-ubuntu16.04:4.0.1.0"
+  kubemanager: "docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.1.0"
+  vrouterAgent: "docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.1.0"
+  kubernetesAgent: "docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.1.0"
+  # vrouterCompiler: "contrail-vrouter-compiler-centos7:4.0.1.0-25"
   imagePullPolicy: "IfNotPresent"
 
 conf:
@@ -125,6 +125,10 @@ conf:
       # metadataIP: 
       # metadataPort - port of metadata server
       # metadataPort:
+
+    # (OPTIONAL)
+    # analyticsdbMinDiskGB: 50
+    # configdbMinDiskGB: 5
 
   # (OPTIONAL)
   # controller section configuration needed by controller container
