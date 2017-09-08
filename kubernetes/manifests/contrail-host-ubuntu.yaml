@@ -17,6 +17,8 @@ data:
     controller_nodes = 10.84.13.7
     analytics_nodes = 10.84.13.7
     analyticsdb_nodes = 10.84.13.7
+    # analyticsdb_minimum_diskgb = 50
+    # configdb_minimum_diskgb = 5
   agent-config: |-
     [AGENT]
     compile_vrouter_module = True
@@ -65,7 +67,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analyticsdb
-        image: "10.84.5.71:5000/contrail-analyticsdb-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-analyticsdb-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -122,7 +124,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-analytics
-        image: "10.84.5.71:5000/contrail-analytics-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-analytics-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -169,7 +171,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-controller
-        image: "10.84.5.71:5000/contrail-controller-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-controller-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -227,7 +229,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
-        image: "10.84.5.71:5000/contrail-kube-manager-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -284,7 +286,7 @@ spec:
       hostNetwork: true
       initContainers:
       - name: contrail-kubernetes-agent
-        image: "10.84.5.71:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -301,7 +303,7 @@ spec:
           name: var-log-contrail-cni
       containers:
       - name: contrail-agent
-        image: "10.84.5.71:5000/contrail-agent-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-agent-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         securityContext:
           privileged: true
