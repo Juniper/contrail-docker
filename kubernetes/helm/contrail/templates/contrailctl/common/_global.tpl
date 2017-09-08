@@ -82,5 +82,7 @@ analytics_ip = {{ .analytics.virtualIp }}
 
 {{ if not .neutron.metadataIP }}#{{ end }}neutron_metadata_ip = {{ .neutron.metadataIP | default "" }}
 {{ if not .neutron.metadataPort }}#{{ end }}neutron_metadata_port = {{ .neutron.metadataPort | default "" }}
+{{ if not .analyticsdbMinDiskGB }}#{{ end }}analyticsdb_minimum_diskgb = {{ .analyticsdbMinDiskGB | default 256 }}
+{{ if not .configdbMinDiskGB }}#{{ end }}configdb_minimum_diskgb = {{ .configdbMinDiskGB | default 20 }}
 
 {{- end -}}

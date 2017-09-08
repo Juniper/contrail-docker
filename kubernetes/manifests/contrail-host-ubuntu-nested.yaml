@@ -62,7 +62,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
-        image: "10.84.5.71:5000/contrail-kube-manager-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-kube-manager-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         securityContext:
           privileged: true
@@ -119,7 +119,7 @@ spec:
       hostNetwork: true
       containers:
       - name: contrail-kubernetes-agent
-        image: "10.84.5.71:5000/contrail-kubernetes-agent-ubuntu16.04:4.0.0.0-20"
+        image: "docker.io/opencontrail/contrail-kubernetes-agent-ubuntu16.04:4.0.1.0"
         imagePullPolicy: ""
         command: ["/bin/bash", "-c", "/entrypoint.sh -l"]
         securityContext:
