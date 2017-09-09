@@ -58,6 +58,9 @@
           "type": "object"
         }
       }
+    },
+    "RABBITMQ": {
+        "$ref": "definitions.json#/definitions/rabbitmq_config"
     }
   }
 }
