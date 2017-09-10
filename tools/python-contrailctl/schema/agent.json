@@ -119,7 +119,7 @@
         },
         "compute_controller_list": {
           "description": "list of controller nodes",
-          "type": "string"
+          "type": "array"
         },
         "metadata_ssl_enable": {
           "description": "Knob to enable ssl for openstack metadata service",
