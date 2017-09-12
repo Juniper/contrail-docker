@@ -76,6 +76,10 @@
           "description": "Nested mode kubernetes or not",
           "type": "boolean"
         },
+        "kubernetes_node_data_interface": {
+          "description": "Data interface name of the kubernetes node",
+          "type": "string"
+        },
         "hosts_entries": {
           "description": "An optional dictionary of hostname and ip to write /etc/hosts entries",
           "type" : "object"
