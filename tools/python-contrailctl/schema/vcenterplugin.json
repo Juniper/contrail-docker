@@ -68,6 +68,10 @@
         "vc_plugin_ip": {
           "description": "ansible hostip of the plugin",
           "type": "string"
+        },
+        "clustername": {
+          "description": "clustername associated with the DVS for vc-compute case",
+          "type": "string"
         }
       }
     }
