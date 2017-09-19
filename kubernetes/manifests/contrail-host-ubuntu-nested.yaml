@@ -12,6 +12,7 @@ data:
     controller_nodes = 10.10.10.1
     analytics_nodes = 10.10.10.2
     nested_mode = True
+    kubernetes_node_data_interface = eth0
   kubemanager-config: |-
     [KUBERNETES]
     cluster_name = k8s-default
