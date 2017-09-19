@@ -276,6 +276,10 @@
             "v3"
           ]
         },
+        "auth_url": {
+          "description": "Authentication Url",
+          "type": "string"
+        },
         "ip": {
           "description": "Ip address of the host running keystone",
           "type": "string"
