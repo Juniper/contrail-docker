@@ -220,6 +220,26 @@
           "description": "Whether to validate api-server SSL certificate.",
           "type": "boolean"
         },
+        "webui_auth_protocol": {
+          "description": "web-server auth protocol",
+          "type": "string",
+          "enum": [
+            "http",
+            "https"
+          ]
+        },
+        "ssl_certfile": {
+          "description": "SSL certificate to install",
+          "type": "string"
+        },
+        "ssl_keyfile": {
+          "description": "SSL key to use with certificate",
+          "type": "string"
+        },
+        "ssl_cafile": {
+          "description": "SSL CA to use with the certificate and key provided",
+          "type": "string"
+        },
         "redis_password": {
           "description": "Redis password.",
           "type": "string"
