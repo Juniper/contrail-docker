@@ -76,8 +76,6 @@ spec:
           name: contrail-config
         - mountPath: /var/lib/cassandra
           name: analyticsdb-data
-        - mountPath: /var/lib/zookeeper
-          name: zookeeper-analyticsdb-data
       volumes:
       - name: contrail-config
         configMap:
@@ -88,9 +86,6 @@ spec:
       - name: analyticsdb-data
         hostPath:
           path: /var/lib/analyticsdb 
-      - name: zookeeper-analyticsdb-data
-        hostPath:
-          path: /var/lib/analyticsdb_zookeeper_data
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
