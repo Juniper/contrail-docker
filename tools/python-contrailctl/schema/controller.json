@@ -236,6 +236,13 @@
             "rbac"
           ]
         },
+        "auth": {
+          "description": "Set authentication. Default is not-defined",
+          "type": "string",
+          "enum": [
+            "keystone"
+          ]
+        },
         "strict_compliance": {
           "description": "Run contrail-api to be strictly compliant with neutron.",
           "type": "boolean"
