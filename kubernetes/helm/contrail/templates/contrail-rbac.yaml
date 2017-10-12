@@ -34,5 +34,6 @@ metadata:
   name: contrail-kube-manager-token
   namespace: kube-system
   annotations: 
+    helm.sh/hook: post-install
     kubernetes.io/service-account.name: contrail-kube-manager
 type: kubernetes.io/service-account-token
