@@ -76,6 +76,7 @@ spec:
           name: contrail-config
         - mountPath: /var/lib/cassandra
           name: analyticsdb-data
+      volumes:
       - name: contrail-config
         configMap:
           name: contrail-config
