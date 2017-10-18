@@ -4,7 +4,7 @@
 {% set neutron_server_packages_append = ['neutron-plugin-contrail', 'python-contrail'] %}
 
 # Horizon packages
-{% set horizon_packages_append = ['contrail-openstack-dashboard', 'python-django-horizon'] %}
+{% set horizon_packages_append = ['contrail-openstack-dashboard', 'python-django-horizon', 'python-neutronclient=1:6.1.0-0ubuntu2~cloud0.1contrail'] %}
 
 # Contrail Heat plugin packages
 {% set heat_engine_packages_append = ['contrail-heat', 'python-contrail'] %}
