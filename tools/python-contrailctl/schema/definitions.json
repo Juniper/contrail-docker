@@ -251,10 +251,6 @@
         "neutron_metadata_port": {
           "description": "Port of metadata server",
           "type": "string"
-        },
-        "opscenter_ip": {
-          "description": "IP address for the OpsCenter server",
-          "type": "string"
         }
       }
     },
