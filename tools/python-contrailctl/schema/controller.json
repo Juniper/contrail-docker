@@ -56,20 +56,12 @@
           "description": "contrail storage enable",
           "type": "boolean"
         },
-        "nova_api_ip": {
-          "description": "IP(or vip) of nova api",
-          "type": "string"
-        },
-        "glance_api_ip": {
-          "description": "IP(or vip) of glance api",
-          "type": "string"
-        },
         "compute_manager_ip": {
-          "description": "IP(or vip) of nova api",
+          "description": "IP(or vip) of compute manager (nova for OpenStack)",
           "type": "string"
         },
         "image_manager_ip": {
-          "description": "IP(or vip) of glance api",
+          "description": "IP(or vip) of image manager (glance for OpenStack)",
           "type": "string"
         },
         "network_manager_ip": {
