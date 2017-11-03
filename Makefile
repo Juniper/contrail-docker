@@ -32,6 +32,15 @@ else
 	export http_proxy_build_arg :=
 endif
 
+ifeq  ($(CONTRAIL_SKU), ocata)
+ifndef CONTRAIL_REPO_MIRROR_SNAPSHOT
+	export CONTRAIL_REPO_MIRROR_SNAPSHOT := 10312017
+endif
+ifndef CONTRAIL_REPO_MIRROR_URL
+	export CONTRAIL_REPO_MIRROR_URL := http://10.84.34.201:8080
+endif
+endif
+
 ifdef CONTRAIL_REPO_MIRROR_SNAPSHOT
 	export repo_snapshot_build_arg := --build-arg CONTRAIL_REPO_MIRROR_SNAPSHOT=$(CONTRAIL_REPO_MIRROR_SNAPSHOT)
 endif
@@ -114,6 +123,19 @@ kolla-ubuntu-prep: kolla-prep
 	  sed -i '1 i\deb [arch=amd64] $(CONTRAIL_REPO_URL) ./' $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 	cp -af $(KOLLA_DIR)/99contrail $(KOLLA_DIR)/docker/openstack-base/99contrail
 	cp -af $(KOLLA_DIR)/99contrail $(KOLLA_DIR)/docker/nova/nova-libvirt/99contrail
+
+ifdef CONTRAIL_REPO_MIRROR_SNAPSHOT
+	# Use contrail mirrors and not use upstream
+	if [ ! -e $(KOLLA_DIR)/docker/base/sources.list.ubuntu.orig ] ; then \
+	   cp $(KOLLA_DIR)/docker/base/sources.list.ubuntu $(KOLLA_DIR)/docker/base/sources.list.ubuntu.orig ;\
+	fi;
+	cp -af docker/contrail-ubuntu-mirror.key $(KOLLA_DIR)/docker/base/contrail-ubuntu-mirror.key
+	sed -i "s#^.*\(xenial main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(xenial-updates main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(xenial-security main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-security\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(xenial-updates\/ocata main\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates-ocata\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ xenial-updates-ocata main#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+endif
+
 
 kolla-centos-prep: kolla-prep
 	@echo "Applying Centos related Kolla patches"

@@ -1,5 +1,11 @@
 {% extends parent_template %}
 
+# Use contrail mirrors - add contrail repo keys
+{% block base_header %}
+COPY contrail-ubuntu-mirror.key /etc/apt/contrail-ubuntu-mirror.key
+RUN apt-key add /etc/apt/contrail-ubuntu-mirror.key && rm /etc/apt/contrail-ubuntu-mirror.key
+{% endblock %}
+
 # Contrail Neutron plugin packages
 {% set neutron_server_packages_append = ['neutron-plugin-contrail', 'python-contrail'] %}
 
