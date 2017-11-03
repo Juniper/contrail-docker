@@ -143,6 +143,34 @@ endif
 	sed -i "s#^.*\(ocata main\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates-$(CONTRAIL_SKU)\/$(CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT)\/ xenial-updates-$(CONTRAIL_SKU) main#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 
 
+ifndef CONTRAIL_REPO_MIRROR_URL
+	$(eval CONTRAIL_REPO_MIRROR_URL := http://10.84.34.201:8080)
+endif
+ifndef CONTRAIL_REPO_MIRROR_SNAPSHOT
+	$(eval CONTRAIL_REPO_MIRROR_SNAPSHOT := 10312017)
+endif
+ifndef CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT
+	$(eval CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT := 07262017)
+endif
+
+	# Use contrail mirrors and not use upstream
+	if [ ! -e $(KOLLA_DIR)/docker/base/sources.list.ubuntu.orig ] ; then \
+	   cp -f $(KOLLA_DIR)/docker/base/sources.list.ubuntu $(KOLLA_DIR)/docker/base/sources.list.ubuntu.orig ;\
+	fi;
+	cp -af docker/contrail-ubuntu-mirror.key $(KOLLA_DIR)/docker/base/contrail-ubuntu-mirror.key
+	sed -i "s#^.*\(xenial main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(xenial-updates main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(xenial-security main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-security\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(ocata main\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates-$(CONTRAIL_SKU)\/$(CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT)\/ xenial-updates-$(CONTRAIL_SKU) main#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(ocata main\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates-$(CONTRAIL_SKU)\/$(CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT)\/ xenial-updates-$(CONTRAIL_SKU) main#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+
+	# Initially do not have any https in the sources.list as apt-get update
+	# might fail. Have a backup containing the https repos and remove the https
+	# repos
+	cp -f $(KOLLA_DIR)/docker/base/sources.list.ubuntu $(KOLLA_DIR)/docker/base/sources.list.ubuntu.nohttps
+	sed -i "/https\:\/\//d" $(KOLLA_DIR)/docker/base/sources.list.ubuntu.nohttps
+
+
 kolla-centos-prep: kolla-prep
 	@echo "Applying Centos related Kolla patches"
 	echo -e "[contrail-repo]\nname = contrail-repo\nbaseurl = $(CONTRAIL_REPO_URL)\nenabled = 1\ngpgcheck = 0\n" > $(KOLLA_DIR)/docker/base/contrail.repo ;\
