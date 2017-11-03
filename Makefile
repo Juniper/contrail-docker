@@ -1,6 +1,15 @@
 ## Variables accepted
 #
 # KEEP_IMAGES - to avoid cleaning up container images locally
+# CONTRAIL_SKU - The openstack SKU - default value is 'mitaka'
+#     To build kolla continers, set this to 'ocata' or later
+# CONTRAIL_REPO_MIRROR_SNAPSHOT - snapshot of mirror used to build kolla
+#     containers - default value is 10312017
+# CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT - snapshot of mirror used to get
+#     openstack packages for kolla containers - default value is
+#     2017_10_27__23_04_43
+# CONTRAIL_REPO_MIRROR_URL - url for the contrail mirror repos - default value
+#     is 10.84.34.201:8080
 #
 ##
 
@@ -112,6 +121,27 @@ kolla-ubuntu-prep: kolla-prep
 	# Due to LP #1706549; Remove once fixed
 	grep "deb \[arch=amd64\] http:\/\/$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) .\/" $(KOLLA_DIR)/docker/base/sources.list.ubuntu || \
 	  sed -i '1 i\deb [arch=amd64] $(CONTRAIL_REPO_URL) ./' $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+
+ifndef CONTRAIL_REPO_MIRROR_URL
+	$(eval CONTRAIL_REPO_MIRROR_URL := http://10.84.34.201:8080)
+endif
+ifndef CONTRAIL_REPO_MIRROR_SNAPSHOT
+	$(eval CONTRAIL_REPO_MIRROR_SNAPSHOT := 2017_10_27__23_04_43)
+endif
+ifndef CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT
+	$(eval CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT := 07262017)
+endif
+
+	# Use contrail mirrors and not use upstream
+	if [ ! -e $(KOLLA_DIR)/docker/base/sources.list.ubuntu.orig ] ; then \
+	   cp -f $(KOLLA_DIR)/docker/base/sources.list.ubuntu $(KOLLA_DIR)/docker/base/sources.list.ubuntu.orig ;\
+	fi;
+	cp -af docker/contrail-ubuntu-mirror.key $(KOLLA_DIR)/docker/base/contrail-ubuntu-mirror.key
+	sed -i "s#^.*\(xenial main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(xenial-updates main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(xenial-security main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-security\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+	sed -i "s#^.*\(ocata main\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates-$(CONTRAIL_SKU)\/$(CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT)\/ xenial-updates-$(CONTRAIL_SKU) main#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
+
 
 kolla-centos-prep: kolla-prep
 	@echo "Applying Centos related Kolla patches"
