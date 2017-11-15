@@ -65,6 +65,7 @@ MAKE_ARGS="$MAKE_ARGS CONTRAIL_VERSION=$build_version"
 MAKE_ARGS="$MAKE_ARGS CONTRAIL_ANSIBLE_ARTIFACT=$ansible_tgz"
 MAKE_ARGS="$MAKE_ARGS CONTAINER_REGISTRY=${REGISTRY_SERVER:-10.84.34.155}:5000"
 MAKE_ARGS="$MAKE_ARGS CONTAINER_SAVE_LOCATION=$container_save_location"
+MAKE_ARGS="$MAKE_ARGS CONTRAIL_SKU=$BUILD_SKU"
 
 cd $container_build_workspace
 set -o pipefail			# So that we exit with make's exit status, not tee's
