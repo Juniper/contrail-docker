@@ -142,6 +142,12 @@ endif
 	sed -i "s#^.*\(xenial-security main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-security\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 	sed -i "s#^.*\(ocata main\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates-$(CONTRAIL_SKU)\/$(CONTRAIL_OPENSTACK_REPO_MIRROR_SNAPSHOT)\/ xenial-updates-$(CONTRAIL_SKU) main#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 
+	# Initially do not have any https in the sources.list as apt-get update
+	# might fail. Have a backup containing the https repos and remove the https
+	# repos
+	cp -f $(KOLLA_DIR)/docker/base/sources.list.ubuntu $(KOLLA_DIR)/docker/base/sources.list.ubuntu.nohttps
+	sed -i "/https\:\/\//d" $(KOLLA_DIR)/docker/base/sources.list.ubuntu.nohttps
+
 
 kolla-centos-prep: kolla-prep
 	@echo "Applying Centos related Kolla patches"
