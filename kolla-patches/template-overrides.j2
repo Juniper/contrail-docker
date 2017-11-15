@@ -4,7 +4,10 @@
 {% block base_header %}
 COPY contrail-ubuntu-mirror.key /etc/apt/contrail-ubuntu-mirror.key
 RUN apt-key add /etc/apt/contrail-ubuntu-mirror.key && rm -f /etc/apt/contrail-ubuntu-mirror.key
-RUN apt-get update
+COPY sources.list.{{ base_distro }}.nohttps /etc/apt/sources.list
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends apt-transport-https ca-certificates \
+    && apt-get clean
 {% endblock %}
 
 # Contrail Neutron plugin packages
