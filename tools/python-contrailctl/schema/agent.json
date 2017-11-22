@@ -132,6 +132,22 @@
         "tsn_server_list": {
           "description": "list of tsn nodes when agent runs in tsn-no-forwarding mode (tsn ha)",
           "type": "array"
+        },
+        "resource_backup_restore": {
+          "description": "Enable/Disable backup of config and resource files",
+          "type": "boolean"
+        },
+        "backup_idle_timeout": {
+          "description": "Agent does not generate backup file if change is detected in this time",
+          "type": "string"
+        },
+        "restore_audit_timeout": {
+          "description": "Audit time for config/resource read from file",
+          "type": "string"
+        },
+        "backup_file_count": {
+          "description": "Number of backup files",
+          "type": "string"
         }
       }
     },
