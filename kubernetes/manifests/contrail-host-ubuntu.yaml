@@ -17,13 +17,14 @@ data:
     controller_nodes = 10.84.13.7
     analytics_nodes = 10.84.13.7
     analyticsdb_nodes = 10.84.13.7
+    opscenter_ip = 10.84.13.7
     # analyticsdb_minimum_diskgb = 50
     # configdb_minimum_diskgb = 5
   agent-config: |-
     [AGENT]
     compile_vrouter_module = True
     # Optional ctrl_data_network, if different from management
-    # ctrl_data_network = "192.168.10.0/24"
+    # ctrl_data_network = 192.168.10.0/24
   kubemanager-config: |-
     [KUBERNETES]
     cluster_name = k8s-default
