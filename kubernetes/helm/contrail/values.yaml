@@ -12,7 +12,7 @@ images:
   imagePullPolicy: "IfNotPresent"
 
 conf:
-  # global section configuration needed by all containers
+  # global section configuration needed by all containers   test
   global:
     controller: 
       # nodes - (MANDATORY) list of controller node IP
