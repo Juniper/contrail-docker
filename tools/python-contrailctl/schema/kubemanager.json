@@ -44,7 +44,11 @@
         "token": {
           "description": "kubernetes api server access token",
           "type": "string"
-        }
+        },
+        "ip_fabric_forwarding": {
+          "description": "ip_fabric_forwarding for kubernetes virtual networks.",
+          "type": "boolean"
+        },
       }
     },
     "KUBERNETES_VNC": {
