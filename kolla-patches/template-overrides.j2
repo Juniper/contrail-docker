@@ -22,6 +22,10 @@ RUN apt-get update
 RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail
 {% endblock %}
 
+{% block keepalived_header %}
+RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail
+{% endblock %}
+
 {% block horizon_header %}
 RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99contrail
 {% endblock %}
