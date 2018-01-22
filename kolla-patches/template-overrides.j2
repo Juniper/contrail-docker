@@ -47,7 +47,8 @@ RUN cp -af /usr/lib/python2.7/dist-packages/neutron_lbaas_dashboard/enabled/_148
     /usr/share/openstack-dashboard/manage.py compress
 {% endblock %}
 
+#fix ironic_conductor issue for askpas and notty error
 {% block ironic_conductor_footer %}
 COPY iscsi_tcp_sudoers /etc/sudoers.d/kolla_iscsi_tcp_sudoers
 RUN chmod 440 /etc/sudoers.d/kolla_iscsi_tcp_sudoers
-{%endblock%}
+{% endblock %}
