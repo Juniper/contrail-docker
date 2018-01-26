@@ -52,3 +52,48 @@ RUN cp -af /usr/lib/python2.7/dist-packages/neutron_lbaas_dashboard/enabled/_148
 COPY iscsi_tcp_sudoers /etc/sudoers.d/kolla_iscsi_tcp_sudoers
 RUN chmod 440 /etc/sudoers.d/kolla_iscsi_tcp_sudoers
 {% endblock %}
+
+#fix for upstream kolla bug: https://bugs.launchpad.net/kolla/+bug/1537407
+
+{% set swift_proxy_server_packages_append = ['python-keystonemiddleware'] %}
+
+#fix for upstream kolla bug: https://bugs.launchpad.net/kolla/+bug/1630425
+
+{% set swift_object_expirer_packages_append = ['swift-object-expirer'] %}
+
+#fix swift containers issue for askpas and notty error
+
+{% block swift_proxy_server_footer %}
+COPY swift_tcp_sudoers /etc/sudoers.d/kolla_swift_tcp_sudoers
+RUN chmod 440 /etc/sudoers.d/kolla_swift_tcp_sudoers
+{% endblock %}
+
+{% block swift_object_expirer_footer %}
+COPY swift_tcp_sudoers /etc/sudoers.d/kolla_swift_tcp_sudoers
+RUN chmod 440 /etc/sudoers.d/kolla_swift_tcp_sudoers
+{% endblock %}
+
+{% block swift_object_footer %}
+COPY swift_tcp_sudoers /etc/sudoers.d/kolla_swift_tcp_sudoers
+RUN chmod 440 /etc/sudoers.d/kolla_swift_tcp_sudoers
+{% endblock %}
+
+{% block swift_container_footer %}
+COPY swift_tcp_sudoers /etc/sudoers.d/kolla_swift_tcp_sudoers
+RUN chmod 440 /etc/sudoers.d/kolla_swift_tcp_sudoers
+{% endblock %}
+
+{% block swift_account_footer %}
+COPY swift_tcp_sudoers /etc/sudoers.d/kolla_swift_tcp_sudoers
+RUN chmod 440 /etc/sudoers.d/kolla_swift_tcp_sudoers
+{% endblock %}
+
+{% block swift_rsyncd_footer %}
+COPY swift_tcp_sudoers /etc/sudoers.d/kolla_swift_tcp_sudoers
+RUN chmod 440 /etc/sudoers.d/kolla_swift_tcp_sudoers
+{% endblock %}
+
+{% block swift_base_footer %}
+COPY swift_tcp_sudoers /etc/sudoers.d/kolla_swift_tcp_sudoers
+RUN chmod 440 /etc/sudoers.d/kolla_swift_tcp_sudoers
+{% endblock %}

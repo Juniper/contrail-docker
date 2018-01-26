@@ -138,6 +138,13 @@ endif
 	fi;
 	cp -af docker/contrail-ubuntu-mirror.key $(KOLLA_DIR)/docker/base/contrail-ubuntu-mirror.key
 	cp -af ${KOLLA_DIR}/iscsi_tcp_sudoers ${KOLLA_DIR}/docker/ironic/ironic-conductor/iscsi_tcp_sudoers
+	cp -af ${KOLLA_DIR}/swift_tcp_sudoers ${KOLLA_DIR}/docker/swift/swift-proxy-server/swift_tcp_sudoers
+	cp -af ${KOLLA_DIR}/swift_tcp_sudoers ${KOLLA_DIR}/docker/swift/swift-account/swift_tcp_sudoers
+	cp -af ${KOLLA_DIR}/swift_tcp_sudoers ${KOLLA_DIR}/docker/swift/swift-base/swift_tcp_sudoers
+	cp -af ${KOLLA_DIR}/swift_tcp_sudoers ${KOLLA_DIR}/docker/swift/swift-container/swift_tcp_sudoers
+	cp -af ${KOLLA_DIR}/swift_tcp_sudoers ${KOLLA_DIR}/docker/swift/swift-object-expirer/swift_tcp_sudoers
+	cp -af ${KOLLA_DIR}/swift_tcp_sudoers ${KOLLA_DIR}/docker/swift/swift-object/swift_tcp_sudoers
+	cp -af ${KOLLA_DIR}/swift_tcp_sudoers ${KOLLA_DIR}/docker/swift/swift-rsyncd/swift_tcp_sudoers
 	sed -i "s#^.*\(xenial main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 	sed -i "s#^.*\(xenial-updates main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-updates\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 	sed -i "s#^.*\(xenial-security main restricted universe multiverse\)#deb [arch=amd64] $(CONTRAIL_REPO_MIRROR_URL)\/xenial-security\/$(CONTRAIL_REPO_MIRROR_SNAPSHOT)\/ \1#" $(KOLLA_DIR)/docker/base/sources.list.ubuntu
