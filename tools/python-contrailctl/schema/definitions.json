@@ -359,6 +359,10 @@
         "domain_id": {
           "description": "Domain id for keystone v3",
           "type": "string"
+        },
+        "region_name": {
+          "description": "Region name for OpenStack communications",
+          "type": "string"
         }
       }
     },
