@@ -1,0 +1,18 @@
+FROM contrail-base-centos7:{{ contrail_version }}
+ARG CONTRAIL_VERSION
+ARG OS
+LABEL Name=contrail-controller-$OS \
+      Version="$CONTRAIL_VERSION" \
+      contrail.role=contrail-go \
+      Description="Dockerimage for Contrail Go API Server" Vendor="Juniper Networks"
+ENV CONTRAIL_ROLE contrail-go
+RUN echo $CONTRAIL_ROLE > /etc/contrail-role
+RUN yum install -y contrail
+
+EXPOSE 9091
+
+# Repo cleanup
+RUN [ -f /etc/yum.repos.d/contrail-install.repo ] && \
+      rm -f /etc/yum.repos.d/contrail-install.repo ; \
+    yum clean all ; yum clean expire-cache ;\
+    echo pass
