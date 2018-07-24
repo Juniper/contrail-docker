@@ -1,2 +1,2 @@
 ansible
-jsonschema
+jsonschema==2.5.1
