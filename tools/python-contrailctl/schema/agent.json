@@ -148,6 +148,14 @@
         "backup_file_count": {
           "description": "Number of backup files",
           "type": "string"
+        },
+        "slo_destination_list": {
+          "description": "Destination to which slo session messages have to be sent: collector file syslog",
+          "type": "string"
+        },
+        "sample_destination_list": {
+          "description": "Destination to which sample session messages have to be sent: collector file syslog",
+          "type": "string"
         }
       }
     },
