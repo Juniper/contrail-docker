@@ -117,6 +117,7 @@ kolla-prep:
 kolla-ubuntu-patches: SHELL:=/bin/bash
 kolla-ubuntu-prep: kolla-prep
 	@echo "Applying Ubuntu related Kolla patches"
+	cd $(KOLLA_DIR) && patch -p1 < ocata_ubuntu16.patch && cd -
 	echo "deb [arch=amd64] $(CONTRAIL_REPO_URL) ./" > $(KOLLA_DIR)/contrail.list
 	# Due to LP #1706549; Remove once fixed
 	grep "deb \[arch=amd64\] http:\/\/$(CONTRAIL_REPO_IP):$(CONTRAIL_REPO_PORT) .\/" $(KOLLA_DIR)/docker/base/sources.list.ubuntu || \

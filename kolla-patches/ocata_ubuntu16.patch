@@ -1,0 +1,78 @@
+diff --git a/docker/base/Dockerfile.j2 b/docker/base/Dockerfile.j2
+index c80d1e64f..43d94e6b2 100644
+--- a/docker/base/Dockerfile.j2
++++ b/docker/base/Dockerfile.j2
+@@ -70,7 +70,7 @@ COPY {{ repo_file }} /etc/yum.repos.d/{{ repo_file }}
+     'https://packages.elastic.co/GPG-KEY-elasticsearch',
+     'https://repos.influxdata.com/influxdb.key',
+     'https://packagecloud.io/gpg.key',
+-    'https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana',
++    'https://packages.grafana.com/gpg.key',
+     'https://packages.treasuredata.com/GPG-KEY-td-agent'
+ ] %}
+ 
+@@ -257,7 +257,6 @@ COPY apt_preferences.{{ base_distro }} /etc/apt/preferences
+     {# 05CE15085FC09D18E99EFB22684A14CF2582E0C5 -- InfluxDB Packaging Service <support@influxdb.com> #}
+     {# 177F4010FE56CA3336300305F1656F24C74CD1D8 -- MariaDB Signing Key <signing-key@mariadb.org> #}
+     {# 391A9AA2147192839E9DB0315EDB1B62EC4926EA -- Canonical Cloud Archive Signing Key <ftpmaster@canonical.com> #}
+-    {# 418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB -- packagecloud ops (production key) <ops@packagecloud.io> #}
+     {# 46095ACC8548582C1A2699A9D27D666CD88E42B4 -- Elasticsearch (Elasticsearch Signing Key) <dev_ops@elasticsearch.org> #}
+     {# 4D1BB29D63D98E422B2113B19334A25F8507EFA5 -- Percona MySQL Development Team (Packaging key) <mysql-dev@percona.com> #}
+     {# 58118E89F3A912897C070ADBF76221572C52609D -- Docker Release Tool (releasedocker) <docker@docker.com> #}
+@@ -266,21 +265,25 @@ COPY apt_preferences.{{ base_distro }} /etc/apt/preferences
+       '05CE15085FC09D18E99EFB22684A14CF2582E0C5',
+       '177F4010FE56CA3336300305F1656F24C74CD1D8',
+       '391A9AA2147192839E9DB0315EDB1B62EC4926EA',
+-      '418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB',
+       '46095ACC8548582C1A2699A9D27D666CD88E42B4',
+       '4D1BB29D63D98E422B2113B19334A25F8507EFA5',
+       '58118E89F3A912897C070ADBF76221572C52609D',
+       '901F9177AB97ACBE',
+     ] %}
++    {% set remote_apt_keys = [
++      'https://packages.grafana.com/gpg.key'
++    ] %}
+ {% elif base_distro == 'debian' %}
+     {% set base_apt_keys = [
+       '58118E89F3A912897C070ADBF76221572C52609D',
+       '0xcbcb082a1bb943db',
+       'D27D666CD88E42B4',
+       '05CE15085FC09D18E99EFB22684A14CF2582E0C5',
+-      '418A7F2FB0E1E6E7EABF6FE8C2E73424D59097AB',
+       '901F9177AB97ACBE',
+     ] %}
++    {% set remote_apt_keys = [
++      'https://packages.grafana.com/gpg.key'
++    ] %}
+     {% set base_apt_packages = base_apt_packages +
+       ['sudo',]
+     %}
+diff --git a/docker/base/grafana.repo b/docker/base/grafana.repo
+index dc8d30b44..f4b6f1f3f 100644
+--- a/docker/base/grafana.repo
++++ b/docker/base/grafana.repo
+@@ -1,7 +1,9 @@
+ [grafana]
+ name=grafana
+-baseurl=https://packagecloud.io/grafana/stable/el/7/$basearch
++baseurl=https://packages.grafana.com/oss/rpm
+ repo_gpgcheck=1
+ enabled=1
+ gpgcheck=1
+-gpgkey=https://packagecloud.io/gpg.key https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana
++gpgkey=https://packages.grafana.com/gpg.key
++sslverify=1
++sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+diff --git a/docker/base/sources.list.debian b/docker/base/sources.list.debian
+index f1195c943..d639752df 100644
+--- a/docker/base/sources.list.debian
++++ b/docker/base/sources.list.debian
+@@ -29,7 +29,7 @@ deb http://apt.dockerproject.org/repo debian-jessie main
+ deb https://repos.influxdata.com/debian jessie stable
+ 
+ # Grafana repo
+-deb https://packagecloud.io/grafana/stable/debian/ jessie main
++deb https://packages.grafana.com/oss/deb stable main
+ 
+ # Fluentd repo
+ deb http://packages.treasuredata.com/2/debian/jessie/ jessie contrib
