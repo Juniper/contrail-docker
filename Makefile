@@ -165,6 +165,7 @@ kolla: prep kolla-prep kolla-$(DISTRO)-prep kolla-patches
 	    virtualenv venv && source venv/bin/activate && \
 	    easy_install $(KOLLA_DIR) && \
 	    python setup.py install && \
+		pip install future && \
 	    kolla-build --config-file kolla-build.conf \
 	                --tag $(CONTRAIL_VERSION) \
 	                --base $(DISTRO) \
