@@ -90,16 +90,15 @@ index 990ffc957..5e4ab1b5f 100644
  # Fluentd repo
  deb http://packages.treasuredata.com/2/ubuntu/xenial/ xenial contrib
 diff --git a/docker/fluentd/Dockerfile.j2 b/docker/fluentd/Dockerfile.j2
-index 2fceed8a2..6a5d5ee2c 100644
+index 2fceed8a2..bce2bddf9 100644
 --- a/docker/fluentd/Dockerfile.j2
 +++ b/docker/fluentd/Dockerfile.j2
-@@ -28,7 +28,8 @@ MAINTAINER {{ maintainer }}
+@@ -28,7 +28,7 @@ MAINTAINER {{ maintainer }}
  
  RUN ulimit -n 65536 \
      && sed -i -e "s/USER=td-agent/USER=root/" -e "s/GROUP=td-agent/GROUP=root/" /etc/init.d/td-agent \
 -    && td-agent-gem install fluent-plugin-parser fluent-plugin-kubernetes_metadata_filter fluent-plugin-elasticsearch fluent-plugin-grep fluent-plugin-grok-parser:2.1.4 fluent-plugin-rewrite-tag-filter \
-+    && td-agent-gem install fluent-plugin-parser
-+    fluent-plugin-kubernetes_metadata_filter:1.0.2 fluent-plugin-elasticsearch fluent-plugin-grep fluent-plugin-grok-parser:2.1.4 fluent-plugin-rewrite-tag-filter \
++    && td-agent-gem install fluent-plugin-parser fluent-plugin-kubernetes_metadata_filter:1.0.2 fluent-plugin-elasticsearch fluent-plugin-grep fluent-plugin-grok-parser:2.1.4 fluent-plugin-rewrite-tag-filter \
      && rm -f /etc/td-agent/td-agent.conf
  
  COPY fluentd_sudoers /etc/sudoers.d/kolla_fluentd_sudoers
