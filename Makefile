@@ -170,6 +170,8 @@ kolla: prep kolla-prep kolla-$(DISTRO)-prep kolla-patches
 	@echo "Building Kolla Docker containers at $(KOLLA_DIR)"
 	cd $(KOLLA_DIR) && \
 	    virtualenv venv && source venv/bin/activate && \
+	    pip install "setuptools<45.0" && \
+	    pip install -r $(KOLLA_DIR)/requirements.txt && \
 	    easy_install $(KOLLA_DIR) && \
 	    python setup.py install && \
 	    kolla-build --config-file kolla-build.conf \
