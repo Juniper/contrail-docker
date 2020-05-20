@@ -77,10 +77,14 @@ index f1195c943..d639752df 100644
  # Fluentd repo
  deb http://packages.treasuredata.com/2/debian/jessie/ jessie contrib
 diff --git a/docker/base/sources.list.ubuntu b/docker/base/sources.list.ubuntu
-index 990ffc957..5e4ab1b5f 100644
---- a/docker/base/sources.list.ubuntu
-+++ b/docker/base/sources.list.ubuntu
-@@ -29,7 +29,7 @@ deb http://apt.dockerproject.org/repo ubuntu-xenial main
+@@ -23,13 +23,13 @@
+ deb https://packages.elastic.co/kibana/4.6/debian stable main
+ 
+ # Docker repo
+-deb http://apt.dockerproject.org/repo ubuntu-xenial main
++# deb http://apt.dockerproject.org/repo ubuntu-xenial main
+ 
+ # InfluxDB repo
  deb https://repos.influxdata.com/ubuntu xenial stable
  
  # Grafana repo
