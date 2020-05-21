@@ -1,5 +1,5 @@
 diff --git a/docker/base/Dockerfile.j2 b/docker/base/Dockerfile.j2
-index c80d1e64f..43d94e6b2 100644
+index c80d1e6..43d94e6 100644
 --- a/docker/base/Dockerfile.j2
 +++ b/docker/base/Dockerfile.j2
 @@ -70,7 +70,7 @@ COPY {{ repo_file }} /etc/yum.repos.d/{{ repo_file }}
@@ -48,7 +48,7 @@ index c80d1e64f..43d94e6b2 100644
        ['sudo',]
      %}
 diff --git a/docker/base/grafana.repo b/docker/base/grafana.repo
-index dc8d30b44..f4b6f1f3f 100644
+index dc8d30b..f4b6f1f 100644
 --- a/docker/base/grafana.repo
 +++ b/docker/base/grafana.repo
 @@ -1,7 +1,9 @@
@@ -64,7 +64,7 @@ index dc8d30b44..f4b6f1f3f 100644
 +sslverify=1
 +sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 diff --git a/docker/base/sources.list.debian b/docker/base/sources.list.debian
-index f1195c943..d639752df 100644
+index f1195c9..d639752 100644
 --- a/docker/base/sources.list.debian
 +++ b/docker/base/sources.list.debian
 @@ -29,7 +29,7 @@ deb http://apt.dockerproject.org/repo debian-jessie main
@@ -77,7 +77,10 @@ index f1195c943..d639752df 100644
  # Fluentd repo
  deb http://packages.treasuredata.com/2/debian/jessie/ jessie contrib
 diff --git a/docker/base/sources.list.ubuntu b/docker/base/sources.list.ubuntu
-@@ -23,13 +23,13 @@
+index 990ffc9..e5fa44c 100644
+--- a/docker/base/sources.list.ubuntu
++++ b/docker/base/sources.list.ubuntu
+@@ -23,13 +23,13 @@ deb https://packages.elastic.co/elasticsearch/2.x/debian stable main
  deb https://packages.elastic.co/kibana/4.6/debian stable main
  
  # Docker repo
@@ -94,7 +97,7 @@ diff --git a/docker/base/sources.list.ubuntu b/docker/base/sources.list.ubuntu
  # Fluentd repo
  deb http://packages.treasuredata.com/2/ubuntu/xenial/ xenial contrib
 diff --git a/docker/fluentd/Dockerfile.j2 b/docker/fluentd/Dockerfile.j2
-index 2fceed8a2..bce2bddf9 100644
+index 2fceed8..bce2bdd 100644
 --- a/docker/fluentd/Dockerfile.j2
 +++ b/docker/fluentd/Dockerfile.j2
 @@ -28,7 +28,7 @@ MAINTAINER {{ maintainer }}
@@ -107,7 +110,7 @@ index 2fceed8a2..bce2bddf9 100644
  
  COPY fluentd_sudoers /etc/sudoers.d/kolla_fluentd_sudoers
 diff --git a/docker/rabbitmq/Dockerfile.j2 b/docker/rabbitmq/Dockerfile.j2
-index c1be1eb6e..a77868fea 100644
+index c1be1eb..a77868f 100644
 --- a/docker/rabbitmq/Dockerfile.j2
 +++ b/docker/rabbitmq/Dockerfile.j2
 @@ -45,7 +45,7 @@ MAINTAINER {{ maintainer }}
