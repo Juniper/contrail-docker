@@ -9,7 +9,7 @@
 #     openstack packages for kolla containers - default value is
 #     2017_10_27__23_04_43
 # CONTRAIL_REPO_MIRROR_URL - url for the contrail mirror repos - default value
-#     is 10.84.34.201:8080
+#     is 10.84.5.75:8080
 #
 ##
 
@@ -124,7 +124,7 @@ kolla-ubuntu-prep: kolla-prep
 	  sed -i '1 i\deb [arch=amd64] $(CONTRAIL_REPO_URL) ./' $(KOLLA_DIR)/docker/base/sources.list.ubuntu
 
 ifndef CONTRAIL_REPO_MIRROR_URL
-	$(eval CONTRAIL_REPO_MIRROR_URL := http://10.84.34.201:8080)
+	$(eval CONTRAIL_REPO_MIRROR_URL := http://10.84.5.75:8080)
 endif
 ifndef CONTRAIL_REPO_MIRROR_SNAPSHOT
 	$(eval CONTRAIL_REPO_MIRROR_SNAPSHOT := 10312017)
