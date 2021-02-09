@@ -1,4 +1,4 @@
-FROM 10.84.34.155:5000/contrail-base-os-images-centos7:7.3
+FROM svl-artifactory.juniper.net/contrail-legacy/contrail-base-os-images-centos7:7.3
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_INSTALL_PACKAGE_TAR_URL
 ARG CONTRAIL_REPO_PORT
