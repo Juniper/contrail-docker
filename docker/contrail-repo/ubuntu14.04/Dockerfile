@@ -1,4 +1,4 @@
-FROM 10.84.34.155:5000/ubuntu:14.04.5
+FROM svl-artifactory.juniper.net/contrail-legacy/ubuntu:14.04.5
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_INSTALL_PACKAGE_TAR_URL
 ARG http_proxy

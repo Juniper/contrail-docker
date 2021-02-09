@@ -1,4 +1,4 @@
-FROM 10.84.34.155:5000/contrail-base-os-images-ubuntu:16.04.2
+FROM svl-artifactory.juniper.net/contrail-legacy/contrail-base-os-images-ubuntu:16.04.2
 MAINTAINER Juniper Contrail <contrail@juniper.net>
 ARG CONTRAIL_REPO_URL
 ARG CONTRAIL_ANSIBLE_TAR
