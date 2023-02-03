@@ -30,6 +30,8 @@ RUN apt-get update -qy && \
     apt-get autoremove -yq  &&\
     rm -fr /usr/share/doc/* /usr/share/man/*
 RUN mkdir -p /etc/contrailctl/
+RUN apt install python-dev python-pip
+RUN pip install --extra-index-url https://svl-artifactory.juniper.net/artifactory/api/pypi/pypi-virtual/simple/ -r requirements.txt
 COPY python-contrailctl /python-contrailctl
 RUN cd /python-contrailctl/; python setup.py install
 ADD $CONTRAIL_ANSIBLE_TAR /
