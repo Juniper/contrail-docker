@@ -1,2 +1,2 @@
-ansible
+ansible==2.3.0
 jsonschema==2.6.0
